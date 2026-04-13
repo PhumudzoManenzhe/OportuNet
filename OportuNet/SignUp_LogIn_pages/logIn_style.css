@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Global reset and typography shared by the login and sign-up forms. */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Full-page centering and background for the authentication screens. */
+body {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0 10px;
+    display: flex;
+    background: #f4f6f8; /* Unified soft gray background */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Shared card container styling for login and sign-up forms. */
+.login_form, .signup-container {
+    width: 100%;
+    max-width: 435px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Main heading styles for the auth cards. */
+.login_form h3, h2 {
+    font-size: 24px;
+    text-align: center;
+    color: #171645;
+    margin-bottom: 25px;
+}
+
+/* Button & Link Styles */
+/* Base link styling used across the auth pages. */
+a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Link hover feedback. */
+a:hover {
+    text-decoration: underline;
+}
+
+/* Input Boxes */
+/* Vertical spacing around grouped inputs. */
+.input_box, .input-group {
+    margin-bottom: 20px;
+}
+
+/* Shared label styling. */
+label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Base text-input appearance. */
+input {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #DADAF2;
+    border-radius: 6px;
+    outline: none;
+    background: #F8F8FB;
+    font-size: 16px;
+    padding: 0 15px;
+    transition: 0.2s ease;
+}
+
+/* Focus state for text inputs. */
+input:focus {
+    border-color: #2563eb;
+    background: #fff;
+}
+
+/* Social Buttons */
+/* Shared spacing for social authentication blocks. */
+.login_option, .google-btn {
+    margin: 10px 0 25px 0;
+}
+
+/* Shared styling for Google auth buttons and provider links. */
+.option a, .google-btn {
+    height: 52px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    background: #F8F8FB;
+    border: 1px solid #DADAF2;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #171645;
+    font-weight: 500;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+/* Hover state for social auth buttons. */
+.option a:hover, .google-btn:hover {
+    background: #ededf5;
+    border-color: #2563eb;
+}
+
+/* Provider icon sizing. */
+.option a img, .google-btn img {
+    max-width: 20px;
+}
+
+/* Separator */
+/* Divider styling between social and email login options. */
+.separator, .divider {
+    position: relative;
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 500;
+    color: #888;
+}
+
+/* Text chip that overlays the divider line. */
+.separator span, .divider span {
+    background: #fff;
+    z-index: 1;
+    padding: 0 15px;
+    position: relative;
+    text-transform: lowercase;
+}
+
+/* Horizontal line used behind the separator label. */
+.separator::after, .divider::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    height: 1px;
+    background: #C2C2C2;
+}
+
+/* Action Buttons */
+/* Primary submit button styling. */
+button[type="submit"], .signup-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 6px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: 0.3s ease;
+}
+
+/* Hover feedback for the primary submit button. */
+button[type="submit"]:hover, .signup-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Layout for the password label and forgot-password link. */
+.password_title {
+    display: flex;
+    justify-content: space-between;
+}
+/* Wrapper that positions the password toggle inside the input area. */
+.password_wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Extra right padding to make room for the visibility toggle. */
+.password_wrapper input {
+  width: 100%;
+  padding-right: 60px; /* space for toggle */
+}
+
+/* Inline password visibility toggle. */
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #007BFF; /* blue to match your theme */
+  user-select:none;
+}
+
+/* Hover state for the visibility toggle. */
+.toggle-password:hover {
+  text-decoration: underline;
+}

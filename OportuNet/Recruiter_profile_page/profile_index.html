@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Page metadata, icon library, recruiter profile stylesheet, and interactive profile script. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A mobile-first recruiter profile page in view-only mode for business, workspace, and hiring details.">
+    <title>Recruiter Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="profile_style.css">
+    <script src="profile_script.js" defer></script>
+</head>
+<body class="recruiter-view-only">
+    <!-- Sticky top bar with a search field reserved for broader app navigation. -->
+    <header class="app-header">
+        <nav class="toolbar toolbar-profile" aria-label="Profile navigation">
+
+            <!-- Search form at the top of the recruiter profile. -->
+            <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">
+                <label class="sr-only" for="profile-search">Search</label>
+                <input id="profile-search" name="profile-search" type="search" placeholder="Search">
+            </form>
+        </nav>
+    </header>
+
+    <!-- Main recruiter profile layout containing company identity, editable sections, and activity. -->
+    <main class="profile-app">
+        <!-- Cover area with a camera button for future banner editing. -->
+        <section class="cover-panel" aria-label="Profile cover">
+            <button type="button" id="banner-camera-button" class="camera-button">
+                <span aria-hidden="true">&#9673;</span>
+                <span class="sr-only">Change profile picture</span>
+            </button>
+        </section>
+
+        <!-- Summary card showing recruiter identity, avatar controls, and top-level actions. -->
+        <article class="profile-card" aria-labelledby="profile-name">
+            <header class="profile-summary">
+                <!-- Avatar shell that displays the recruiter image or fallback initials. -->
+                <figure class="profile-figure">
+                    <span id="avatar-menu-button" class="avatar-button">
+                        <img id="profile-photo" class="profile-photo" alt="Profile picture" hidden>
+                        <span id="avatar-fallback" class="avatar-fallback" aria-hidden="true"></span>
+                        <span class="sr-only">Profile picture</span>
+                    </span>
+                </figure>
+
+                <!-- Context menu for avatar-related actions such as view or change photo. -->
+                <nav id="avatar-menu" class="avatar-menu" aria-label="Profile picture actions" hidden>
+                    <ul>
+                        <li><button type="button" id="view-profile-option">View profile</button></li>
+                        <li><button type="button" id="change-photo-option">Change profile picture</button></li>
+                    </ul>
+                </nav>
+
+                <!-- Quick summary actions menu for editing the core profile details. -->
+                <nav class="profile-summary-tools" aria-label="Profile summary actions">
+                    <details class="section-action-menu">
+                        <summary class="section-icon-button">
+                            <span aria-hidden="true">&#9998;</span>
+                            <span class="sr-only">Open profile summary actions</span>
+                        </summary>
+                        <menu class="section-action-list">
+                            <li><button type="button" data-open-editor="profile-name-input">Edit details</button></li>
+                        </menu>
+                    </details>
+                </nav>
+
+                <h1 id="profile-name"></h1>
+                <p id="profile-headline" class="profile-headline"></p>
+                <p class="profile-meta">
+                    <span id="profile-institution"></span>
+                </p>
+                <p id="profile-location" class="profile-location"></p>
+
+                <ul class="action-pills" aria-label="Primary profile actions">
+                    <li><button type="button" id="add-section-button" class="pill pill-outline"></button></li>
+                </ul>
+            </header>
+        </article>
+
+        <!-- Analytics section summarising private recruiter engagement metrics. -->
+        <section class="screen-section" aria-labelledby="analytics-heading">
+            <header class="section-heading section-heading-stacked">
+                <h2 id="analytics-heading">Analytics</h2>
+                <p class="section-kicker" id="analytics-privacy"></p>
+            </header>
+
+            <ol id="analytics-list" class="analytics-list"></ol>
+        </section>
+
+        <!-- About section describing the recruiter or business focus. -->
+        <section class="screen-section" aria-labelledby="about-heading">
+            <header class="section-heading">
+                <h2 id="about-heading">About</h2>
+                <details class="section-action-menu">
+                    <summary class="section-icon-button">
+                        <span aria-hidden="true">&#9998;</span>
+                        <span class="sr-only">Open about section actions</span>
+                    </summary>
+                    <menu class="section-action-list">
+                        <li><button type="button" data-open-editor="about-intro-input">Edit details</button></li>
+                    </menu>
+                </details>
+            </header>
+            <p id="about-intro" class="body-copy"></p>
+            <p id="about-passion" class="body-copy"></p>
+        </section>
+
+        <!-- Business details section that can show a placeholder or active list items. -->
+        <section id="education-section" class="screen-section screen-section-muted" aria-label="Business details">
+            <!-- Placeholder card shown before business details have been added. -->
+            <article id="education-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Business Details</h2>
+                    <button type="button" id="dismiss-education-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide business detail suggestions</span>
+                    </button>
+                </header>
+                <p id="education-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="education-add-button" class="pill pill-outline pill-wide" data-open-add-section="education"></button>
+                </p>
+            </article>
+            <!-- Active header shown when the section contains saved business details. -->
+            <header id="education-active-header" class="section-heading" hidden>
+                <h2 id="education-heading">Business Details</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="education">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add business details</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open business details section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="education-school-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="education">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="education-list" class="resume-list" hidden></ol>
+        </section>
+
+        <!-- Workspace details section for describing operating environments and teams. -->
+        <section id="experience-section" class="screen-section screen-section-muted" aria-label="Workspace details">
+            <!-- Placeholder state shown when no workspace entries have been added yet. -->
+            <article id="experience-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Workspace Details</h2>
+                    <button type="button" id="dismiss-experience-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide workspace detail suggestions</span>
+                    </button>
+                </header>
+                <p id="experience-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="experience-add-button" class="pill pill-outline pill-wide" data-open-add-section="experience"></button>
+                </p>
+            </article>
+            <!-- Active section header used once workspace details exist. -->
+            <header id="experience-active-header" class="section-heading" hidden>
+                <h2 id="experience-heading">Workspace Details</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="experience">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add workspace details</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open workspace details section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="experience-title-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="experience">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="experience-list" class="resume-list" hidden></ol>
+        </section>
+
+        <!-- Hiring focus section that highlights active recruiting priorities. -->
+        <section id="qualifications-section" class="screen-section screen-section-muted" aria-label="Hiring focus">
+            <!-- Placeholder prompt encouraging the recruiter to add hiring-focus details. -->
+            <article id="qualifications-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Hiring Focus</h2>
+                    <button type="button" id="dismiss-qualifications-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide hiring focus suggestions</span>
+                    </button>
+                </header>
+                <p id="qualifications-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="qualifications-add-button" class="pill pill-outline pill-wide" data-open-add-section="qualifications"></button>
+                </p>
+            </article>
+            <!-- Active header that appears after hiring-focus items are present. -->
+            <header id="qualifications-active-header" class="section-heading" hidden>
+                <h2>Hiring Focus</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="qualifications">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add hiring focus entry</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open hiring focus section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="qualifications-intro-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="qualifications">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="qualifications-list" class="resume-list" hidden></ol>
+        </section>
+
+        <!-- Open roles section where visible hiring opportunities can be listed. -->
+        <section id="projects-section" class="screen-section screen-section-muted" aria-label="Open roles">
+            <!-- Placeholder state for adding the first open-role entry. -->
+            <article id="projects-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Open Roles</h2>
+                    <button type="button" id="dismiss-projects-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide open role suggestions</span>
+                    </button>
+                </header>
+                <p id="projects-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="projects-add-button" class="pill pill-outline pill-wide" data-open-add-section="projects"></button>
+                </p>
+            </article>
+            <!-- Active header shown once open-role entries exist. -->
+            <header id="projects-active-header" class="section-heading" hidden>
+                <h2>Open Roles</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="projects">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add open role entry</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open open roles section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="projects-intro-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="projects">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="projects-list" class="resume-list" hidden></ol>
+        </section>
+
+        <!-- Company highlights section for showcasing milestones and public wins. -->
+        <section id="achievements-section" class="screen-section screen-section-muted" aria-label="Company highlights">
+            <!-- Placeholder prompt used before any highlight entries are added. -->
+            <article id="achievements-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Company Highlights</h2>
+                    <button type="button" id="dismiss-achievements-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide company highlight suggestions</span>
+                    </button>
+                </header>
+                <p id="achievements-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="achievements-add-button" class="pill pill-outline pill-wide" data-open-add-section="achievements"></button>
+                </p>
+            </article>
+            <!-- Active header shown once company highlight entries have been saved. -->
+            <header id="achievements-active-header" class="section-heading" hidden>
+                <h2>Company Highlights</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="achievements">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add company highlight entry</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open company highlights section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="achievements-intro-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="achievements">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="achievements-list" class="resume-list" hidden></ol>
+        </section>
+
+        <!-- Activity section for recruiter updates and company-facing posts. -->
+        <section class="screen-section" aria-labelledby="activity-heading">
+            <header class="section-heading section-heading-activity">
+                <section>
+                    <h2 id="activity-heading">Activity</h2>
+                    <p><span id="followers-button" class="text-link"></span></p>
+                </section>
+                <ul class="inline-actions">
+                    <li><button type="button" id="create-post-button" class="pill pill-outline pill-compact" data-feedback="Post creation will be connected to the shared backend later."></button></li>
+                </ul>
+            </header>
+            <p id="activity-empty-title" class="activity-title"></p>
+            <p id="activity-empty-copy" class="body-copy"></p>
+            <footer class="section-footer">
+                <button type="button" id="activity-show-all-button" class="show-all-button">Show all &rarr;</button>
+            </footer>
+            <ol id="activity-posts-list" class="activity-posts-list" hidden></ol>
+        </section>
+    </main>
+
+    <!-- Slide-up panel used to add new details to one of the profile sections. -->
+    <aside id="add-section-panel" class="editor-panel" hidden aria-labelledby="add-section-heading">
+        <!-- Form that changes shape depending on the section the recruiter wants to add. -->
+        <form id="add-section-form" class="editor-form">
+            <header class="editor-header">
+                <h2 id="add-section-heading">Add section details</h2>
+                <button type="button" id="close-add-section-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close add section panel</span>
+                </button>
+            </header>
+
+            <fieldset class="editor-group">
+                <legend>Choose a section</legend>
+                <label class="form-field" for="add-section-select">Section
+                    <select id="add-section-select" name="sectionType" required>
+                        <option value="">Select a section</option>
+                        <option value="education">Business Details</option>
+                        <option value="experience">Workspace Details</option>
+                        <option value="qualifications">Hiring Focus</option>
+                        <option value="projects">Open Roles</option>
+                        <option value="achievements">Company Highlights</option>
+                    </select>
+                </label>
+            </fieldset>
+
+            <fieldset id="education-add-group" class="editor-group" hidden>
+                <legend>Business details</legend>
+                <label class="form-field" for="add-education-school-input">Business name
+                    <input id="add-education-school-input" name="addEducationSchool" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-education-field-input">Industry
+                    <input id="add-education-field-input" name="addEducationField" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-education-dates-input">Business size
+                    <input id="add-education-dates-input" name="addEducationDates" type="text" maxlength="120">
+                </label>
+            </fieldset>
+
+            <fieldset id="experience-add-group" class="editor-group" hidden>
+                <legend>Workspace details</legend>
+                <label class="form-field" for="add-experience-title-input">Workspace name
+                    <input id="add-experience-title-input" name="addExperienceTitle" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-experience-company-input">Business unit
+                    <input id="add-experience-company-input" name="addExperienceCompany" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-experience-type-input">Workspace type
+                    <input id="add-experience-type-input" name="addExperienceType" type="text" maxlength="80">
+                </label>
+                <label class="form-field" for="add-experience-dates-input">Operating hours
+                    <input id="add-experience-dates-input" name="addExperienceDates" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-experience-duration-input">Team size
+                    <input id="add-experience-duration-input" name="addExperienceDuration" type="text" maxlength="80">
+                </label>
+                <label class="form-field" for="add-experience-location-type-input">Work model
+                    <input id="add-experience-location-type-input" name="addExperienceLocationType" type="text" maxlength="80">
+                </label>
+                <label class="form-field" for="add-experience-description-input">Workspace description
+                    <textarea id="add-experience-description-input" name="addExperienceDescription" rows="4" maxlength="260"></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset id="supplemental-add-group" class="editor-group" hidden>
+                <legend id="supplemental-legend">Section details</legend>
+                <label class="form-field" for="add-shared-title-input"><span id="shared-title-label">Title</span>
+                    <input id="add-shared-title-input" name="addSharedTitle" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-shared-subtitle-input"><span id="shared-subtitle-label">Subtitle</span>
+                    <input id="add-shared-subtitle-input" name="addSharedSubtitle" type="text" maxlength="160">
+                </label>
+                <label class="form-field" for="add-shared-dates-input"><span id="shared-dates-label">Dates</span>
+                    <input id="add-shared-dates-input" name="addSharedDates" type="text" maxlength="120">
+                </label>
+                <label class="form-field" for="add-shared-description-input"><span id="shared-description-label">Description</span>
+                    <textarea id="add-shared-description-input" name="addSharedDescription" rows="4" maxlength="260"></textarea>
+                </label>
+            </fieldset>
+
+            <menu class="editor-actions">
+                <li><button type="submit" class="pill pill-primary pill-wide">Add to profile</button></li>
+                <li><button type="button" id="cancel-add-section-button" class="pill pill-outline pill-wide">Cancel</button></li>
+            </menu>
+        </form>
+    </aside>
+
+    <!-- Main editor panel used to modify existing recruiter profile content. -->
+    <aside id="editor-panel" class="editor-panel" hidden aria-labelledby="editor-heading">
+        <!-- Form with grouped fieldsets for editing specific profile sections. -->
+        <form id="editor-form" class="editor-form">
+            <header class="editor-header">
+                <h2 id="editor-heading">Edit profile content</h2>
+                <button type="button" id="close-editor-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close editor</span>
+                </button>
+            </header>
+
+            <fieldset class="editor-group" data-editor-section="profile">
+                <legend>Profile</legend>
+                <label class="form-field" for="profile-name-input">Full name
+                    <input id="profile-name-input" name="profileName" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="headline-input">Headline
+                    <textarea id="headline-input" name="headline" rows="3" maxlength="220" required></textarea>
+                </label>
+                <label class="form-field" for="institution-input">Company
+                    <input id="institution-input" name="institution" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="location-input">Location
+                    <input id="location-input" name="location" type="text" maxlength="120" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="analytics">
+                <legend>Analytics</legend>
+                <label class="form-field" for="analytics-privacy-input">Privacy label
+                    <input id="analytics-privacy-input" name="analyticsPrivacy" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="profile-views-input">Profile views label
+                    <input id="profile-views-input" name="profileViews" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="profile-views-copy-input">Profile views description
+                    <textarea id="profile-views-copy-input" name="profileViewsCopy" rows="2" maxlength="180" required></textarea>
+                </label>
+                <label class="form-field" for="post-impressions-input">Post impressions label
+                    <input id="post-impressions-input" name="postImpressions" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="post-impressions-copy-input">Post impressions description
+                    <textarea id="post-impressions-copy-input" name="postImpressionsCopy" rows="2" maxlength="180" required></textarea>
+                </label>
+                <label class="form-field" for="post-impressions-period-input">Post impressions period
+                    <input id="post-impressions-period-input" name="postImpressionsPeriod" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="about">
+                <legend>About</legend>
+                <label class="form-field" for="about-intro-input">About paragraph 1
+                    <textarea id="about-intro-input" name="aboutIntro" rows="4" maxlength="320" required></textarea>
+                </label>
+                <label class="form-field" for="about-passion-input">About paragraph 2
+                    <textarea id="about-passion-input" name="aboutPassion" rows="3" maxlength="220" required></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="activity">
+                <legend>Activity</legend>
+                <label class="form-field" for="create-post-label-input">Create post button label
+                    <input id="create-post-label-input" name="createPostLabel" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="activity-title-input">Activity empty title
+                    <input id="activity-title-input" name="activityTitle" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="activity-copy-input">Activity empty description
+                    <textarea id="activity-copy-input" name="activityCopy" rows="3" maxlength="180" required></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="experience">
+                <legend>Workspace Details</legend>
+                <label class="form-field" for="experience-title-input">Workspace name
+                    <input id="experience-title-input" name="experienceTitle" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="experience-company-input">Business unit
+                    <input id="experience-company-input" name="experienceCompany" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="experience-type-input">Workspace type
+                    <input id="experience-type-input" name="experienceType" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="experience-dates-input">Operating hours
+                    <input id="experience-dates-input" name="experienceDates" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="experience-duration-input">Team size
+                    <input id="experience-duration-input" name="experienceDuration" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="experience-location-type-input">Work model
+                    <input id="experience-location-type-input" name="experienceLocationType" type="text" maxlength="80" required>
+                </label>
+                <label class="form-field" for="experience-description-input">Workspace description
+                    <textarea id="experience-description-input" name="experienceDescription" rows="4" maxlength="260" required></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="education">
+                <legend>Business Details</legend>
+                <label class="form-field" for="education-school-input">Business name
+                    <input id="education-school-input" name="educationSchool" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="education-field-input">Industry
+                    <input id="education-field-input" name="educationField" type="text" maxlength="120" required>
+                </label>
+                <label class="form-field" for="education-dates-input">Business size
+                    <input id="education-dates-input" name="educationDates" type="text" maxlength="120" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="qualifications">
+                <legend>Hiring Focus</legend>
+                <label class="form-field" for="qualifications-intro-input">Hiring focus prompt
+                    <textarea id="qualifications-intro-input" name="qualificationsIntro" rows="3" maxlength="220" required></textarea>
+                </label>
+                <label class="form-field" for="qualifications-button-input">Hiring focus button label
+                    <input id="qualifications-button-input" name="qualificationsButton" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="projects">
+                <legend>Open Roles</legend>
+                <label class="form-field" for="projects-intro-input">Open roles prompt
+                    <textarea id="projects-intro-input" name="projectsIntro" rows="3" maxlength="220" required></textarea>
+                </label>
+                <label class="form-field" for="projects-button-input">Open roles button label
+                    <input id="projects-button-input" name="projectsButton" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="achievements">
+                <legend>Company Highlights</legend>
+                <label class="form-field" for="achievements-intro-input">Company highlights prompt
+                    <textarea id="achievements-intro-input" name="achievementsIntro" rows="3" maxlength="220" required></textarea>
+                </label>
+                <label class="form-field" for="achievements-button-input">Company highlights button label
+                    <input id="achievements-button-input" name="achievementsButton" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <menu class="editor-actions">
+                <li><button type="submit" class="pill pill-primary pill-wide">Save changes</button></li>
+                <li><button type="button" id="cancel-editor-button" class="pill pill-outline pill-wide">Cancel</button></li>
+            </menu>
+        </form>
+    </aside>
+
+    <!-- Toast feedback element used to show short success or error messages. -->
+    <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
+
+    <!-- Bottom navigation for moving back to recruiter dashboard tabs and settings. -->
+    <nav class="bottom-nav" aria-label="Primary">
+        <a href="../Recruiter_homepage/index.html" class="nav-item active">
+            <i class="fa-solid fa-house" aria-hidden="true"></i>
+            <span>Home</span>
+        </a>
+        <a href="../Recruiter_homepage/index.html?tab=applications" class="nav-item">
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+            <span>Applications</span>
+        </a>
+        <a href="../Recruiter_homepage/index.html?tab=notifications" class="nav-item">
+            <i class="fa-regular fa-bell" aria-hidden="true"></i>
+            <span>Alerts</span>
+        </a>
+        <button class="nav-item" id="profile-settings-button" type="button" data-feedback="Settings will be connected to the wider application shell.">
+            <i class="fa-solid fa-gear" aria-hidden="true"></i>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <!-- Template used to render each analytics metric card dynamically. -->
+    <template id="analytics-item-template">
+        <li>
+            <article class="analytics-item">
+                <p class="metric-icon" aria-hidden="true"></p>
+                <section class="metric-copy">
+                    <h3 class="metric-title"></h3>
+                    <p class="metric-description"></p>
+                    <p class="metric-period"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <!-- Template used to render recruiter activity posts with delete controls. -->
+    <template id="activity-post-template">
+        <li>
+            <article class="activity-post-card">
+                <header class="activity-post-header">
+                    <section class="activity-post-meta">
+                        <h3 class="activity-post-author"></h3>
+                        <time class="activity-post-time"></time>
+                    </section>
+                    <button type="button" class="activity-post-delete">Delete</button>
+                </header>
+                <p class="activity-post-content"></p>
+            </article>
+        </li>
+    </template>
+
+    <!-- Shared template for most profile entries such as experience or highlights. -->
+    <template id="resume-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta resume-company-line"></p>
+                    <p class="resume-meta resume-date-line"></p>
+                    <p class="resume-meta resume-location-line"></p>
+                    <p class="resume-description"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <!-- Education-style template reused for business detail entries. -->
+    <template id="education-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta education-field-line"></p>
+                    <p class="resume-meta education-date-line"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <!-- Hidden file input that supports profile photo selection from the device. -->
+    <input id="photo-input" type="file" accept="image/*" hidden>
+</body>
+</html>
