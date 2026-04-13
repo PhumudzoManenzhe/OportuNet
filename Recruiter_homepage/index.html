@@ -30,6 +30,11 @@
         </div>
 
         <div class="nav-right">
+            <!-- TOP RIGHT BELL ICON - KEPT (NOT REMOVED) -->
+            <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
+                <i class="fa-regular fa-bell"></i>
+            </button>
+
             <div class="user-dropdown">
                 <button class="profile-trigger dropdown-trigger" id="dropdownTrigger" type="button">
                     <div class="avatar-sm">PC</div>
@@ -83,7 +88,7 @@
                 </div>
             </header>
 
-            <!-- Bulk Delete Sidebar (complementary content) -->
+            <!-- Bulk Delete Sidebar -->
             <aside id="bulkDeleteBar" class="bulk-delete-bar" style="display: none;" aria-label="Bulk delete controls">
                 <span><strong id="selectedCount">0</strong> jobs selected</span>
                 <div class="bulk-actions">
@@ -202,6 +207,7 @@
     </footer>
 
     <!-- ========== BOTTOM NAVIGATION ========== -->
+    <!-- ALERT BUTTON REMOVED FROM BOTTOM NAV (only Home, Applications, Settings remain) -->
     <nav class="bottom-nav" aria-label="Mobile navigation">
         <button class="nav-item active" id="opportunitiesBtn" type="button">
             <i class="fa-solid fa-house"></i>
