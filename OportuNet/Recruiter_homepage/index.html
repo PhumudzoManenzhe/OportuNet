@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Page metadata, typography, local stylesheet, and icon library for the recruiter dashboard. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard | SA Skills Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-theme="light">
+    <!-- Top navigation with branding, search, notifications, and recruiter account actions. -->
+    <nav class="navbar">
+        <!-- Brand block that identifies the product and workspace type. -->
+        <section class="nav-brand">
+            <strong class="brand-mark" aria-hidden="true">SA</strong>
+            <section>
+                <span class="brand-label">SA Skills Portal</span>
+                <p class="brand-subtitle">A social feed for applicants, providers, and updates</p>
+            </section>
+        </section>
+
+        <!-- Search bar used to filter opportunities from the top of the dashboard. -->
+        <section class="nav-center">
+            <label class="search-container" aria-label="Search opportunities">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search opportunities...">
+            </label>
+        </section>
+
+        <!-- Notification button and dropdown menu for profile-related recruiter actions. -->
+        <section class="nav-right">
+            <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
+                <i class="fa-regular fa-bell"></i>
+            </button>
+
+            <!-- User dropdown that exposes profile, settings, support, and logout links. -->
+            <section class="user-dropdown">
+                <button class="profile-trigger dropdown-trigger" id="dropdownTrigger" type="button">
+                    <strong class="avatar-sm" aria-hidden="true">PC</strong>
+                    <p>
+                        <span class="user-name">Provider Co.</span>
+                        <span class="profile-caption">Recruiter</span>
+                    </p>
+                </button>
+
+                <!-- Expanded account menu shown when the recruiter opens the dropdown trigger. -->
+                <section class="dropdown-menu" id="dropdownMenu">
+                    <header class="dropdown-header">
+                        <strong class="avatar-large" aria-hidden="true">PC</strong>
+                        <section class="dropdown-header-info">
+                            <p class="dropdown-name">Provider Co.</p>
+                            <p class="dropdown-email">provider@company.co.za</p>
+                        </section>
+                    </header>
+                    <hr class="dropdown-divider">
+                    <a href="../Recruiter_profile_page/profile_index.html" class="dropdown-item" id="profileBtn"><i class="fa-solid fa-user dropdown-icon"></i><span>My Profile</span></a>
+                    <a href="#" class="dropdown-item" id="settingsBtn"><i class="fa-solid fa-gear dropdown-icon"></i><span>Settings</span></a>
+                    <a href="#" class="dropdown-item" id="privacyBtn"><i class="fa-solid fa-lock dropdown-icon"></i><span>Privacy</span></a>
+                    <a href="#" class="dropdown-item" id="helpBtn"><i class="fa-solid fa-circle-question dropdown-icon"></i><span>Help & Support</span></a>
+                    <hr class="dropdown-divider">
+                    <a href="#" class="dropdown-item" id="logoutBtn"><i class="fa-solid fa-right-from-bracket dropdown-icon"></i><span>Logout</span></a>
+                </section>
+            </section>
+        </section>
+    </nav>
+
+    <!-- Main recruiter dashboard containing the active tab content for opportunities, applications, and notifications. -->
+    <main class="container">
+        <!-- Welcome panel that introduces the recruiter workspace. -->
+        <section class="welcome">
+            <span class="eyebrow">Recruiter Workspace</span>
+            <h1>Welcome back, Provider Co.</h1>
+            <p>Track your opportunities, review applications, and find the next great candidate.</p>
+        </section>
+
+        <!-- Default tab showing the recruiter's opportunities list and its controls. -->
+        <section id="opportunitiesSection">
+            <!-- Header with sorting, export, and create-opportunity actions. -->
+            <header class="section-header">
+                <h2>My Opportunities</h2>
+                <section class="header-buttons">
+                    <section class="sort-buttons">
+                        <label>Sort by:</label>
+                        <button class="sort-btn active" id="sortByDateBtn" type="button">Date</button>
+                        <button class="sort-btn" id="sortByApplicantsBtn" type="button">Applicants</button>
+                    </section>
+                    <button class="btn-secondary" id="exportJobsBtn" type="button">Export CSV</button>
+                    <button class="btn-primary" id="postJobBtn" type="button">Post New Opportunity</button>
+                </section>
+            </header>
+
+            <!-- Bulk action bar that appears when multiple jobs are selected. -->
+            <aside id="bulkDeleteBar" class="bulk-delete-bar" style="display: none;">
+                <span><strong id="selectedCount">0</strong> jobs selected</span>
+                <section class="bulk-actions">
+                    <button class="btn-danger" id="bulkDeleteBtn" type="button">Delete Selected</button>
+                    <button class="btn-secondary" id="cancelBulkBtn" type="button">Cancel</button>
+                </section>
+            </aside>
+
+            <!-- Dynamic grid where opportunity cards are rendered by JavaScript. -->
+            <section id="opportunitiesList" class="opportunities-grid"></section>
+
+            <!-- Pagination controls for moving between pages of opportunity cards. -->
+            <nav id="paginationControls" class="pagination-controls" aria-label="Opportunities pagination">
+                <button id="prevPageBtn" class="pagination-btn" type="button" disabled>Previous</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button id="nextPageBtn" class="pagination-btn" type="button" disabled>Next</button>
+            </nav>
+        </section>
+
+        <!-- Applications tab where submitted candidate applications are listed and filtered. -->
+        <section id="applicationsSection" style="display: none;">
+            <header class="section-header">
+                <h2>All Applications</h2>
+                <section class="filter-buttons">
+                    <button class="filter-btn active" id="filterAll" type="button">All</button>
+                    <button class="filter-btn" id="filterPending" type="button">Pending</button>
+                    <button class="filter-btn" id="filterReviewed" type="button">Reviewed</button>
+                </section>
+            </header>
+            <section id="applicationsList" class="applications-table"></section>
+        </section>
+
+        <!-- Notifications tab where recruiter activity alerts are rendered. -->
+        <section id="notificationsSection" style="display: none;">
+            <header class="section-header">
+                <h2>Notifications</h2>
+                <button class="btn-primary" id="markAllReadBtn" type="button">Mark all as read</button>
+            </header>
+            <section id="notificationsList" class="notifications-list"></section>
+        </section>
+    </main>
+
+    <!-- Modal used to create a new opportunity or edit an existing one. -->
+    <aside id="postJobModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <section class="modal-content">
+            <header class="modal-header">
+                <h2 id="modalTitle">Post New Opportunity</h2>
+                <button class="close-modal" id="closeModalBtn" type="button" aria-label="Close">&times;</button>
+            </header>
+            <!-- Form that captures all job details before saving or posting. -->
+            <form id="postJobForm">
+                <section class="form-group">
+                    <label>Job Title *</label>
+                    <input type="text" id="jobTitle" required>
+                </section>
+                <section class="form-group">
+                    <label>Location *</label>
+                    <input type="text" id="jobLocation" required>
+                </section>
+                <section class="form-group">
+                    <label>Stipend / Salary *</label>
+                    <input type="text" id="jobStipend" required>
+                </section>
+                <section class="form-group">
+                    <label>Duration *</label>
+                    <input type="text" id="jobDuration" required>
+                </section>
+                <section class="form-group">
+                    <label>Closing Date *</label>
+                    <input type="date" id="jobClosingDate" required>
+                </section>
+                <section class="form-group">
+                    <label>Requirements (one per line) *</label>
+                    <textarea id="jobRequirements" rows="5" required></textarea>
+                    <small id="charCounter" class="char-counter">0 characters</small>
+                </section>
+                <section class="form-group">
+                    <label>Description</label>
+                    <textarea id="jobDescription" rows="3"></textarea>
+                </section>
+                <section class="form-group">
+                    <label>Status</label>
+                    <select id="jobStatus">
+                        <option value="active">Active</option>
+                        <option value="draft">Draft (Save for later)</option>
+                    </select>
+                </section>
+                <footer class="form-buttons">
+                    <button type="button" class="btn-secondary" id="saveDraftBtn">Save as Draft</button>
+                    <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submitJobBtn">Post Opportunity</button>
+                </footer>
+            </form>
+        </section>
+    </aside>
+
+    <!-- Confirmation modal for delete-style actions that need extra user approval. -->
+    <aside id="confirmModal" class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+        <section class="modal-content confirm-content">
+            <header class="modal-header">
+                <h3 id="confirmModalTitle">Confirm Action</h3>
+            </header>
+            <section class="confirm-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </section>
+            <footer class="form-buttons">
+                <button class="btn-secondary" id="confirmCancelBtn" type="button">Cancel</button>
+                <button class="btn-danger" id="confirmOkBtn" type="button">Yes, Delete</button>
+            </footer>
+        </section>
+    </aside>
+
+    <!-- Footer with a simple product statement at the bottom of the page. -->
+    <footer>
+        <p>&copy; 2026 SA Skills Portal | Connecting South African talent with opportunities</p>
+    </footer>
+
+    <!-- Mobile-friendly bottom navigation for switching dashboard tabs quickly. -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="opportunitiesBtn" type="button">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" id="applicationsBtn" type="button">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Applications</span>
+        </button>
+        <button class="nav-item" id="notificationsBtn" type="button">
+            <i class="fa-regular fa-bell"></i>
+            <span>Alerts</span>
+        </button>
+        <button class="nav-item" id="settingsNavBtn" type="button">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <!-- Dashboard script that powers filtering, posting, applications, and notifications. -->
+    <script src="script.js"></script>
+</body>
+</html>
