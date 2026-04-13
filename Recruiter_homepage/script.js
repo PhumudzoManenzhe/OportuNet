@@ -10,8 +10,16 @@ let selectedJobs = new Set();
 let bulkMode = false;
 let editingJobId = null;
 
+// Sample data
 notifications = [
     { id: 1, title: "Welcome!", message: "Post your first opportunity using the button above", time: "Just now", read: false }
+];
+
+// Sample applications for testing
+applications = [
+    { id: 101, jobId: 1, applicantName: "Thabo Nkosi", appliedDate: "2026-04-10", qualifications: "Matric with Maths - 78%", status: "pending" },
+    { id: 102, jobId: 1, applicantName: "Lerato Molefe", appliedDate: "2026-04-09", qualifications: "Matric with Maths - 65%", status: "pending" },
+    { id: 103, jobId: 2, applicantName: "Sipho Dlamini", appliedDate: "2026-04-08", qualifications: "IT Diploma", status: "reviewed" }
 ];
 
 function escapeHtml(text) {
@@ -27,26 +35,33 @@ function getApplicantCount(jobId) {
     return applications.filter((application) => application.jobId === jobId).length;
 }
 
+function getPendingApplicantCount(jobId) {
+    return applications.filter((application) => application.jobId === jobId && application.status === "pending").length;
+}
+
 function saveToLocalStorage() {
     localStorage.setItem("recruiter_jobs", JSON.stringify(jobs));
+    localStorage.setItem("recruiter_applications", JSON.stringify(applications));
 }
 
 function loadFromLocalStorage() {
-    const saved = localStorage.getItem("recruiter_jobs");
-    if (saved) {
-        jobs = JSON.parse(saved);
+    const savedJobs = localStorage.getItem("recruiter_jobs");
+    const savedApps = localStorage.getItem("recruiter_applications");
+    if (savedJobs) {
+        jobs = JSON.parse(savedJobs);
+    }
+    if (savedApps) {
+        applications = JSON.parse(savedApps);
     }
 }
 
 function sortJobs(jobsArray) {
     const sorted = [...jobsArray];
-
     if (currentSort === "date") {
         sorted.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
     } else {
         sorted.sort((a, b) => getApplicantCount(b.id) - getApplicantCount(a.id));
     }
-
     return sorted;
 }
 
@@ -56,13 +71,23 @@ function updateBottomNav(tab) {
         applications: "applicationsBtn",
         notifications: "notificationsBtn"
     };
-
     document.querySelectorAll(".bottom-nav .nav-item").forEach((item) => item.classList.remove("active"));
-
     if (navMap[tab]) {
         const activeButton = document.getElementById(navMap[tab]);
         if (activeButton) {
             activeButton.classList.add("active");
+        }
+    }
+}
+
+function updateApplicationsTabBadge() {
+    const totalPending = applications.filter(app => app.status === 'pending').length;
+    const applicationsBtn = document.getElementById('applicationsBtn');
+    if (applicationsBtn) {
+        if (totalPending > 0) {
+            applicationsBtn.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>Applications <span class="badge-pending">${totalPending}</span></span>`;
+        } else {
+            applicationsBtn.innerHTML = `<i class="fa-solid fa-file-lines"></i><span>Applications</span>`;
         }
     }
 }
@@ -72,10 +97,7 @@ function renderOpportunities() {
     if (!container) return;
 
     let filteredJobs = jobs.filter((job) => {
-        const matchesSearch =
-            searchTerm === "" ||
-            job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.location.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = searchTerm === "" || job.title.toLowerCase().includes(searchTerm.toLowerCase()) || job.location.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesSearch;
     });
 
@@ -95,9 +117,9 @@ function renderOpportunities() {
 
     if (paginatedJobs.length === 0) {
         if (jobs.length === 0) {
-            container.innerHTML = '<div class="empty-state"><p>You have not posted any opportunities yet.</p><p>Click "Post New Opportunity" to create your first learnership.</p></div>';
+            container.innerHTML = '<div class="empty-state"><p>📌 You haven\'t posted any opportunities yet.</p><p>Click "Post New Opportunity" to create your first learnership.</p><p>💡 Once you post a job and receive applications, they will appear here with a "Needs Attention" badge.</p></div>';
         } else {
-            container.innerHTML = `<div class="empty-state"><p>No opportunities match "${escapeHtml(searchTerm)}"</p><p>Try a different search term.</p></div>`;
+            container.innerHTML = `<div class="empty-state"><p>🔍 No opportunities match "${escapeHtml(searchTerm)}"</p><p>Try a different search term.</p></div>`;
         }
         return;
     }
@@ -106,37 +128,49 @@ function renderOpportunities() {
     paginatedJobs.forEach((job) => {
         const isSelected = selectedJobs.has(job.id);
         const statusClass = job.status === "draft" ? "draft" : (job.status === "closed" ? "closed" : "active");
-        const statusText = job.status === "draft" ? "Draft" : (job.status === "closed" ? "Closed" : "Active");
+        const statusText = job.status === "draft" ? "📝 Draft" : (job.status === "closed" ? "🔒 Closed" : "✅ Active");
+        const applicantCount = getApplicantCount(job.id);
+        const pendingCount = getPendingApplicantCount(job.id);
+        const needsAttention = applicantCount > 0 && job.status === 'active';
+        const highPriority = applicantCount > 10;
+        
+        const attentionBadge = needsAttention ? '<span class="status-badge needs-attention">⚠️ Needs Attention</span>' : '';
+        const priorityIcon = highPriority ? '<i class="fa-solid fa-circle-exclamation" style="color: #dc2626; margin-left: 8px;" title="High volume of applicants"></i>' : '';
+        const reviewButton = applicantCount > 0 ? `<button class="review-btn" onclick="reviewApplicants(${job.id})">📋 Review ${applicantCount} Applicant${applicantCount !== 1 ? 's' : ''}</button>` : '<button class="review-btn disabled" disabled style="background-color: #94a3b8;">No applicants yet</button>';
 
         html += `
-            <div class="opportunity-card ${statusClass}">
-                <div class="card-header">
+            <article class="opportunity-card ${statusClass}">
+                <header class="card-header">
                     <div>
                         ${bulkMode ? `<input type="checkbox" class="card-checkbox" data-id="${job.id}" ${isSelected ? "checked" : ""}>` : ""}
-                        <h3>${escapeHtml(job.title)}</h3>
+                        <h3>${escapeHtml(job.title)}${priorityIcon}</h3>
                     </div>
                     <div>
-                        <button class="duplicate-job-btn" onclick="duplicateJob(${job.id})">Copy</button>
-                        <button class="edit-job-btn" onclick="editJob(${job.id})">Edit</button>
-                        <button class="delete-job-btn" onclick="confirmDeleteJob(${job.id})">Delete</button>
+                        <button class="duplicate-job-btn" onclick="duplicateJob(${job.id})">📋 Copy</button>
+                        <button class="edit-job-btn" onclick="editJob(${job.id})">✏️ Edit</button>
+                        <button class="delete-job-btn" onclick="confirmDeleteJob(${job.id})">🗑️ Delete</button>
                     </div>
-                </div>
+                </header>
                 <div class="opportunity-meta">
                     <span class="status-badge ${statusClass}">${statusText}</span>
-                    <span class="applicant-count">${getApplicantCount(job.id)} applicants</span>
-                    <button class="status-toggle" onclick="toggleJobStatus(${job.id})">${job.status === "active" ? "Close" : (job.status === "draft" ? "Publish" : "Reactivate")}</button>
+                    <span class="applicant-count">👥 ${applicantCount} applicant${applicantCount !== 1 ? 's' : ''}</span>
+                    ${pendingCount > 0 ? `<span class="pending-count">⏳ ${pendingCount} pending</span>` : ''}
+                    ${attentionBadge}
+                    <button class="status-toggle" onclick="toggleJobStatus(${job.id})">${job.status === "active" ? "🔒 Close" : (job.status === "draft" ? "✅ Publish" : "✅ Reactivate")}</button>
                 </div>
-                <div class="location-info">Location: ${escapeHtml(job.location)}</div>
-                <div class="stipend-info">Stipend: ${escapeHtml(job.stipend)}</div>
-                <div class="closing-date">Closing: ${job.closingDate}</div>
+                <div class="location-info">📍 ${escapeHtml(job.location)}</div>
+                <div class="stipend-info">💰 ${escapeHtml(job.stipend)}</div>
+                <div class="closing-date">📅 Closing: ${job.closingDate}</div>
                 <div class="action-buttons-group">
                     <button class="view-details-btn" onclick="viewJobDetails(${job.id})">View Details</button>
+                    ${reviewButton}
                 </div>
-            </div>
+            </article>
         `;
     });
 
     container.innerHTML = html;
+    updateApplicationsTabBadge();
 
     if (bulkMode) {
         document.querySelectorAll(".card-checkbox").forEach((checkbox) => {
@@ -150,6 +184,19 @@ function renderOpportunities() {
                 updateBulkDeleteBar();
             });
         });
+    }
+}
+
+function reviewApplicants(jobId) {
+    const job = jobs.find(j => j.id === jobId);
+    const applicantCount = getApplicantCount(jobId);
+    const pendingCount = getPendingApplicantCount(jobId);
+    
+    if (job && applicantCount > 0) {
+        alert(`📋 Reviewing "${job.title}"\n\nTotal Applicants: ${applicantCount}\nPending Review: ${pendingCount}\n\nThis will open the full applicant management page in Sprint 2.`);
+        switchTab('applications');
+    } else {
+        alert(`No applicants to review for "${job?.title || 'this job'}" yet.`);
     }
 }
 
@@ -197,7 +244,7 @@ function bulkDelete() {
     renderApplications();
     renderNotifications();
     saveToLocalStorage();
-    alert(`Deleted ${deletedCount} opportunities`);
+    alert(`✅ Deleted ${deletedCount} opportunities`);
 }
 
 function toggleJobStatus(jobId) {
@@ -237,7 +284,7 @@ function duplicateJob(jobId) {
     renderOpportunities();
     notifications.unshift({ id: Date.now(), title: "Job Duplicated", message: `You duplicated "${original.title}"`, time: "Just now", read: false });
     renderNotifications();
-    alert(`"${original.title}" has been duplicated as a draft`);
+    alert(`✅ "${original.title}" has been duplicated as a draft`);
 }
 
 function renderApplications() {
@@ -245,7 +292,7 @@ function renderApplications() {
     if (!container) return;
 
     if (applications.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No applications yet.</p><p>When students apply to your opportunities, they will appear here.</p></div>';
+        container.innerHTML = '<div class="empty-state"><p>📭 No applications yet.</p><p>When students apply to your opportunities, they will appear here.</p></div>';
         return;
     }
 
@@ -256,12 +303,12 @@ function renderApplications() {
         filteredApps = applications.filter((app) => app.status === "reviewed");
     }
 
-    let html = '</table><thead><tr><th>Applicant Name</th><th>Opportunity</th><th>Applied Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>Applicant Name</th><th>Opportunity</th><th>Applied Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
 
     filteredApps.forEach((app) => {
         const job = jobs.find((item) => item.id === app.jobId);
         const jobTitle = job ? job.title : "Unknown";
-        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(jobTitle)}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${escapeHtml(app.status)}</td><td class="action-buttons"><button onclick="viewApplicant(${app.id})">View</button><button onclick="shortlistApplicant(${app.id})">Shortlist</button><button onclick="rejectApplicant(${app.id})">Reject</button></td></tr>`;
+        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(jobTitle)}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${escapeHtml(app.status)}</td><td class="action-buttons"><button onclick="viewApplicant(${app.id})">👤 View</button><button onclick="shortlistApplicant(${app.id})">✓ Shortlist</button><button onclick="rejectApplicant(${app.id})">✗ Reject</button></td></tr>`;
     });
 
     html += "</tbody></table>";
@@ -273,7 +320,7 @@ function renderNotifications() {
     if (!container) return;
 
     if (notifications.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No new notifications.</p></div>';
+        container.innerHTML = '<div class="empty-state"><p>🔔 No new notifications.</p></div>';
         return;
     }
 
@@ -360,11 +407,9 @@ function switchTab(tab) {
 function getInitialTab() {
     const searchParams = new URLSearchParams(window.location.search);
     const requestedTab = searchParams.get("tab");
-
     if (requestedTab === "applications" || requestedTab === "notifications") {
         return requestedTab;
     }
-
     return "opportunities";
 }
 
@@ -431,7 +476,7 @@ function saveAsDraft() {
     closePostJobModal();
     switchTab("opportunities");
     renderNotifications();
-    alert("Job saved as draft");
+    alert("💾 Job saved as draft");
 }
 
 function postJob(event) {
@@ -468,11 +513,11 @@ function postJob(event) {
         const index = jobs.findIndex((job) => job.id === editingJobId);
         if (index !== -1) jobs[index] = jobData;
         notifications.unshift({ id: Date.now(), title: "Job Updated", message: `You updated "${title}"`, time: "Just now", read: false });
-        alert("Job updated successfully");
+        alert("✅ Job updated successfully");
     } else {
         jobs.push(jobData);
         notifications.unshift({ id: Date.now(), title: "Job Posted", message: `You posted "${title}"`, time: "Just now", read: false });
-        alert("Job posted successfully");
+        alert("✅ Job posted successfully");
     }
 
     saveToLocalStorage();
@@ -512,7 +557,7 @@ function confirmDeleteJob(jobId) {
         renderApplications();
         notifications.unshift({ id: Date.now(), title: "Job Deleted", message: `You deleted "${job.title}"`, time: "Just now", read: false });
         renderNotifications();
-        alert(`"${job.title}" deleted`);
+        alert(`✅ "${job.title}" deleted`);
     }
 }
 
@@ -521,14 +566,14 @@ function viewJobDetails(jobId) {
     if (!job) return;
 
     const requirementsText = job.requirements.map((requirement) => `- ${requirement}`).join("\n");
-    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nApplicants: ${getApplicantCount(job.id)}\nStatus: ${job.status}\n\nRequirements:\n${requirementsText}\n\n${job.description || "No description"}`);
+    alert(`📋 ${job.title}\n\n📍 Location: ${job.location}\n💰 Stipend: ${job.stipend}\n📅 Duration: ${job.duration}\n📆 Closing: ${job.closingDate}\n👥 Applicants: ${getApplicantCount(job.id)}\n⏳ Pending: ${getPendingApplicantCount(job.id)}\n📌 Status: ${job.status}\n\n📝 Requirements:\n${requirementsText}\n\n${job.description || "No description"}`);
 }
 
 function viewApplicant(appId) {
     const application = applications.find((item) => item.id === appId);
     if (!application) return;
 
-    alert(`${application.applicantName}\n${application.opportunityTitle}\n${application.appliedDate}\n${application.qualifications}\nStatus: ${application.status}`);
+    alert(`👤 ${application.applicantName}\n📋 ${application.opportunityTitle}\n📅 ${application.appliedDate}\n📚 ${application.qualifications}\n📌 Status: ${application.status}`);
 }
 
 function shortlistApplicant(appId) {
@@ -539,7 +584,7 @@ function shortlistApplicant(appId) {
     renderApplications();
     notifications.unshift({ id: Date.now(), title: "Shortlisted", message: `You shortlisted ${application.applicantName}`, time: "Just now", read: false });
     renderNotifications();
-    alert(`${application.applicantName} shortlisted`);
+    alert(`✅ ${application.applicantName} shortlisted`);
 }
 
 function rejectApplicant(appId) {
@@ -550,7 +595,7 @@ function rejectApplicant(appId) {
     renderApplications();
     notifications.unshift({ id: Date.now(), title: "Rejected", message: `You rejected ${application.applicantName}`, time: "Just now", read: false });
     renderNotifications();
-    alert(`${application.applicantName} rejected`);
+    alert(`❌ ${application.applicantName} rejected`);
 }
 
 function markNotificationRead(id) {
@@ -575,9 +620,9 @@ function exportJobsToCSV() {
         return;
     }
 
-    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,Applicants,Requirements\n";
+    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,Applicants,Pending\n";
     jobs.forEach((job) => {
-        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}",${getApplicantCount(job.id)},"${job.requirements.join("; ")}"\n`;
+        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}",${getApplicantCount(job.id)},${getPendingApplicantCount(job.id)}\n`;
     });
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -587,6 +632,7 @@ function exportJobsToCSV() {
     link.download = `jobs_${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+    alert(`✅ Exported ${jobs.length} jobs`);
 }
 
 function setupCharCounter() {
@@ -634,8 +680,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const helpBtn = document.getElementById("helpBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // ========== BUTTON BEHAVIOR FOR SPRINT 1 ==========
-    // Only Home button works fully
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
     if (applicationsBtn) applicationsBtn.addEventListener("click", () => alert("Applications page - Coming in Sprint 2"));
     if (notificationsBtn) notificationsBtn.addEventListener("click", () => alert("Notifications page - Coming in Sprint 2"));
