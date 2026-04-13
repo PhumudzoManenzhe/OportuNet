@@ -357,6 +357,17 @@ function switchTab(tab) {
     if (tab === "notifications") renderNotifications();
 }
 
+function getInitialTab() {
+    const searchParams = new URLSearchParams(window.location.search);
+    const requestedTab = searchParams.get("tab");
+
+    if (requestedTab === "applications" || requestedTab === "notifications") {
+        return requestedTab;
+    }
+
+    return "opportunities";
+}
+
 function validateJobForm() {
     const fields = ["jobTitle", "jobLocation", "jobStipend", "jobDuration", "jobClosingDate", "jobRequirements"];
     return fields.every((id) => {
@@ -675,12 +686,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dropdownMenu) dropdownMenu.classList.remove("show");
     });
 
-    if (profileBtn) profileBtn.addEventListener("click", (event) => { event.preventDefault(); alert("Profile - Sprint 2"); });
+    if (profileBtn) profileBtn.addEventListener("click", () => {
+        if (dropdownMenu) {
+            dropdownMenu.classList.remove("show");
+        }
+    });
     if (settingsBtn) settingsBtn.addEventListener("click", (event) => { event.preventDefault(); alert("Settings - Sprint 2"); });
     if (privacyBtn) privacyBtn.addEventListener("click", (event) => { event.preventDefault(); alert("Privacy - Sprint 2"); });
     if (helpBtn) helpBtn.addEventListener("click", (event) => { event.preventDefault(); alert("Help - Sprint 2"); });
     if (logoutBtn) logoutBtn.addEventListener("click", (event) => { event.preventDefault(); alert("Logged out"); });
 
     setupCharCounter();
-    switchTab("opportunities");
+    switchTab(getInitialTab());
 });
