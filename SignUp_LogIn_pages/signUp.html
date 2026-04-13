@@ -8,35 +8,36 @@
 </head>
 <body>
 
-<div class="signup-container">
+<main class="signup-container">
     <h2>Create Account</h2>
 
     <form id="signupForm">
-        <div class="input-group">
+
+        <section class="input-group">
             <label>Full Name</label>
             <input type="text" placeholder="Enter your name" required>
-        </div>
+        </section>
 
-        <div class="input-group">
+        <section class="input-group">
             <label>Email</label>
             <input type="email" placeholder="Enter your email" required>
-        </div>
+        </section>
 
-        <div class="input-group">
+        <section class="input-group">
             <label>Password</label>
             <input type="password" id="password" placeholder="Enter your password" required>
-        </div>
+        </section>
 
-        <div class="input-group">
+        <section class="input-group">
             <label>Confirm Password</label>
             <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-        </div>
+        </section>
 
         <button type="submit" class="signup-btn">Sign Up</button>
 
-        <div class="divider">
+        <section class="divider">
             <span>OR</span>
-        </div>
+        </section>
 
         <button type="button" class="google-btn">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
@@ -46,23 +47,13 @@
         <p class="login-link">
             Already have an account? <a href="logIn.html">Login</a>
         </p>
+
     </form>
-</div>
+</main>
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
 <script src="signup_logIn.js"></script>
-<!-- <script>
-document.getElementById("signupForm").addEventListener("submit", function(e) {
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-
-    if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        e.preventDefault();
-    }
-});
-</script> -->
 
 </body>
 </html>

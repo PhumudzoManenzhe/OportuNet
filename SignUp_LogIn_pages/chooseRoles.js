@@ -19,9 +19,9 @@ function setRole(role) {
     .then(() => {
         // Redirect based on role
         if (role === "applicant") {
-            window.location.href = "applicant_homepage.html";
+            window.location.href = "../Applicant_homepage/index.html";
         } else {
-            window.location.href = "recruiter_homepage.html";
+            window.location.href = "../Recruiter_homepage/index.html";
         }
     })
     .catch((error) => {

@@ -19,7 +19,7 @@ function googleLogin() {
     auth.signInWithPopup(googleProvider)
     .then((result) => {
         console.log("Google User:", result.user);
-        window.location.href = "index.html"; // Redirect to your homepage
+        window.location.href = "../Applicant_homepage/index.html"; // Redirect to your homepage
     }).catch((error) => {
         alert("Google Error: " + error.message);
     });
@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
             forgotPassword(email);
         });
     }
+    // Handle Password Toggle(show and hide password)
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
 
