@@ -45,7 +45,7 @@ body::before {
     z-index: -1;
 }
 
-.navbar {
+header.navbar {
     position: fixed;
     top: 0;
     left: 0;
@@ -129,7 +129,7 @@ body::before {
 .sort-buttons label,
 #pageInfo,
 .dropdown-email,
-footer p {
+.page-footer p {
     color: var(--muted);
     font-size: 13px;
 }
@@ -358,7 +358,7 @@ footer p {
 
 .opportunities-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 18px;
 }
 
@@ -367,10 +367,12 @@ footer p {
     border-radius: 24px;
     border: 1px solid var(--line);
     background: var(--surface-strong);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .opportunity-card:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .opportunity-card h3,
@@ -384,6 +386,7 @@ footer p {
     justify-content: space-between;
     gap: 12px;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .card-header > div:last-child {
@@ -404,11 +407,12 @@ footer p {
 
 .status-badge,
 .applicant-count,
-.status-toggle {
+.status-toggle,
+.pending-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 12px;
+    padding: 6px 12px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
@@ -434,6 +438,11 @@ footer p {
     color: var(--brand-deep);
 }
 
+.pending-count {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
 .status-toggle {
     background: var(--gray-soft);
     color: var(--muted);
@@ -446,6 +455,7 @@ footer p {
 .closing-date {
     color: #334155;
     margin: 6px 0;
+    font-size: 14px;
 }
 
 .action-buttons-group,
@@ -468,6 +478,8 @@ footer p {
     border: 1px solid var(--line);
     background: white;
     cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
 }
 
 .edit-job-btn,
@@ -485,6 +497,24 @@ footer p {
 .duplicate-job-btn {
     color: #166534;
     border-color: rgba(22, 101, 52, 0.2);
+}
+
+.edit-job-btn:hover,
+.view-details-btn:hover,
+.notification-read-btn:hover,
+.action-buttons button:hover {
+    background: var(--brand-soft);
+    transform: translateY(-1px);
+}
+
+.delete-job-btn:hover {
+    background: #fee2e2;
+    transform: translateY(-1px);
+}
+
+.duplicate-job-btn:hover {
+    background: #dcfce7;
+    transform: translateY(-1px);
 }
 
 .bulk-delete-bar,
@@ -556,7 +586,7 @@ footer p {
     color: var(--muted);
 }
 
-.modal {
+dialog.modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -565,6 +595,11 @@ footer p {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    border: none;
+}
+
+dialog.modal[open] {
+    display: flex;
 }
 
 .modal-content {
@@ -620,6 +655,7 @@ footer p {
     text-align: right;
     margin-top: 6px;
     color: var(--muted);
+    font-size: 12px;
 }
 
 .form-buttons {
@@ -636,7 +672,7 @@ footer p {
     color: var(--text);
 }
 
-footer {
+.page-footer {
     text-align: center;
     padding: 24px 20px 8px;
     color: var(--muted);
@@ -676,6 +712,7 @@ footer {
 .dropdown-divider {
     height: 1px;
     background: var(--line);
+    margin: 0;
 }
 
 .dropdown-item {
@@ -683,6 +720,7 @@ footer {
     padding: 14px 18px;
     color: var(--text);
     text-decoration: none;
+    transition: background 0.2s;
 }
 
 .dropdown-item:hover {
@@ -723,6 +761,11 @@ footer {
     font-weight: 700;
 }
 
+.nav-item.active {
+    background: var(--brand);
+    color: white;
+}
+
 .icon-btn:hover,
 .btn-primary:hover,
 .btn-secondary:hover,
@@ -731,16 +774,76 @@ footer {
 .filter-btn:hover,
 .pagination-btn:hover,
 .nav-item:hover,
-.edit-job-btn:hover,
-.delete-job-btn:hover,
-.duplicate-job-btn:hover,
-.view-details-btn:hover,
-.notification-read-btn:hover,
-.action-buttons button:hover,
 .close-modal:hover {
     transform: translateY(-1px);
 }
 
+/* ========== NEW SPRINT 1 FEATURE STYLES ========== */
+
+/* Needs Attention Badge - Pulsing animation */
+.status-badge.needs-attention {
+    background-color: #fef3c7;
+    color: #d97706;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.6; transform: scale(1); }
+}
+
+/* Review Button */
+.review-btn {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.review-btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.review-btn:disabled,
+.review-btn.disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Badge on Applications Tab */
+.badge-pending {
+    background-color: #dc2626;
+    color: white;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* High Priority Icon */
+.high-priority-icon {
+    color: #dc2626;
+    margin-left: 8px;
+    font-size: 14px;
+}
+
+/* Article card semantic styling */
+article.opportunity-card {
+    break-inside: avoid;
+}
+
+/* Responsive */
 @media (max-width: 960px) {
     .section-header,
     .header-buttons,
@@ -756,7 +859,7 @@ footer {
         padding-top: 138px;
     }
 
-    .navbar {
+    header.navbar {
         height: auto;
         flex-wrap: wrap;
         padding: 16px;
