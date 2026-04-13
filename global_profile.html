@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A mobile-first LinkedIn-style profile page in view-only mode with future-ready backend placeholders.">
+    <title>LinkedIn-Style Profile</title>
+    <link rel="stylesheet" href="global_profile.css">
+    <script src="global_profile.js" defer></script>
+</head>
+<body>
+    <header class="app-header">
+        <nav class="toolbar" aria-label="Profile navigation">
+            <button type="button" class="toolbar-button" data-feedback="Back navigation will be connected when this page is attached to the wider app.">
+                <span aria-hidden="true">&larr;</span>
+                <span class="sr-only">Go back</span>
+            </button>
+
+            <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">
+                <label class="sr-only" for="profile-search">Search</label>
+                <input id="profile-search" name="profile-search" type="search" placeholder="Search">
+            </form>
+
+            <button type="button" class="toolbar-button" data-feedback="Settings will be connected to the wider application shell.">
+                <span aria-hidden="true">&#9881;</span>
+                <span class="sr-only">Open settings</span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="profile-app">
+        <section class="cover-panel" aria-label="Profile cover"></section>
+
+        <article class="profile-card" aria-labelledby="profile-name">
+            <header class="profile-summary">
+                <figure class="profile-figure">
+                    <span class="profile-avatar-shell">
+                        <img id="profile-photo" class="profile-photo" alt="Profile picture" hidden>
+                        <span id="avatar-fallback" class="avatar-fallback" aria-hidden="true"></span>
+                    </span>
+                </figure>
+
+                <h1 id="profile-name"></h1>
+                <p id="profile-headline" class="profile-headline"></p>
+                <p class="profile-meta">
+                    <span id="profile-institution"></span>
+                </p>
+                <p id="profile-location" class="profile-location"></p>
+            </header>
+        </article>
+
+        <section class="screen-section" aria-labelledby="about-heading">
+            <header class="section-heading">
+                <h2 id="about-heading">About</h2>
+            </header>
+            <p id="about-intro" class="body-copy"></p>
+            <p id="about-passion" class="body-copy"></p>
+        </section>
+
+        <section id="education-section" class="screen-section" aria-labelledby="education-heading">
+            <header class="section-heading">
+                <h2 id="education-heading">Education</h2>
+            </header>
+            <ol id="education-list" class="resume-list"></ol>
+        </section>
+
+        <section id="experience-section" class="screen-section" aria-labelledby="experience-heading">
+            <header class="section-heading">
+                <h2 id="experience-heading">Experience</h2>
+            </header>
+            <ol id="experience-list" class="resume-list"></ol>
+        </section>
+
+        <section id="qualifications-section" class="screen-section" aria-labelledby="qualifications-heading" hidden>
+            <header class="section-heading">
+                <h2 id="qualifications-heading">Qualifications</h2>
+            </header>
+            <ol id="qualifications-list" class="resume-list"></ol>
+        </section>
+
+        <section id="skills-section" class="screen-section" aria-labelledby="skills-heading">
+            <header class="section-heading">
+                <h2 id="skills-heading">Skills</h2>
+            </header>
+            <ol id="skills-list" class="resume-list"></ol>
+        </section>
+
+        <section id="projects-section" class="screen-section" aria-labelledby="projects-heading" hidden>
+            <header class="section-heading">
+                <h2 id="projects-heading">Projects</h2>
+            </header>
+            <ol id="projects-list" class="resume-list"></ol>
+        </section>
+
+        <section id="achievements-section" class="screen-section" aria-labelledby="achievements-heading" hidden>
+            <header class="section-heading">
+                <h2 id="achievements-heading">Achievements</h2>
+            </header>
+            <ol id="achievements-list" class="resume-list"></ol>
+        </section>
+
+        <section class="screen-section" aria-labelledby="activity-heading">
+            <header class="section-heading section-heading-activity">
+                <section>
+                    <h2 id="activity-heading">Activity</h2>
+                    <p id="activity-count" class="section-count"></p>
+                </section>
+            </header>
+            <p id="activity-empty-title" class="activity-title"></p>
+            <p id="activity-empty-copy" class="body-copy"></p>
+            <footer id="activity-footer" class="section-footer">
+                <button type="button" id="activity-show-all-button" class="show-all-button">Show all &rarr;</button>
+            </footer>
+            <ol id="activity-posts-list" class="activity-posts-list" hidden></ol>
+        </section>
+    </main>
+
+    <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
+
+    <footer class="bottom-nav-shell">
+        <nav class="bottom-nav" aria-label="Primary">
+            <ul>
+                <li><a class="nav-item nav-item-active" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#8962;</span>
+                    <span>Home</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9678;</span>
+                    <span>My Network</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">+</span>
+                    <span>Post</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9711;</span>
+                    <span>Notifications</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9635;</span>
+                    <span>Jobs</span>
+                </a></li>
+            </ul>
+        </nav>
+    </footer>
+
+    <template id="activity-post-template">
+        <li>
+            <article class="activity-post-card">
+                <header class="activity-post-header">
+                    <section class="activity-post-meta">
+                        <h3 class="activity-post-author"></h3>
+                        <time class="activity-post-time"></time>
+                    </section>
+                </header>
+                <p class="activity-post-content"></p>
+            </article>
+        </li>
+    </template>
+
+    <template id="resume-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta resume-company-line"></p>
+                    <p class="resume-meta resume-date-line"></p>
+                    <p class="resume-meta resume-location-line"></p>
+                    <p class="resume-description"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <template id="education-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta education-field-line"></p>
+                    <p class="resume-meta education-date-line"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <template id="skill-group-template">
+        <li>
+            <article class="resume-item skill-group-card">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <ul class="grouped-skill-list"></ul>
+                </section>
+            </article>
+        </li>
+    </template>
+</body>
+</html>
