@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Role</title>
+
+  <link rel="stylesheet" href="chooseRole_style.css">
+</head>
+<body>
+
+<div class="login_form">
+  <h1>Select Your Role</h1>
+  <p style="text-align:center; margin-bottom: 25px; color:#666;">
+    Tell us how you want to use the platform
+  </p>
+
+  <div class="role-options">
+
+    <button class="role-btn" id="applicantBtn">
+      👨‍💻 Applicant  
+      <small>Find jobs & apply</small>
+    </button>
+
+    <button class="role-btn" id="recruiterBtn">
+      🏢 Recruiter  
+      <small>Post jobs & hire</small>
+    </button>
+
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script src="script.js"></script>
+<script src="chooseRole.js"></script>
+
+</body>
+</html>
