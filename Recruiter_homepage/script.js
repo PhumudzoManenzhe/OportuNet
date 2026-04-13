@@ -256,7 +256,7 @@ function renderApplications() {
         filteredApps = applications.filter((app) => app.status === "reviewed");
     }
 
-    let html = '<table><thead><tr><th>Applicant Name</th><th>Opportunity</th><th>Applied Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+    let html = '</table><thead><tr><th>Applicant Name</th><th>Opportunity</th><th>Applied Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
 
     filteredApps.forEach((app) => {
         const job = jobs.find((item) => item.id === app.jobId);
@@ -634,11 +634,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const helpBtn = document.getElementById("helpBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
+    // ========== BUTTON BEHAVIOR FOR SPRINT 1 ==========
+    // Only Home button works fully
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
-    if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
-    if (notificationsBtn) notificationsBtn.addEventListener("click", () => switchTab("notifications"));
-    if (topNotificationBtn) topNotificationBtn.addEventListener("click", () => switchTab("notifications"));
-    if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("Settings - Sprint 2"));
+    if (applicationsBtn) applicationsBtn.addEventListener("click", () => alert("Applications page - Coming in Sprint 2"));
+    if (notificationsBtn) notificationsBtn.addEventListener("click", () => alert("Notifications page - Coming in Sprint 2"));
+    if (topNotificationBtn) topNotificationBtn.addEventListener("click", () => alert("Notifications - Coming in Sprint 2"));
+    if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("Settings - Coming in Sprint 2"));
+
     if (searchInput) searchInput.addEventListener("input", searchOpportunities);
     if (postJobBtn) postJobBtn.addEventListener("click", openPostJobModal);
     if (closeModalBtn) closeModalBtn.addEventListener("click", closePostJobModal);
