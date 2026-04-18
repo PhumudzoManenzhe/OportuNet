@@ -46,36 +46,6 @@ body.editor-open {
     overflow: hidden;
 }
 
-body.recruiter-view-only .profile-summary-tools,
-body.recruiter-view-only .section-action-menu,
-body.recruiter-view-only .action-pills,
-body.recruiter-view-only .inline-actions,
-body.recruiter-view-only .add-skills-wrap,
-body.recruiter-view-only #banner-camera-button,
-body.recruiter-view-only [id^="dismiss-"],
-body.recruiter-view-only .activity-post-delete {
-    display: none !important;
-}
-
-body.recruiter-view-only #avatar-menu {
-    display: none !important;
-}
-
-body.recruiter-view-only #add-section-panel,
-body.recruiter-view-only #editor-panel {
-    display: none !important;
-}
-
-body.recruiter-view-only #avatar-menu-button,
-body.recruiter-view-only #followers-button {
-    cursor: default;
-    pointer-events: none;
-}
-
-body.recruiter-view-only .text-link {
-    text-decoration: none;
-}
-
 body > header,
 body > main,
 body > footer {
@@ -149,26 +119,6 @@ abbr {
     padding: 0.85rem 1rem;
 }
 
-.toolbar-profile {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 3.7rem;
-}
-
-.toolbar-search {
-    width: min(32.5rem, calc(100% - 5.5rem));
-    margin-inline: auto;
-}
-
-.toolbar-profile .toolbar-button {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
 .toolbar-button,
 .section-icon-button,
 .camera-button,
@@ -215,7 +165,7 @@ abbr {
     position: relative;
     width: min(100%, var(--content-width));
     margin-inline: auto;
-    padding-bottom: 7.5rem;
+    padding-bottom: 5.5rem;
 }
 
 .cover-panel {
@@ -273,7 +223,6 @@ abbr {
 
 .avatar-button {
     position: relative;
-    display: block;
     width: 5.55rem;
     height: 5.55rem;
     border-radius: 50%;
@@ -873,7 +822,7 @@ abbr {
 .feedback-toast {
     position: fixed;
     left: 50%;
-    bottom: 6.4rem;
+    bottom: 5.5rem;
     z-index: 45;
     width: min(calc(100% - 2rem), 22rem);
     margin: 0;
@@ -963,10 +912,6 @@ abbr {
         padding-inline: 1.25rem;
     }
 
-    .toolbar-profile .toolbar-button {
-        left: 1.25rem;
-    }
-
     .profile-card,
     .screen-section {
         margin-inline: 1rem;
@@ -1022,65 +967,5 @@ abbr {
 
     .bottom-nav {
         border: 1px solid var(--line);
-    }
-}
-
-.bottom-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%);
-    width: min(560px, calc(100% - 24px));
-    padding: 12px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    border: none;
-    border-radius: 24px;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 22px 44px rgba(15, 23, 42, 0.2);
-    overflow: visible;
-    z-index: 1000;
-}
-
-.nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 16px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.68);
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-}
-
-.nav-item.active {
-    background: var(--brand);
-    color: white;
-}
-
-.nav-item:hover {
-    transform: translateY(-1px);
-}
-
-.nav-item:focus-visible {
-    outline: 3px solid rgba(219, 234, 254, 0.48);
-    outline-offset: 2px;
-}
-
-@media (max-width: 640px) {
-    .bottom-nav {
-        width: calc(100% - 18px);
-        padding: 10px 12px;
     }
 }
