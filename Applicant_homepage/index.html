@@ -1,352 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Applicant Home Feed | SA Skills Portal</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicant_homepage</title>
+  <link rel="stylesheet" href="Applicant_homepage.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <div class="brand-mark">OPTN</div>
-            <div>
-                <span class="brand-label">OportuNet</span>
-            </div>
-        </div>
+  <main class="dashboard">
 
-        <div class="nav-center">
-            <label class="search-container" aria-label="Search feed">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input class="search-input" type="text" placeholder="Search jobs, updates, people, or topics">
-            </label>
-        </div>
+    <header class="topbar">
+      <section class="topbar-title">
+         <h1>OpportuNet</h1>
+      </section>
 
-        <div class="nav-right">
-            <button class="icon-btn" type="button" aria-label="Notifications">
-                <i class="fa-regular fa-bell"></i>
-            </button>
-            <a href="../Applicant_profile_page/global_profile.html" class="profile-trigger">
-                <div class="avatar-sm">PM</div>
-                <div>
-                    <span class="user-name">Phumudzo</span>
-                    <span class="profile-caption">Applicant</span>
-                </div>
-            </a>
-        </div>
-    </nav>
+      <nav class="topbar-actions" aria-label="User actions">
+        <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="card-btn"><i class="glyphicon glyphicon-bell"></i></a>
+        <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="card-btn"><i class="glyphicon glyphicon-cog"></i></a>
+        <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="card-btn"><i class="glyphicon glyphicon-user"></i></a>
+      </nav>
+    </header>
 
-    <div class="page-shell">
-        <section class="hero-card">
-            <div class="hero-copy">
-                <h1>Explore opportunities and community updates in one polished feed.</h1>
-                <p>Your homepage is for discovery and interaction. Use the Jobs workspace for application statuses, interview stages, and more professional tracking.</p>
-            </div>
-        </section>
+    <header class="Welcome">
+      <section class="Welcome_message">
+        <p>Welcome back. Explore available learnerships and skills development opportunities.</p>
+      </section>
+    </header>
 
-        <div class="content-grid">
-            <main class="main-column">
-                <section class="card composer-card">
-                    <div class="composer-header">
-                        <div class="composer-title">
-                            <div class="avatar-lg">PM</div>
-                            <div>
-                                <h2>Create a Post</h2>
-                                <p>Share a status, ask a question, or post something useful for the community.</p>
-                            </div>
-                        </div>
-                        <button class="ghost-btn small-btn compose-trigger" type="button">
-                            <i class="fa-solid fa-pen"></i>
-                            <span>Write</span>
-                        </button>
-                    </div>
 
-                    <div class="composer-body">
-                        <textarea class="composer-input" placeholder="What do you want to share with the community today?"></textarea>
-                    </div>
 
-                    <div class="composer-actions">
-                        <div class="composer-hints">
-                            <span><i class="fa-solid fa-camera"></i> Update</span>
-                            <span><i class="fa-solid fa-link"></i> Resource</span>
-                            <span><i class="fa-solid fa-hashtag"></i> Discussion</span>
-                        </div>
-                        <button class="primary-btn publish-post" type="button">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span>Post Now</span>
-                        </button>
-                    </div>
-                </section>
 
-                <section class="card feed-shell">
-                    <div class="feed-head">
-                        <div>
-                            <h2>Community Feed</h2>
-                            <p class="results-summary">Showing 4 posts in your feed</p>
-                        </div>
-                    </div>
+<section class="overview" aria-label="Opportunity categories">
+  
+  <a href="../INTERNSHIPS_PAGE/Internships_page.html" class="card-btn">Internships</a>
 
-                    <div class="feed-scroll">
-                        <article class="feed-post post-job" data-type="job" data-search="telkom systems development learnership pretoria javascript cloud support stipend">
-                            <div class="post-topline">
-                                <span class="post-type-pill">Job Post</span>
-                                <span class="post-time">12 minutes ago</span>
-                            </div>
+  <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="card-btn">Learnerships</a>
 
-                            <div class="post-author">
-                                <div class="author-badge company-badge">TS</div>
-                                <div>
-                                    <h3>Telkom SA</h3>
-                                    <p>New learnership opportunity in Pretoria</p>
-                                </div>
-                            </div>
+  <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="card-btn">Apprenticeships</a>
 
-                            <div class="post-body">
-                                <h4>Systems Development Learnership</h4>
-                                <p>Applications are open for our 2026 intake. We are looking for applicants with Grade 12 Mathematics and strong interest in software, support, and cloud fundamentals.</p>
-                            </div>
+</section>
 
-                            <div class="post-tags">
-                                <span>NQF Level 5</span>
-                                <span>R6,500 pm</span>
-                                <span>Pretoria</span>
-                            </div>
+</main>
 
-                            <div class="post-stats">
-                                <span><i class="fa-solid fa-thumbs-up"></i> <strong class="like-count">18</strong> Likes</span>
-                                <span><strong class="comment-count">6</strong> Comments</span>
-                            </div>
-
-                            <div class="interaction-bar">
-                                <button class="interaction-btn like-btn" type="button"><i class="fa-regular fa-thumbs-up"></i><span>Like</span></button>
-                                <button class="interaction-btn comment-btn" type="button"><i class="fa-regular fa-comment"></i><span>Comment</span></button>
-                                <button class="interaction-btn bookmark-btn" type="button"><i class="fa-regular fa-bookmark"></i><span>Save</span></button>
-                            </div>
-
-                            <div class="comment-section">
-                                <div class="comment-input-area">
-                                    <div class="avatar-xs">PM</div>
-                                    <input type="text" placeholder="Join the conversation..." class="comment-input">
-                                    <button class="btn-post-comment" type="button">Post</button>
-                                </div>
-                                <div class="comment-list"></div>
-                            </div>
-
-                            <div class="post-footer">
-                                <button class="ghost-btn jobs-shortcut" type="button">Open in Jobs</button>
-                            </div>
-                        </article>
-
-                        <article class="feed-post post-update" data-type="update" data-search="microsoft skills festival cloud ai workshop students update johannesburg">
-                            <div class="post-topline">
-                                <span class="post-type-pill">Update</span>
-                                <span class="post-time">47 minutes ago</span>
-                            </div>
-
-                            <div class="post-author">
-                                <div class="author-badge update-badge">MS</div>
-                                <div>
-                                    <h3>Microsoft Skills Festival</h3>
-                                    <p>Shared a community update</p>
-                                </div>
-                            </div>
-
-                            <div class="post-body">
-                                <h4>Cloud and AI workshop registrations are now open</h4>
-                                <p>Free seats are available for applicants who want to strengthen digital skills before internship season. Sessions include CV polishing, cloud basics, and responsible AI practice.</p>
-                            </div>
-
-                            <div class="post-tags">
-                                <span>Workshop</span>
-                                <span>Cloud Basics</span>
-                                <span>Johannesburg</span>
-                            </div>
-
-                            <div class="post-stats">
-                                <span><i class="fa-solid fa-thumbs-up"></i> <strong class="like-count">29</strong> Likes</span>
-                                <span><strong class="comment-count">9</strong> Comments</span>
-                            </div>
-
-                            <div class="interaction-bar">
-                                <button class="interaction-btn like-btn" type="button"><i class="fa-regular fa-thumbs-up"></i><span>Like</span></button>
-                                <button class="interaction-btn comment-btn" type="button"><i class="fa-regular fa-comment"></i><span>Comment</span></button>
-                                <button class="interaction-btn bookmark-btn" type="button"><i class="fa-regular fa-bookmark"></i><span>Save</span></button>
-                            </div>
-
-                            <div class="comment-section">
-                                <div class="comment-input-area">
-                                    <div class="avatar-xs">PM</div>
-                                    <input type="text" placeholder="Leave a comment..." class="comment-input">
-                                    <button class="btn-post-comment" type="button">Post</button>
-                                </div>
-                                <div class="comment-list"></div>
-                            </div>
-                        </article>
-
-                        <article class="feed-post post-status" data-type="status" data-search="ayanda khumalo interview confidence portfolio frontend feedback status">
-                            <div class="post-topline">
-                                <span class="post-type-pill">Status</span>
-                                <span class="post-time">1 hour ago</span>
-                            </div>
-
-                            <div class="post-author">
-                                <div class="author-badge person-badge">AK</div>
-                                <div>
-                                    <h3>Ayanda Khumalo</h3>
-                                    <p>Posted a personal status</p>
-                                </div>
-                            </div>
-
-                            <div class="post-body">
-                                <p>I finally finished updating my portfolio after getting feedback from this community. Next step is preparing for my first frontend interview. Any tips for staying calm during technical questions?</p>
-                            </div>
-
-                            <div class="post-tags">
-                                <span>#InterviewPrep</span>
-                                <span>#Portfolio</span>
-                                <span>#Frontend</span>
-                            </div>
-
-                            <div class="post-stats">
-                                <span><i class="fa-solid fa-thumbs-up"></i> <strong class="like-count">41</strong> Likes</span>
-                                <span><strong class="comment-count">14</strong> Comments</span>
-                            </div>
-
-                            <div class="interaction-bar">
-                                <button class="interaction-btn like-btn" type="button"><i class="fa-regular fa-thumbs-up"></i><span>Like</span></button>
-                                <button class="interaction-btn comment-btn" type="button"><i class="fa-regular fa-comment"></i><span>Comment</span></button>
-                                <button class="interaction-btn bookmark-btn" type="button"><i class="fa-regular fa-bookmark"></i><span>Save</span></button>
-                            </div>
-
-                            <div class="comment-section">
-                                <div class="comment-input-area">
-                                    <div class="avatar-xs">PM</div>
-                                    <input type="text" placeholder="Support or reply..." class="comment-input">
-                                    <button class="btn-post-comment" type="button">Post</button>
-                                </div>
-                                <div class="comment-list"></div>
-                            </div>
-                        </article>
-
-                        <article class="feed-post post-update" data-type="update" data-search="careers sa cv clinic friday career advice applications support update">
-                            <div class="post-topline">
-                                <span class="post-type-pill">Update</span>
-                                <span class="post-time">2 hours ago</span>
-                            </div>
-
-                            <div class="post-author">
-                                <div class="author-badge community-badge">CS</div>
-                                <div>
-                                    <h3>Careers SA Community</h3>
-                                    <p>Shared a reminder</p>
-                                </div>
-                            </div>
-
-                            <div class="post-body">
-                                <h4>CV clinic this Friday</h4>
-                                <p>Bring your CV draft and a short introduction about your goals. Mentors will help applicants improve structure, clarity, and confidence before applying through the Jobs page.</p>
-                            </div>
-
-                            <div class="post-tags">
-                                <span>CV Clinic</span>
-                                <span>Friday</span>
-                                <span>Career Advice</span>
-                            </div>
-
-                            <div class="post-stats">
-                                <span><i class="fa-solid fa-thumbs-up"></i> <strong class="like-count">22</strong> Likes</span>
-                                <span><strong class="comment-count">7</strong> Comments</span>
-                            </div>
-
-                            <div class="interaction-bar">
-                                <button class="interaction-btn like-btn" type="button"><i class="fa-regular fa-thumbs-up"></i><span>Like</span></button>
-                                <button class="interaction-btn comment-btn" type="button"><i class="fa-regular fa-comment"></i><span>Comment</span></button>
-                                <button class="interaction-btn bookmark-btn" type="button"><i class="fa-regular fa-bookmark"></i><span>Save</span></button>
-                            </div>
-
-                            <div class="comment-section">
-                                <div class="comment-input-area">
-                                    <div class="avatar-xs">PM</div>
-                                    <input type="text" placeholder="Join the discussion..." class="comment-input">
-                                    <button class="btn-post-comment" type="button">Post</button>
-                                </div>
-                                <div class="comment-list"></div>
-                            </div>
-                        </article>
-                    </div>
-                </section>
-            </main>
-
-            <aside class="side-column">
-                <section class="card side-card">
-                    <div class="side-card-header">
-                        <h3>Community Pulse</h3>
-                        <span class="mini-badge">Live</span>
-                    </div>
-                    <div class="pulse-list">
-                        <div class="pulse-item">
-                            <strong>#InternshipSeason</strong>
-                            <p>63 people are talking about interview preparation today.</p>
-                        </div>
-                        <div class="pulse-item">
-                            <strong>#CVReview</strong>
-                            <p>New updates from applicants polishing their portfolios and resumes.</p>
-                        </div>
-                        <div class="pulse-item">
-                            <strong>#LearnershipTips</strong>
-                            <p>Providers are sharing deadline reminders and job advice.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="card side-card">
-                    <div class="side-card-header">
-                        <h3>Suggested Connections</h3>
-                        <a href="#">See all</a>
-                    </div>
-                    <div class="connection-list">
-                        <div class="connection-item">
-                            <div class="author-badge person-badge">TN</div>
-                            <div>
-                                <strong>Thandi Nkosi</strong>
-                                <p>Data science applicant</p>
-                            </div>
-                        </div>
-                        <div class="connection-item">
-                            <div class="author-badge community-badge">LD</div>
-                            <div>
-                                <strong>Lebo Dlamini</strong>
-                                <p>UX learner and mentor</p>
-                            </div>
-                        </div>
-                        <div class="connection-item">
-                            <div class="author-badge update-badge">KM</div>
-                            <div>
-                                <strong>Kagiso Maseko</strong>
-                                <p>Cloud support applicant</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </aside>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-        <a href="../Applicant_profile_page/global_profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-briefcase"></i><span>Jobs</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-    </nav>
-
-    <button class="floating-post-btn compose-trigger" type="button" aria-label="Create a post">
-        <i class="fa-solid fa-pen-to-square"></i>
-    </button>
-
-    <script src="script.js"></script>
 </body>
 </html>
