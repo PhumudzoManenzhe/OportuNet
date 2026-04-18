@@ -1,10 +1,10 @@
-﻿const initialPageData = Object.freeze({
+const initialPageData = Object.freeze({
     profile: {
-        name: "Ayesha Patel",
-        headline: "Senior Talent Partner | Building strong hiring pipelines for product, operations, and customer teams",
-        institution: "Vertex People Solutions",
-        campus: "Johannesburg Hub",
-        location: "Johannesburg, Gauteng, South Africa",
+        name: "Naledi Mokoena",
+        headline: "Frontend Developer and UX Research Enthusiast | Building accessible digital tools for students and small teams",
+        institution: "Northstar Digital Studio",
+        campus: "Pretoria Hub",
+        location: "Pretoria, Gauteng, South Africa",
         addSectionButton: "Add section",
         photoUrl: ""
     },
@@ -14,163 +14,163 @@
             {
                 id: "views",
                 icon: "<span class=\"metric-icon-badge metric-icon-badge-views\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M2.75 12S6.4 6.75 12 6.75 21.25 12 21.25 12 17.6 17.25 12 17.25 2.75 12 2.75 12Z\"></path><circle cx=\"12\" cy=\"12\" r=\"2.7\"></circle></svg></span>",
-                title: "412 profile visits",
-                description: "Hiring managers and business partners found your profile through recruiter and talent searches.",
+                title: "218 profile views",
+                description: "People found your profile through design, frontend, and student-tech searches.",
                 period: ""
             },
             {
                 id: "impressions",
                 icon: "<span class=\"metric-icon-badge metric-icon-badge-impressions\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M4.5 18.5H19.5\"></path><path d=\"M7 18.5V12.75\"></path><path d=\"M11.33 18.5V9.25\"></path><path d=\"M15.67 18.5V6.25\"></path><path d=\"M20 18.5V11\"></path></svg></span>",
-                title: "128 update impressions",
-                description: "Recent hiring and culture updates are getting steady visibility.",
+                title: "34 post impressions",
+                description: "Your recent updates are getting steady engagement.",
                 period: "Past 7 days"
             }
         ]
     },
     about: {
-        intro: "I lead recruitment partnerships for growing teams and help businesses build thoughtful, well-structured hiring pipelines that balance speed, fit, and candidate experience.",
-        passion: "My focus is on aligning open roles with business goals, workspace realities, and team culture while keeping the hiring journey clear for candidates and hiring managers."
+        intro: "I am a frontend developer with a growing focus on UX research and interface design. I enjoy turning complex workflows into simple, welcoming experiences that people can use with confidence.",
+        passion: "Most of my work revolves around education, community tools, and accessible web interfaces. I like combining structure, visual polish, and practical problem solving."
     },
     qualifications: {
-        intro: "Highlight the markets, departments, or role levels your team is actively hiring for.",
-        buttonLabel: "Add hiring focus",
+        intro: "Highlight certifications and focused learning that strengthen your design and frontend practice.",
+        buttonLabel: "Add qualifications",
         items: [
             {
                 id: "qualification-1",
-                logo: "T",
-                title: "Technology and Product Hiring",
-                subtitle: "Frontend, backend, product design, and QA",
-                dates: "Active in 2026",
-                description: "Partnering with engineering and product leads to fill delivery-critical roles across multiple squads."
+                logo: "G",
+                title: "Google UX Design Certificate",
+                subtitle: "Coursera · Google",
+                dates: "2025",
+                description: "Completed training in user research, wireframing, prototyping, and usability testing."
             },
             {
                 id: "qualification-2",
-                logo: "O",
-                title: "Operations and Support Teams",
-                subtitle: "Customer support, onboarding, and office operations",
-                dates: "Quarter 2 hiring",
-                description: "Supporting steady business growth with structured hiring for customer-facing and internal operations roles."
+                logo: "R",
+                title: "Responsive Web Design Certification",
+                subtitle: "freeCodeCamp",
+                dates: "2024",
+                description: "Covered semantic HTML, modern CSS layouts, and accessibility-focused frontend practice."
             }
         ]
     },
     activity: {
-        createPostLabel: "Share an update",
-        emptyTitle: "Recruiter updates are available",
-        emptyCopy: "Hiring notes, role announcements, and company updates shared from this profile will appear here. Use Show all to view the full list."
+        createPostLabel: "Create a post",
+        emptyTitle: "Recent posts are available",
+        emptyCopy: "Posts shared from this profile will appear here. Use Show all to view the full list."
     },
     posts: [
         {
             id: "post-1",
-            content: "We opened applications for two frontend roles this week and the response has been strong already. Clearer role briefs are making the screening stage much smoother.",
+            content: "Spent the morning refining a student dashboard prototype. Small layout changes made the navigation feel much calmer and easier to scan.",
             timestamp: "2026-04-10T09:15:00+02:00"
         },
         {
             id: "post-2",
-            content: "Our hiring team spent time tightening interview scorecards this month. It has made feedback loops clearer for both candidates and hiring managers.",
+            content: "I have been enjoying the balance between design research and frontend implementation lately. Seeing user notes turn into working UI is still my favorite part of the process.",
             timestamp: "2026-04-07T16:40:00+02:00"
         },
         {
             id: "post-3",
-            content: "We are continuing to grow our operations and customer support teams across multiple workspaces. Excited about the talent conversations coming through.",
+            content: "Wrapped up a lightweight resource hub for peer mentors this week. Proud of how much clarity we got from keeping the interface simple.",
             timestamp: "2026-04-04T13:05:00+02:00"
         }
     ],
     experience: [
         {
             id: "experience-1",
-            logo: "J",
-            title: "Johannesburg Talent Hub",
-            company: "Vertex People Solutions",
-            employmentType: "In-house recruitment workspace",
-            dates: "Mon-Fri | 08:00-17:00",
-            duration: "12 recruiters",
+            logo: "F",
+            title: "Frontend Developer Intern",
+            company: "Northstar Digital Studio",
+            employmentType: "Contract",
+            dates: "Jan 2026 - Present",
+            duration: "4 mos",
             locationType: "Hybrid",
-            description: "Central hiring workspace for sourcing, screening, stakeholder meetings, and weekly recruiting reviews."
+            description: "Builds responsive interfaces, translates wireframes into reusable UI, and supports usability improvements across client-facing products."
         },
         {
             id: "experience-2",
-            logo: "C",
-            title: "Cape Town Operations Desk",
-            company: "Regional hiring support",
-            employmentType: "Satellite workspace",
-            dates: "Tue-Thu | Collaboration days",
-            duration: "5 coordinators",
+            logo: "U",
+            title: "UX Research Assistant",
+            company: "Campus Innovation Lab",
+            employmentType: "Part-time",
+            dates: "Aug 2025 - Dec 2025",
+            duration: "5 mos",
             locationType: "On-site",
-            description: "Supports interviews, candidate onboarding, and coordination for high-volume roles in the Western Cape."
+            description: "Ran student interviews, summarized usability findings, and helped test early prototypes for academic support tools."
         }
     ],
     education: [
         {
             id: "education-1",
-            logo: "V",
-            school: "Vertex People Solutions",
-            field: "Recruitment and talent advisory",
-            dates: "51-200 employees"
+            logo: "U",
+            school: "University of Pretoria",
+            field: "BSc Information and Knowledge Systems",
+            dates: "2022 - 2025"
         },
         {
             id: "education-2",
-            logo: "N",
-            school: "Nexa Workspace Group",
-            field: "Flexible office and hiring support",
-            dates: "3 workspaces across South Africa"
+            logo: "O",
+            school: "Open Design Academy",
+            field: "Short Course in Product Design",
+            dates: "2025"
         }
     ],
     skills: {
-        intro: "Add the roles, tools, and hiring channels that define how your team recruits.",
+        intro: "Mock skills for this demo profile.",
         softSkills: [
-            "Software engineers",
-            "Product designers",
-            "Customer success",
-            "Operations coordinators"
+            "Facilitation",
+            "Active listening",
+            "Collaboration",
+            "Presentation design"
         ],
         technicalSkills: [
-            "LinkedIn Recruiter",
-            "Greenhouse",
-            "Google Workspace",
-            "Microsoft Teams"
+            "HTML & CSS",
+            "JavaScript",
+            "Figma",
+            "User research"
         ]
     },
     projects: {
-        intro: "Show the roles your business is currently hiring for so candidates and partners can quickly scan opportunities.",
-        buttonLabel: "Add open role",
+        intro: "Showcase projects that reflect both strong interface thinking and practical implementation.",
+        buttonLabel: "Add projects",
         items: [
             {
                 id: "project-1",
-                logo: "F",
-                title: "Senior Frontend Developer",
-                subtitle: "Johannesburg | Hybrid",
-                dates: "Applications open now",
-                description: "Leading UI delivery across customer-facing products and mentoring a small frontend team."
+                logo: "S",
+                title: "StudyFlow Dashboard",
+                subtitle: "Lead designer and frontend builder",
+                dates: "2026",
+                description: "Designed and built a progress dashboard concept that helps students track deadlines, tasks, and weekly priorities."
             },
             {
                 id: "project-2",
-                logo: "C",
-                title: "Customer Success Lead",
-                subtitle: "Cape Town | On-site",
-                dates: "Shortlist in progress",
-                description: "Owning onboarding quality, escalations, and customer retention support for a growing service team."
+                logo: "M",
+                title: "MentorLink Resource Hub",
+                subtitle: "UX research and UI implementation",
+                dates: "2025",
+                description: "Created a simple internal portal for peer mentors to share guides, announcements, and support resources."
             }
         ]
     },
     achievements: {
-        intro: "Use this space for visible company milestones, hiring wins, or culture moments worth sharing.",
-        buttonLabel: "Add highlight",
+        intro: "Highlight awards and milestones that show initiative, consistency, and visible impact.",
+        buttonLabel: "Add achievements",
         items: [
             {
                 id: "achievement-1",
-                logo: "W",
-                title: "Expanded to a third workspace location",
-                subtitle: "Operations and recruitment growth",
-                dates: "2026",
-                description: "Opened a new collaborative hiring space to support cross-functional interview days and client workshops."
+                logo: "T",
+                title: "Top 5 at Pretoria Design Jam",
+                subtitle: "Community innovation challenge",
+                dates: "2025",
+                description: "Recognized for a student-support prototype focused on first-year onboarding."
             },
             {
                 id: "achievement-2",
-                logo: "R",
-                title: "Reduced time-to-hire by 28%",
-                subtitle: "Recruitment process improvement",
-                dates: "Past 12 months",
-                description: "Introduced structured screening and shared scorecards to shorten decision cycles without losing candidate quality."
+                logo: "D",
+                title: "Dean's Merit Recognition",
+                subtitle: "University of Pretoria",
+                dates: "2024",
+                description: "Awarded for consistent academic performance and participation in collaborative tech initiatives."
             }
         ]
     }
@@ -224,6 +224,7 @@ const state = {
     isAddSectionOpen: false,
     projectsDismissed: false,
     qualificationsDismissed: false,
+    skillsDismissed: false,
     feedbackTimer: null,
     temporaryPhotoUrl: "",
     isEditorOpen: false
@@ -260,6 +261,7 @@ const elements = {
     dismissAchievementsButton: document.getElementById("dismiss-achievements-button"),
     dismissProjectsButton: document.getElementById("dismiss-projects-button"),
     dismissQualificationsButton: document.getElementById("dismiss-qualifications-button"),
+    dismissSkillsButton: document.getElementById("dismiss-skills-button"),
     editorHeading: document.getElementById("editor-heading"),
     editorForm: document.getElementById("editor-form"),
     editorPanel: document.getElementById("editor-panel"),
@@ -282,13 +284,11 @@ const elements = {
     followersButton: document.getElementById("followers-button"),
     feedback: document.getElementById("page-feedback"),
     photoInput: document.getElementById("photo-input"),
-    profileBackButton: document.getElementById("profile-back-button"),
     profileHeadline: document.getElementById("profile-headline"),
     profileInstitution: document.getElementById("profile-institution"),
     profileLocation: document.getElementById("profile-location"),
     profileName: document.getElementById("profile-name"),
     profilePhoto: document.getElementById("profile-photo"),
-    profileSearchForm: document.getElementById("profile-search-form"),
     projectsAddButton: document.getElementById("projects-add-button"),
     projectsActiveHeader: document.getElementById("projects-active-header"),
     projectsIntro: document.getElementById("projects-intro"),
@@ -301,6 +301,13 @@ const elements = {
     qualificationsList: document.getElementById("qualifications-list"),
     qualificationsPlaceholder: document.getElementById("qualifications-placeholder"),
     qualificationsSection: document.getElementById("qualifications-section"),
+    skillsActiveHeader: document.getElementById("skills-active-header"),
+    skillsAddButton: document.getElementById("skills-add-button"),
+    skillsList: document.getElementById("skills-list"),
+    skillsPlaceholder: document.getElementById("skills-placeholder"),
+    skillsPlaceholderIntro: document.getElementById("skills-placeholder-intro"),
+    skillsSection: document.getElementById("skills-section"),
+    skillGroupTemplate: document.getElementById("skill-group-template"),
     supplementalAddGroup: document.getElementById("supplemental-add-group"),
     supplementalLegend: document.getElementById("supplemental-legend"),
     viewProfileOption: document.getElementById("view-profile-option"),
@@ -309,6 +316,7 @@ const elements = {
     achievementsSection: document.getElementById("achievements-section"),
     educationAddGroup: document.getElementById("education-add-group"),
     experienceAddGroup: document.getElementById("experience-add-group"),
+    skillsAddGroup: document.getElementById("skills-add-group"),
     sharedDatesLabel: document.getElementById("shared-dates-label"),
     sharedDescriptionLabel: document.getElementById("shared-description-label"),
     sharedSubtitleLabel: document.getElementById("shared-subtitle-label"),
@@ -339,6 +347,8 @@ const elements = {
         educationSchool: document.getElementById("education-school-input"),
         educationField: document.getElementById("education-field-input"),
         educationDates: document.getElementById("education-dates-input"),
+        softSkills: document.getElementById("soft-skills-input"),
+        technicalSkills: document.getElementById("technical-skills-input"),
         qualificationsIntro: document.getElementById("qualifications-intro-input"),
         qualificationsButton: document.getElementById("qualifications-button-input"),
         projectsIntro: document.getElementById("projects-intro-input"),
@@ -360,72 +370,81 @@ const elements = {
         sharedTitle: document.getElementById("add-shared-title-input"),
         sharedSubtitle: document.getElementById("add-shared-subtitle-input"),
         sharedDates: document.getElementById("add-shared-dates-input"),
-        sharedDescription: document.getElementById("add-shared-description-input")
+        sharedDescription: document.getElementById("add-shared-description-input"),
+        softSkills: document.getElementById("add-soft-skills-input"),
+        technicalSkills: document.getElementById("add-technical-skills-input")
     }
 };
 
 const supplementalSectionCopy = {
     qualifications: {
-        legend: "Hiring focus details",
-        title: "Hiring focus area",
-        subtitle: "Departments, roles or markets",
-        dates: "Current period",
-        description: "Hiring focus summary"
+        legend: "Qualification details",
+        title: "Qualification title",
+        subtitle: "Issuer or institution",
+        dates: "Date or period",
+        description: "Qualification details"
     },
     projects: {
-        legend: "Open role details",
-        title: "Role title",
-        subtitle: "Location, team or level",
-        dates: "Hiring timeline",
-        description: "Role summary"
+        legend: "Project details",
+        title: "Project name",
+        subtitle: "Role, tools or link",
+        dates: "Date or period",
+        description: "Project summary"
     },
     achievements: {
-        legend: "Company highlight details",
-        title: "Highlight title",
-        subtitle: "Team, campaign or context",
+        legend: "Achievement details",
+        title: "Achievement title",
+        subtitle: "Awarding body or context",
         dates: "Date or period",
-        description: "Highlight summary"
+        description: "Achievement summary"
     }
 };
 
 const primarySectionPlaceholderCopy = {
     education: {
-        intro: "Add your business name, industry, and company size so visitors can understand the organization behind this recruiter profile.",
-        buttonLabel: "Add business details"
+        intro: "Add your school, study field, and dates so people can quickly understand your academic background.",
+        buttonLabel: "Add education"
     },
     experience: {
-        intro: "Add the workspace setup, team size, and operating details candidates should know before engaging with your team.",
-        buttonLabel: "Add workspace details"
+        intro: "Add your roles, workplace details, and responsibilities to show your practical experience.",
+        buttonLabel: "Add experience"
     }
 };
 
 const sectionDeleteConfig = {
     education: {
-        label: "Business Details",
+        label: "Education",
         delete(pageData) {
             pageData.education = [];
         }
     },
     experience: {
-        label: "Workspace Details",
+        label: "Experience",
         delete(pageData) {
             pageData.experience = [];
         }
     },
     qualifications: {
-        label: "Hiring Focus",
+        label: "Qualifications",
         delete(pageData) {
             pageData.qualifications.items = [];
         }
     },
+    skills: {
+        label: "Skills",
+        delete(pageData) {
+            pageData.skills.softSkills = [];
+            pageData.skills.technicalSkills = [];
+        }
+    },
     projects: {
-        label: "Open Roles",
+        label: "Projects",
         delete(pageData) {
             pageData.projects.items = [];
         }
     },
     achievements: {
-        label: "Company Highlights",
+        label: "Achievements",
         delete(pageData) {
             pageData.achievements.items = [];
         }
@@ -437,11 +456,12 @@ const editorSectionLabels = {
     analytics: "Analytics",
     about: "About",
     activity: "Activity",
-    experience: "Workspace Details",
-    education: "Business Details",
-    qualifications: "Hiring Focus",
-    projects: "Open Roles",
-    achievements: "Company Highlights"
+    experience: "Experience",
+    education: "Education",
+    skills: "Skills",
+    qualifications: "Qualifications",
+    projects: "Projects",
+    achievements: "Achievements"
 };
 
 const editorTargetSectionMap = {
@@ -470,6 +490,8 @@ const editorTargetSectionMap = {
     "education-school-input": "education",
     "education-field-input": "education",
     "education-dates-input": "education",
+    "soft-skills-input": "skills",
+    "technical-skills-input": "skills",
     "qualifications-intro-input": "qualifications",
     "qualifications-button-input": "qualifications",
     "projects-intro-input": "projects",
@@ -478,9 +500,9 @@ const editorTargetSectionMap = {
     "achievements-button-input": "achievements"
 };
 
-const historyStateKey = "recruiterProfilePageSession";
-const localStorageKey = "recruiterEditableProfilePageSession";
-const mockProfileVersion = "2026-04-12-recruiter-profile";
+const historyStateKey = "profilePageSession";
+const localStorageKey = "editableProfilePageSession";
+const mockProfileVersion = "2026-04-11-randomized-profile";
 
 document.addEventListener("DOMContentLoaded", initializePage);
 window.addEventListener("beforeunload", releaseTemporaryPhotoUrl);
@@ -497,6 +519,7 @@ async function initializePage() {
         state.experienceDismissed = restoredSession?.experienceDismissed || false;
         state.projectsDismissed = restoredSession?.projectsDismissed || false;
         state.qualificationsDismissed = restoredSession?.qualificationsDismissed || false;
+        state.skillsDismissed = restoredSession?.skillsDismissed || false;
         renderPage();
         syncEditorForm();
     } catch (error) {
@@ -506,10 +529,6 @@ async function initializePage() {
 }
 
 function bindEvents() {
-    if (elements.profileBackButton) {
-        elements.profileBackButton.addEventListener("click", handleBackNavigation);
-    }
-
     elements.addSectionButton.addEventListener("click", () => {
         openAddSectionPanel();
     });
@@ -527,14 +546,11 @@ function bindEvents() {
     elements.dismissExperienceButton.addEventListener("click", handleDismissExperience);
     elements.dismissProjectsButton.addEventListener("click", handleDismissProjects);
     elements.dismissQualificationsButton.addEventListener("click", handleDismissQualifications);
+    elements.dismissSkillsButton.addEventListener("click", handleDismissSkills);
     elements.editorForm.addEventListener("submit", handleSave);
     elements.closeEditorButton.addEventListener("click", closeEditor);
     elements.cancelEditorButton.addEventListener("click", closeEditor);
     elements.activityShowAllButton.addEventListener("click", handleToggleActivityPosts);
-
-    if (elements.profileSearchForm) {
-        elements.profileSearchForm.addEventListener("submit", handleSearchSubmit);
-    }
 
     document.querySelectorAll("[data-open-editor]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -609,20 +625,6 @@ function bindEvents() {
     });
 }
 
-function handleBackNavigation() {
-    if (window.history.length > 1) {
-        window.history.back();
-        return;
-    }
-
-    window.location.href = "../Recruiter_homepage/index.html";
-}
-
-function handleSearchSubmit(event) {
-    event.preventDefault();
-    setFeedback("Search will be connected to the wider application shell.");
-}
-
 function renderPage() {
     renderProfile();
     renderAnalytics();
@@ -630,6 +632,7 @@ function renderPage() {
     renderEducation();
     renderExperience();
     renderQualifications();
+    renderSkills();
     renderProjects();
     renderAchievements();
     renderActivity();
@@ -785,6 +788,32 @@ function renderEducation() {
     });
 }
 
+function renderSkills() {
+    const { skills } = state.pageData;
+    const skillItems = [
+        {
+            id: "soft-skills-group",
+            heading: "Soft skills",
+            items: skills.softSkills
+        },
+        {
+            id: "technical-skills-group",
+            heading: "Technical skills",
+            items: skills.technicalSkills
+        }
+    ].filter((group) => group.items.length > 0);
+    const hasSkills = skillItems.length > 0;
+
+    elements.skillsSection.hidden = !hasSkills && state.skillsDismissed;
+    elements.skillsSection.classList.toggle("screen-section-muted", !hasSkills);
+    elements.skillsPlaceholder.hidden = hasSkills;
+    elements.skillsActiveHeader.hidden = !hasSkills;
+    elements.skillsPlaceholderIntro.textContent = skills.intro;
+    elements.skillsList.hidden = !hasSkills;
+
+    renderSkillGroups(elements.skillsList, skillItems);
+}
+
 function renderProjects() {
     renderSupplementalSection({
         sectionElement: elements.projectsSection,
@@ -917,8 +946,30 @@ function renderSharedSectionList(listElement, items) {
     });
 }
 
+function renderSkillGroups(listElement, groups) {
+    listElement.replaceChildren();
+
+    groups.forEach((group) => {
+        const fragment = elements.skillGroupTemplate.content.cloneNode(true);
+        const logo = fragment.querySelector(".resume-logo-text");
+        const title = fragment.querySelector(".resume-title");
+        const groupedList = fragment.querySelector(".grouped-skill-list");
+
+        logo.textContent = createLogoFromText(group.heading);
+        title.textContent = group.heading;
+
+        group.items.forEach((item) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = item;
+            groupedList.append(listItem);
+        });
+
+        listElement.append(fragment);
+    });
+}
+
 function syncEditorForm() {
-    const { profile, analytics, about, qualifications, activity, experience, education, projects, achievements } = state.pageData;
+    const { profile, analytics, about, qualifications, activity, experience, education, skills, projects, achievements } = state.pageData;
     const primaryExperience = experience[0] || {
         logo: "",
         title: "",
@@ -963,6 +1014,8 @@ function syncEditorForm() {
     elements.formFields.educationSchool.value = primaryEducation.school;
     elements.formFields.educationField.value = primaryEducation.field;
     elements.formFields.educationDates.value = primaryEducation.dates;
+    elements.formFields.softSkills.value = skills.softSkills.join(", ");
+    elements.formFields.technicalSkills.value = skills.technicalSkills.join(", ");
     elements.formFields.projectsIntro.value = projects.intro;
     elements.formFields.projectsButton.value = projects.buttonLabel;
     elements.formFields.achievementsIntro.value = achievements.intro;
@@ -1077,6 +1130,7 @@ function updateAddSectionFields(sectionType) {
 
     elements.educationAddGroup.hidden = sectionType !== "education";
     elements.experienceAddGroup.hidden = sectionType !== "experience";
+    elements.skillsAddGroup.hidden = sectionType !== "skills";
     elements.supplementalAddGroup.hidden = !isSupplemental;
 
     if (!isSupplemental) {
@@ -1101,6 +1155,8 @@ function getFirstAddSectionField(sectionType) {
         case "projects":
         case "achievements":
             return elements.addSectionFields.sharedTitle;
+        case "skills":
+            return elements.addSectionFields.softSkills;
         default:
             return null;
     }
@@ -1174,6 +1230,10 @@ async function handleSave(event) {
             nextPageData.education[0].field = elements.formFields.educationField.value.trim();
             nextPageData.education[0].dates = elements.formFields.educationDates.value.trim();
             break;
+        case "skills":
+            nextPageData.skills.softSkills = parseSkillText(elements.formFields.softSkills.value);
+            nextPageData.skills.technicalSkills = parseSkillText(elements.formFields.technicalSkills.value);
+            break;
         case "qualifications":
             nextPageData.qualifications.intro = elements.formFields.qualificationsIntro.value.trim();
             nextPageData.qualifications.buttonLabel = elements.formFields.qualificationsButton.value.trim();
@@ -1195,6 +1255,10 @@ async function handleSave(event) {
         state.pageData = await profileGateway.savePageData(nextPageData);
         if (sectionKey === "qualifications") {
             state.qualificationsDismissed = false;
+        }
+
+        if (sectionKey === "skills") {
+            state.skillsDismissed = false;
         }
 
         if (sectionKey === "projects") {
@@ -1236,7 +1300,8 @@ async function handleAddSection(event) {
         achievementsDismissed: state.achievementsDismissed,
         experienceDismissed: state.experienceDismissed,
         projectsDismissed: state.projectsDismissed,
-        qualificationsDismissed: state.qualificationsDismissed
+        qualificationsDismissed: state.qualificationsDismissed,
+        skillsDismissed: state.skillsDismissed
     };
     let sectionLabel = "";
 
@@ -1250,7 +1315,7 @@ async function handleAddSection(event) {
 
             nextPageData.education.push(educationItem);
             nextDismissedState.educationDismissed = false;
-            sectionLabel = "Business Details";
+            sectionLabel = "Education";
             break;
         }
         case "experience": {
@@ -1262,7 +1327,23 @@ async function handleAddSection(event) {
 
             nextPageData.experience.push(experienceItem);
             nextDismissedState.experienceDismissed = false;
-            sectionLabel = "Workspace Details";
+            sectionLabel = "Experience";
+            break;
+        }
+        case "skills": {
+            const softSkills = parseSkillText(elements.addSectionFields.softSkills.value);
+            const technicalSkills = parseSkillText(elements.addSectionFields.technicalSkills.value);
+
+            if (softSkills.length === 0 && technicalSkills.length === 0) {
+                setFeedback("Add at least one skill before saving.");
+                elements.addSectionFields.softSkills.focus();
+                return;
+            }
+
+            nextPageData.skills.softSkills = mergeUniqueItems(nextPageData.skills.softSkills, softSkills);
+            nextPageData.skills.technicalSkills = mergeUniqueItems(nextPageData.skills.technicalSkills, technicalSkills);
+            nextDismissedState.skillsDismissed = false;
+            sectionLabel = "Skills";
             break;
         }
         case "qualifications":
@@ -1278,17 +1359,17 @@ async function handleAddSection(event) {
 
             if (sectionType === "qualifications") {
                 nextDismissedState.qualificationsDismissed = false;
-                sectionLabel = "Hiring Focus";
+                sectionLabel = "Qualifications";
             }
 
             if (sectionType === "projects") {
                 nextDismissedState.projectsDismissed = false;
-                sectionLabel = "Open Roles";
+                sectionLabel = "Projects";
             }
 
             if (sectionType === "achievements") {
                 nextDismissedState.achievementsDismissed = false;
-                sectionLabel = "Company Highlights";
+                sectionLabel = "Achievements";
             }
 
             break;
@@ -1305,6 +1386,7 @@ async function handleAddSection(event) {
         state.experienceDismissed = nextDismissedState.experienceDismissed;
         state.projectsDismissed = nextDismissedState.projectsDismissed;
         state.qualificationsDismissed = nextDismissedState.qualificationsDismissed;
+        state.skillsDismissed = nextDismissedState.skillsDismissed;
         renderPage();
         syncEditorForm();
         closeAddSectionPanel();
@@ -1329,7 +1411,7 @@ function buildEducationItem() {
     const dates = elements.addSectionFields.educationDates.value.trim();
 
     if (!school || !field || !dates) {
-        setFeedback("Fill in all business details before saving.");
+        setFeedback("Fill in all education details before saving.");
         focusFirstEmptyField([
             elements.addSectionFields.educationSchool,
             elements.addSectionFields.educationField,
@@ -1357,7 +1439,7 @@ function buildExperienceItem() {
     const description = elements.addSectionFields.experienceDescription.value.trim();
 
     if (!title || !company || !employmentType || !dates || !duration || !locationType || !description) {
-        setFeedback("Fill in all workspace details before saving.");
+        setFeedback("Fill in all experience details before saving.");
         focusFirstEmptyField([
             elements.addSectionFields.experienceTitle,
             elements.addSectionFields.experienceCompany,
@@ -1390,7 +1472,7 @@ function buildSharedSectionItem(sectionType) {
     const description = elements.addSectionFields.sharedDescription.value.trim();
 
     if (!title || !subtitle || !dates || !description) {
-        setFeedback(`Fill in all ${editorSectionLabels[sectionType].toLowerCase()} details before saving.`);
+        setFeedback(`Fill in all ${sectionType} details before saving.`);
         focusFirstEmptyField([
             elements.addSectionFields.sharedTitle,
             elements.addSectionFields.sharedSubtitle,
@@ -1503,7 +1585,8 @@ function persistSessionState() {
             achievementsDismissed: state.achievementsDismissed,
             experienceDismissed: state.experienceDismissed,
             projectsDismissed: state.projectsDismissed,
-            qualificationsDismissed: state.qualificationsDismissed
+            qualificationsDismissed: state.qualificationsDismissed,
+            skillsDismissed: state.skillsDismissed
         });
         const nextHistoryState = {
             ...(window.history.state && typeof window.history.state === "object" ? window.history.state : {}),
@@ -1555,6 +1638,10 @@ async function handleDeleteSection(sectionKey) {
             state.experienceDismissed = false;
         }
 
+        if (sectionKey === "skills") {
+            state.skillsDismissed = false;
+        }
+
         if (sectionKey === "projects") {
             state.projectsDismissed = false;
         }
@@ -1601,6 +1688,7 @@ function scrollToSection(sectionType) {
         education: elements.educationSection,
         experience: elements.experienceSection,
         qualifications: elements.qualificationsSection,
+        skills: elements.skillsSection,
         projects: elements.projectsSection,
         achievements: elements.achievementsSection
     };
@@ -1620,35 +1708,42 @@ function handleDismissQualifications() {
     state.qualificationsDismissed = true;
     renderQualifications();
     persistSessionState();
-    setFeedback("Hiring focus suggestions hidden.");
+    setFeedback("Qualifications suggestions hidden.");
 }
 
 function handleDismissEducation() {
     state.educationDismissed = true;
     renderEducation();
     persistSessionState();
-    setFeedback("Business details suggestions hidden.");
+    setFeedback("Education suggestions hidden.");
+}
+
+function handleDismissSkills() {
+    state.skillsDismissed = true;
+    renderSkills();
+    persistSessionState();
+    setFeedback("Skills suggestions hidden.");
 }
 
 function handleDismissExperience() {
     state.experienceDismissed = true;
     renderExperience();
     persistSessionState();
-    setFeedback("Workspace details suggestions hidden.");
+    setFeedback("Experience suggestions hidden.");
 }
 
 function handleDismissProjects() {
     state.projectsDismissed = true;
     renderProjects();
     persistSessionState();
-    setFeedback("Open roles suggestions hidden.");
+    setFeedback("Projects suggestions hidden.");
 }
 
 function handleDismissAchievements() {
     state.achievementsDismissed = true;
     renderAchievements();
     persistSessionState();
-    setFeedback("Company highlights suggestions hidden.");
+    setFeedback("Achievements suggestions hidden.");
 }
 
 function handleToggleActivityPosts() {
@@ -1748,4 +1843,3 @@ function releaseTemporaryPhotoUrl() {
     URL.revokeObjectURL(state.temporaryPhotoUrl);
     state.temporaryPhotoUrl = "";
 }
-

@@ -3,20 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A mobile-first recruiter profile page in view-only mode for business, workspace, and hiring details.">
-    <title>Recruiter Profile</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="description" content="A mobile-first LinkedIn-style profile page with editable profile sections and future-ready backend placeholders.">
+    <title>LinkedIn-Style Profile</title>
     <link rel="stylesheet" href="profile_style.css">
     <script src="profile_script.js" defer></script>
 </head>
-<body class="recruiter-view-only">
+<body>
     <header class="app-header">
-        <nav class="toolbar toolbar-profile" aria-label="Profile navigation">
+        <nav class="toolbar" aria-label="Profile navigation">
+            <button type="button" class="toolbar-button" data-feedback="Back navigation will be connected when this page is attached to the wider app.">
+                <span aria-hidden="true">&larr;</span>
+                <span class="sr-only">Go back</span>
+            </button>
 
-            <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">
+            <form class="toolbar-search" role="search" aria-label="Search">
                 <label class="sr-only" for="profile-search">Search</label>
                 <input id="profile-search" name="profile-search" type="search" placeholder="Search">
             </form>
+
+            <button type="button" class="toolbar-button" data-feedback="Settings will be connected to the wider application shell.">
+                <span aria-hidden="true">&#9881;</span>
+                <span class="sr-only">Open settings</span>
+            </button>
         </nav>
     </header>
 
@@ -31,11 +39,11 @@
         <article class="profile-card" aria-labelledby="profile-name">
             <header class="profile-summary">
                 <figure class="profile-figure">
-                    <span id="avatar-menu-button" class="avatar-button">
+                    <button type="button" id="avatar-menu-button" class="avatar-button" aria-haspopup="true" aria-expanded="false" aria-controls="avatar-menu">
                         <img id="profile-photo" class="profile-photo" alt="Profile picture" hidden>
                         <span id="avatar-fallback" class="avatar-fallback" aria-hidden="true"></span>
-                        <span class="sr-only">Profile picture</span>
-                    </span>
+                        <span class="sr-only">Open profile picture actions</span>
+                    </button>
                 </figure>
 
                 <nav id="avatar-menu" class="avatar-menu" aria-label="Profile picture actions" hidden>
@@ -96,13 +104,13 @@
             <p id="about-passion" class="body-copy"></p>
         </section>
 
-        <section id="education-section" class="screen-section screen-section-muted" aria-label="Business details">
+        <section id="education-section" class="screen-section screen-section-muted" aria-label="Education">
             <article id="education-placeholder" class="skills-card section-placeholder-card">
                 <header class="section-heading">
-                    <h2>Business Details</h2>
+                    <h2>Education</h2>
                     <button type="button" id="dismiss-education-button" class="section-icon-button">
                         <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Hide business detail suggestions</span>
+                        <span class="sr-only">Hide education suggestions</span>
                     </button>
                 </header>
                 <p id="education-intro" class="body-copy"></p>
@@ -111,19 +119,19 @@
                 </p>
             </article>
             <header id="education-active-header" class="section-heading" hidden>
-                <h2 id="education-heading">Business Details</h2>
+                <h2 id="education-heading">Education</h2>
                 <ul class="inline-actions">
                     <li>
                         <button type="button" class="section-icon-button" data-open-add-section="education">
                             <span aria-hidden="true">+</span>
-                            <span class="sr-only">Add business details</span>
+                            <span class="sr-only">Add education</span>
                         </button>
                     </li>
                     <li>
                         <details class="section-action-menu">
                             <summary class="section-icon-button">
                                 <span aria-hidden="true">&#9998;</span>
-                                <span class="sr-only">Open business details section actions</span>
+                                <span class="sr-only">Open education section actions</span>
                             </summary>
                             <menu class="section-action-list">
                                 <li><button type="button" data-open-editor="education-school-input">Edit details</button></li>
@@ -136,13 +144,13 @@
             <ol id="education-list" class="resume-list" hidden></ol>
         </section>
 
-        <section id="experience-section" class="screen-section screen-section-muted" aria-label="Workspace details">
+        <section id="experience-section" class="screen-section screen-section-muted" aria-label="Experience">
             <article id="experience-placeholder" class="skills-card section-placeholder-card">
                 <header class="section-heading">
-                    <h2>Workspace Details</h2>
+                    <h2>Experience</h2>
                     <button type="button" id="dismiss-experience-button" class="section-icon-button">
                         <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Hide workspace detail suggestions</span>
+                        <span class="sr-only">Hide experience suggestions</span>
                     </button>
                 </header>
                 <p id="experience-intro" class="body-copy"></p>
@@ -151,19 +159,19 @@
                 </p>
             </article>
             <header id="experience-active-header" class="section-heading" hidden>
-                <h2 id="experience-heading">Workspace Details</h2>
+                <h2 id="experience-heading">Experience</h2>
                 <ul class="inline-actions">
                     <li>
                         <button type="button" class="section-icon-button" data-open-add-section="experience">
                             <span aria-hidden="true">+</span>
-                            <span class="sr-only">Add workspace details</span>
+                            <span class="sr-only">Add experience</span>
                         </button>
                     </li>
                     <li>
                         <details class="section-action-menu">
                             <summary class="section-icon-button">
                                 <span aria-hidden="true">&#9998;</span>
-                                <span class="sr-only">Open workspace details section actions</span>
+                                <span class="sr-only">Open experience section actions</span>
                             </summary>
                             <menu class="section-action-list">
                                 <li><button type="button" data-open-editor="experience-title-input">Edit details</button></li>
@@ -176,13 +184,13 @@
             <ol id="experience-list" class="resume-list" hidden></ol>
         </section>
 
-        <section id="qualifications-section" class="screen-section screen-section-muted" aria-label="Hiring focus">
+        <section id="qualifications-section" class="screen-section screen-section-muted" aria-label="Qualifications">
             <article id="qualifications-placeholder" class="skills-card section-placeholder-card">
                 <header class="section-heading">
-                    <h2>Hiring Focus</h2>
+                    <h2>Qualifications</h2>
                     <button type="button" id="dismiss-qualifications-button" class="section-icon-button">
                         <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Hide hiring focus suggestions</span>
+                        <span class="sr-only">Hide qualifications suggestions</span>
                     </button>
                 </header>
                 <p id="qualifications-intro" class="body-copy"></p>
@@ -191,19 +199,19 @@
                 </p>
             </article>
             <header id="qualifications-active-header" class="section-heading" hidden>
-                <h2>Hiring Focus</h2>
+                <h2>Qualifications</h2>
                 <ul class="inline-actions">
                     <li>
                         <button type="button" class="section-icon-button" data-open-add-section="qualifications">
                             <span aria-hidden="true">+</span>
-                            <span class="sr-only">Add hiring focus entry</span>
+                            <span class="sr-only">Add qualification entry</span>
                         </button>
                     </li>
                     <li>
                         <details class="section-action-menu">
                             <summary class="section-icon-button">
                                 <span aria-hidden="true">&#9998;</span>
-                                <span class="sr-only">Open hiring focus section actions</span>
+                                <span class="sr-only">Open qualifications section actions</span>
                             </summary>
                             <menu class="section-action-list">
                                 <li><button type="button" data-open-editor="qualifications-intro-input">Edit details</button></li>
@@ -216,13 +224,63 @@
             <ol id="qualifications-list" class="resume-list" hidden></ol>
         </section>
 
-        <section id="projects-section" class="screen-section screen-section-muted" aria-label="Open roles">
+        <section id="skills-section" class="screen-section screen-section-muted" aria-label="Skills">
+            <article id="skills-placeholder" class="skills-card">
+                <header class="section-heading">
+                    <h2>Skills</h2>
+                    <button type="button" id="dismiss-skills-button" class="section-icon-button">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Hide skills suggestions</span>
+                    </button>
+                </header>
+
+                <p id="skills-placeholder-intro" class="body-copy"></p>
+
+                <section class="skill-group">
+                    <h3>Soft skills</h3>
+                </section>
+
+                <section class="skill-group">
+                    <h3>Technical Skills</h3>
+                </section>
+
+                <p class="add-skills-wrap">
+                    <button type="button" id="skills-add-button" class="pill pill-outline pill-wide" data-open-add-section="skills">Add skills</button>
+                </p>
+            </article>
+            <header id="skills-active-header" class="section-heading" hidden>
+                <h2>Skills</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="skills">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add skills</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open skills section actions</span>
+                            </summary>
+                            <menu class="section-action-list">
+                                <li><button type="button" data-open-editor="soft-skills-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="skills">Delete section</button></li>
+                            </menu>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="skills-list" class="resume-list" hidden></ol>
+        </section>
+
+        <section id="projects-section" class="screen-section screen-section-muted" aria-label="Projects">
             <article id="projects-placeholder" class="skills-card section-placeholder-card">
                 <header class="section-heading">
-                    <h2>Open Roles</h2>
+                    <h2>Projects</h2>
                     <button type="button" id="dismiss-projects-button" class="section-icon-button">
                         <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Hide open role suggestions</span>
+                        <span class="sr-only">Hide projects suggestions</span>
                     </button>
                 </header>
                 <p id="projects-intro" class="body-copy"></p>
@@ -231,19 +289,19 @@
                 </p>
             </article>
             <header id="projects-active-header" class="section-heading" hidden>
-                <h2>Open Roles</h2>
+                <h2>Projects</h2>
                 <ul class="inline-actions">
                     <li>
                         <button type="button" class="section-icon-button" data-open-add-section="projects">
                             <span aria-hidden="true">+</span>
-                            <span class="sr-only">Add open role entry</span>
+                            <span class="sr-only">Add project entry</span>
                         </button>
                     </li>
                     <li>
                         <details class="section-action-menu">
                             <summary class="section-icon-button">
                                 <span aria-hidden="true">&#9998;</span>
-                                <span class="sr-only">Open open roles section actions</span>
+                                <span class="sr-only">Open projects section actions</span>
                             </summary>
                             <menu class="section-action-list">
                                 <li><button type="button" data-open-editor="projects-intro-input">Edit details</button></li>
@@ -256,13 +314,13 @@
             <ol id="projects-list" class="resume-list" hidden></ol>
         </section>
 
-        <section id="achievements-section" class="screen-section screen-section-muted" aria-label="Company highlights">
+        <section id="achievements-section" class="screen-section screen-section-muted" aria-label="Achievements">
             <article id="achievements-placeholder" class="skills-card section-placeholder-card">
                 <header class="section-heading">
-                    <h2>Company Highlights</h2>
+                    <h2>Achievements</h2>
                     <button type="button" id="dismiss-achievements-button" class="section-icon-button">
                         <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Hide company highlight suggestions</span>
+                        <span class="sr-only">Hide achievements suggestions</span>
                     </button>
                 </header>
                 <p id="achievements-intro" class="body-copy"></p>
@@ -271,19 +329,19 @@
                 </p>
             </article>
             <header id="achievements-active-header" class="section-heading" hidden>
-                <h2>Company Highlights</h2>
+                <h2>Achievements</h2>
                 <ul class="inline-actions">
                     <li>
                         <button type="button" class="section-icon-button" data-open-add-section="achievements">
                             <span aria-hidden="true">+</span>
-                            <span class="sr-only">Add company highlight entry</span>
+                            <span class="sr-only">Add achievement entry</span>
                         </button>
                     </li>
                     <li>
                         <details class="section-action-menu">
                             <summary class="section-icon-button">
                                 <span aria-hidden="true">&#9998;</span>
-                                <span class="sr-only">Open company highlights section actions</span>
+                                <span class="sr-only">Open achievements section actions</span>
                             </summary>
                             <menu class="section-action-list">
                                 <li><button type="button" data-open-editor="achievements-intro-input">Edit details</button></li>
@@ -300,7 +358,7 @@
             <header class="section-heading section-heading-activity">
                 <section>
                     <h2 id="activity-heading">Activity</h2>
-                    <p><span id="followers-button" class="text-link"></span></p>
+                    <p><button type="button" id="followers-button" class="text-link" data-open-editor="create-post-label-input"></button></p>
                 </section>
                 <ul class="inline-actions">
                     <li><button type="button" id="create-post-button" class="pill pill-outline pill-compact" data-feedback="Post creation will be connected to the shared backend later."></button></li>
@@ -330,49 +388,50 @@
                 <label class="form-field" for="add-section-select">Section
                     <select id="add-section-select" name="sectionType" required>
                         <option value="">Select a section</option>
-                        <option value="education">Business Details</option>
-                        <option value="experience">Workspace Details</option>
-                        <option value="qualifications">Hiring Focus</option>
-                        <option value="projects">Open Roles</option>
-                        <option value="achievements">Company Highlights</option>
+                        <option value="education">Education</option>
+                        <option value="experience">Experience</option>
+                        <option value="qualifications">Qualifications</option>
+                        <option value="skills">Skills</option>
+                        <option value="projects">Projects</option>
+                        <option value="achievements">Achievements</option>
                     </select>
                 </label>
             </fieldset>
 
             <fieldset id="education-add-group" class="editor-group" hidden>
-                <legend>Business details</legend>
-                <label class="form-field" for="add-education-school-input">Business name
+                <legend>Education details</legend>
+                <label class="form-field" for="add-education-school-input">School name
                     <input id="add-education-school-input" name="addEducationSchool" type="text" maxlength="120">
                 </label>
-                <label class="form-field" for="add-education-field-input">Industry
+                <label class="form-field" for="add-education-field-input">Study field
                     <input id="add-education-field-input" name="addEducationField" type="text" maxlength="120">
                 </label>
-                <label class="form-field" for="add-education-dates-input">Business size
+                <label class="form-field" for="add-education-dates-input">Education dates
                     <input id="add-education-dates-input" name="addEducationDates" type="text" maxlength="120">
                 </label>
             </fieldset>
 
             <fieldset id="experience-add-group" class="editor-group" hidden>
-                <legend>Workspace details</legend>
-                <label class="form-field" for="add-experience-title-input">Workspace name
+                <legend>Experience details</legend>
+                <label class="form-field" for="add-experience-title-input">Experience title
                     <input id="add-experience-title-input" name="addExperienceTitle" type="text" maxlength="120">
                 </label>
-                <label class="form-field" for="add-experience-company-input">Business unit
+                <label class="form-field" for="add-experience-company-input">Experience company
                     <input id="add-experience-company-input" name="addExperienceCompany" type="text" maxlength="120">
                 </label>
-                <label class="form-field" for="add-experience-type-input">Workspace type
+                <label class="form-field" for="add-experience-type-input">Employment type
                     <input id="add-experience-type-input" name="addExperienceType" type="text" maxlength="80">
                 </label>
-                <label class="form-field" for="add-experience-dates-input">Operating hours
+                <label class="form-field" for="add-experience-dates-input">Experience dates
                     <input id="add-experience-dates-input" name="addExperienceDates" type="text" maxlength="120">
                 </label>
-                <label class="form-field" for="add-experience-duration-input">Team size
+                <label class="form-field" for="add-experience-duration-input">Experience duration
                     <input id="add-experience-duration-input" name="addExperienceDuration" type="text" maxlength="80">
                 </label>
-                <label class="form-field" for="add-experience-location-type-input">Work model
+                <label class="form-field" for="add-experience-location-type-input">Workplace type
                     <input id="add-experience-location-type-input" name="addExperienceLocationType" type="text" maxlength="80">
                 </label>
-                <label class="form-field" for="add-experience-description-input">Workspace description
+                <label class="form-field" for="add-experience-description-input">Experience description
                     <textarea id="add-experience-description-input" name="addExperienceDescription" rows="4" maxlength="260"></textarea>
                 </label>
             </fieldset>
@@ -390,6 +449,16 @@
                 </label>
                 <label class="form-field" for="add-shared-description-input"><span id="shared-description-label">Description</span>
                     <textarea id="add-shared-description-input" name="addSharedDescription" rows="4" maxlength="260"></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset id="skills-add-group" class="editor-group" hidden>
+                <legend>Skills</legend>
+                <label class="form-field" for="add-soft-skills-input">Soft skills
+                    <textarea id="add-soft-skills-input" name="addSoftSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+                <label class="form-field" for="add-technical-skills-input">Technical skills
+                    <textarea id="add-technical-skills-input" name="addTechnicalSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
                 </label>
             </fieldset>
 
@@ -418,7 +487,7 @@
                 <label class="form-field" for="headline-input">Headline
                     <textarea id="headline-input" name="headline" rows="3" maxlength="220" required></textarea>
                 </label>
-                <label class="form-field" for="institution-input">Company
+                <label class="form-field" for="institution-input">Institution
                     <input id="institution-input" name="institution" type="text" maxlength="120" required>
                 </label>
                 <label class="form-field" for="location-input">Location
@@ -472,69 +541,79 @@
             </fieldset>
 
             <fieldset class="editor-group" data-editor-section="experience">
-                <legend>Workspace Details</legend>
-                <label class="form-field" for="experience-title-input">Workspace name
+                <legend>Experience</legend>
+                <label class="form-field" for="experience-title-input">Experience title
                     <input id="experience-title-input" name="experienceTitle" type="text" maxlength="120" required>
                 </label>
-                <label class="form-field" for="experience-company-input">Business unit
+                <label class="form-field" for="experience-company-input">Experience company
                     <input id="experience-company-input" name="experienceCompany" type="text" maxlength="120" required>
                 </label>
-                <label class="form-field" for="experience-type-input">Workspace type
+                <label class="form-field" for="experience-type-input">Employment type
                     <input id="experience-type-input" name="experienceType" type="text" maxlength="80" required>
                 </label>
-                <label class="form-field" for="experience-dates-input">Operating hours
+                <label class="form-field" for="experience-dates-input">Experience dates
                     <input id="experience-dates-input" name="experienceDates" type="text" maxlength="120" required>
                 </label>
-                <label class="form-field" for="experience-duration-input">Team size
+                <label class="form-field" for="experience-duration-input">Experience duration
                     <input id="experience-duration-input" name="experienceDuration" type="text" maxlength="80" required>
                 </label>
-                <label class="form-field" for="experience-location-type-input">Work model
+                <label class="form-field" for="experience-location-type-input">Workplace type
                     <input id="experience-location-type-input" name="experienceLocationType" type="text" maxlength="80" required>
                 </label>
-                <label class="form-field" for="experience-description-input">Workspace description
+                <label class="form-field" for="experience-description-input">Experience description
                     <textarea id="experience-description-input" name="experienceDescription" rows="4" maxlength="260" required></textarea>
                 </label>
             </fieldset>
 
             <fieldset class="editor-group" data-editor-section="education">
-                <legend>Business Details</legend>
-                <label class="form-field" for="education-school-input">Business name
+                <legend>Education</legend>
+                <label class="form-field" for="education-school-input">School name
                     <input id="education-school-input" name="educationSchool" type="text" maxlength="120" required>
                 </label>
-                <label class="form-field" for="education-field-input">Industry
+                <label class="form-field" for="education-field-input">Study field
                     <input id="education-field-input" name="educationField" type="text" maxlength="120" required>
                 </label>
-                <label class="form-field" for="education-dates-input">Business size
+                <label class="form-field" for="education-dates-input">Education dates
                     <input id="education-dates-input" name="educationDates" type="text" maxlength="120" required>
                 </label>
             </fieldset>
 
+            <fieldset class="editor-group" data-editor-section="skills">
+                <legend>Skills</legend>
+                <label class="form-field" for="soft-skills-input">Soft skills
+                    <textarea id="soft-skills-input" name="softSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+                <label class="form-field" for="technical-skills-input">Technical skills
+                    <textarea id="technical-skills-input" name="technicalSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+            </fieldset>
+
             <fieldset class="editor-group" data-editor-section="qualifications">
-                <legend>Hiring Focus</legend>
-                <label class="form-field" for="qualifications-intro-input">Hiring focus prompt
+                <legend>Qualifications</legend>
+                <label class="form-field" for="qualifications-intro-input">Qualifications prompt
                     <textarea id="qualifications-intro-input" name="qualificationsIntro" rows="3" maxlength="220" required></textarea>
                 </label>
-                <label class="form-field" for="qualifications-button-input">Hiring focus button label
+                <label class="form-field" for="qualifications-button-input">Qualifications button label
                     <input id="qualifications-button-input" name="qualificationsButton" type="text" maxlength="80" required>
                 </label>
             </fieldset>
 
             <fieldset class="editor-group" data-editor-section="projects">
-                <legend>Open Roles</legend>
-                <label class="form-field" for="projects-intro-input">Open roles prompt
+                <legend>Projects</legend>
+                <label class="form-field" for="projects-intro-input">Projects prompt
                     <textarea id="projects-intro-input" name="projectsIntro" rows="3" maxlength="220" required></textarea>
                 </label>
-                <label class="form-field" for="projects-button-input">Open roles button label
+                <label class="form-field" for="projects-button-input">Projects button label
                     <input id="projects-button-input" name="projectsButton" type="text" maxlength="80" required>
                 </label>
             </fieldset>
 
             <fieldset class="editor-group" data-editor-section="achievements">
-                <legend>Company Highlights</legend>
-                <label class="form-field" for="achievements-intro-input">Company highlights prompt
+                <legend>Achievements</legend>
+                <label class="form-field" for="achievements-intro-input">Achievements prompt
                     <textarea id="achievements-intro-input" name="achievementsIntro" rows="3" maxlength="220" required></textarea>
                 </label>
-                <label class="form-field" for="achievements-button-input">Company highlights button label
+                <label class="form-field" for="achievements-button-input">Achievements button label
                     <input id="achievements-button-input" name="achievementsButton" type="text" maxlength="80" required>
                 </label>
             </fieldset>
@@ -548,24 +627,32 @@
 
     <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
 
-    <nav class="bottom-nav" aria-label="Primary">
-        <a href="../Recruiter_homepage/index.html" class="nav-item active">
-            <i class="fa-solid fa-house" aria-hidden="true"></i>
-            <span>Home</span>
-        </a>
-        <a href="../Recruiter_homepage/index.html?tab=applications" class="nav-item">
-            <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
-            <span>Applications</span>
-        </a>
-        <a href="../Recruiter_homepage/index.html?tab=notifications" class="nav-item">
-            <i class="fa-regular fa-bell" aria-hidden="true"></i>
-            <span>Alerts</span>
-        </a>
-        <button class="nav-item" id="profile-settings-button" type="button" data-feedback="Settings will be connected to the wider application shell.">
-            <i class="fa-solid fa-gear" aria-hidden="true"></i>
-            <span>Settings</span>
-        </button>
-    </nav>
+    <footer class="bottom-nav-shell">
+        <nav class="bottom-nav" aria-label="Primary">
+            <ul>
+                <li><a class="nav-item nav-item-active" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#8962;</span>
+                    <span>Home</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9678;</span>
+                    <span>My Network</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">+</span>
+                    <span>Post</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9711;</span>
+                    <span>Notifications</span>
+                </a></li>
+                <li><a class="nav-item" href="#">
+                    <span class="nav-icon" aria-hidden="true">&#9635;</span>
+                    <span>Jobs</span>
+                </a></li>
+            </ul>
+        </nav>
+    </footer>
 
     <template id="analytics-item-template">
         <li>
@@ -622,6 +709,20 @@
                     <h3 class="resume-title"></h3>
                     <p class="resume-meta education-field-line"></p>
                     <p class="resume-meta education-date-line"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <template id="skill-group-template">
+        <li>
+            <article class="resume-item skill-group-card">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <abbr class="resume-logo-text"></abbr>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <ul class="grouped-skill-list"></ul>
                 </section>
             </article>
         </li>
