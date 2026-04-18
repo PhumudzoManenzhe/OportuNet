@@ -1,4 +1,4 @@
-// ========== DATA STORAGE ==========
+// ========== DATA STORAGE =========
 let jobs = [];
 let applications = [];
 let notifications = [];
