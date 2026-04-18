@@ -61,5 +61,5 @@ jobs:
         with:
           app-name: 'OportuNet'
           slot-name: 'Production'
-          package: .
+          package: ./SignUp_LogIn_pages
           
