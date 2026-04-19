@@ -1,9 +1,6 @@
 const initialPageData = Object.freeze({
     profile: {
         name: "Naledi Mokoena",
-        headline: "Frontend Developer and UX Research Enthusiast | Building accessible digital tools for students and small teams",
-        institution: "Northstar Digital Studio",
-        location: "Pretoria, Gauteng, South Africa",
         addSectionButton: "Add section",
         photoUrl: ""
     },
@@ -139,9 +136,6 @@ const elements = {
         ["personalEmail", "personal-email"],
         ["personalPhone", "personal-phone"],
         ["photoInput", "photo-input"],
-        ["profileHeadline", "profile-headline"],
-        ["profileInstitution", "profile-institution"],
-        ["profileLocation", "profile-location"],
         ["profileName", "profile-name"],
         ["profilePhoto", "profile-photo"],
         ["qualificationsActiveHeader", "qualifications-active-header"],
@@ -189,9 +183,6 @@ const elements = {
         ["educationField", "education-field-input"],
         ["educationSchool", "education-school-input"],
         ["email", "email-input"],
-        ["headline", "headline-input"],
-        ["institution", "institution-input"],
-        ["location", "location-input"],
         ["phone", "phone-input"],
         ["profileName", "profile-name-input"],
         ["qualificationsButton", "qualifications-button-input"],
@@ -203,9 +194,6 @@ const elements = {
 
 const editorTargetMap = Object.freeze({
     "profile-name-input": "profile",
-    "headline-input": "profile",
-    "institution-input": "profile",
-    "location-input": "profile",
     "about-intro-input": "about",
     "about-passion-input": "about",
     "education-school-input": "education",
@@ -262,10 +250,7 @@ const sectionViews = {
 const saveHandlers = {
     profile(pageData) {
         Object.assign(pageData.profile, {
-            name: readValue(elements.formFields.profileName),
-            headline: readValue(elements.formFields.headline),
-            institution: readValue(elements.formFields.institution),
-            location: readValue(elements.formFields.location)
+            name: readValue(elements.formFields.profileName)
         });
     },
     about(pageData) {
@@ -461,9 +446,6 @@ function renderPage() {
 
 function renderProfile(profile) {
     setText(elements.profileName, profile.name);
-    setText(elements.profileHeadline, profile.headline);
-    setText(elements.profileInstitution, profile.institution);
-    setText(elements.profileLocation, profile.location);
     setText(elements.addSectionButton, profile.addSectionButton);
     renderAvatar(profile);
 }
@@ -592,9 +574,6 @@ function syncEditorForm() {
     const education = state.pageData.education[0] || {};
     setFieldValues(elements.formFields, {
         profileName: state.pageData.profile.name,
-        headline: state.pageData.profile.headline,
-        institution: state.pageData.profile.institution,
-        location: state.pageData.profile.location,
         phone: state.pageData.personalDetails.phone,
         email: state.pageData.personalDetails.email,
         address: state.pageData.personalDetails.address,
@@ -765,7 +744,7 @@ async function persistPageUpdate(update, { success, failure, afterSave, log }) {
         return result;
     } catch (error) {
         console.error(log, error);
-        setFeedback(failure);
+        setFeedback(error?.message || failure);
         return null;
     }
 }
@@ -877,11 +856,12 @@ async function handlePhotoSelection(event) {
         releaseTemporaryPhotoUrl();
         state.temporaryPhotoUrl = photoUrl;
         state.pageData.profile.photoUrl = photoUrl;
+        state.pageData = await profileGateway.savePageData(state.pageData);
         renderProfile(state.pageData.profile);
-        setFeedback("Profile picture updated for this demo session.");
+        setFeedback("Profile picture updated.");
     } catch (error) {
         console.error("Unable to update the profile picture.", error);
-        setFeedback("The profile picture could not be updated.");
+        setFeedback(error?.message || "The profile picture could not be updated.");
     } finally {
         elements.photoInput.value = "";
     }
@@ -901,11 +881,12 @@ async function handleCvSelection(event) {
         const fileUrl = await profileGateway.uploadCv(file);
         state.pageData.cv.fileName = file.name;
         state.pageData.cv.fileUrl = fileUrl;
+        state.pageData = await profileGateway.savePageData(state.pageData);
         renderCv(state.pageData.cv);
-        setFeedback("PDF CV uploaded for this demo session.");
+        setFeedback("PDF CV uploaded.");
     } catch (error) {
         console.error("Unable to upload the CV.", error);
-        setFeedback("The CV could not be uploaded.");
+        setFeedback(error?.message || "The CV could not be uploaded.");
     } finally {
         elements.cvInput.value = "";
     }

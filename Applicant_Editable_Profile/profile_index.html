@@ -7,6 +7,7 @@
     <title>Applicant Profile</title>
     <link rel="stylesheet" href="profile_style.css">
     <script src="profile_script.js" defer></script>
+    <script type="module" src="profile_firebase.js"></script>
 </head>
 <body>
     <main class="profile-app">
@@ -42,11 +43,6 @@
                 </nav>
 
                 <h1 id="profile-name"></h1>
-                <p id="profile-headline" class="profile-headline"></p>
-                <p class="profile-meta">
-                    <span id="profile-institution"></span>
-                </p>
-                <p id="profile-location" class="profile-location"></p>
 
                 <ul class="action-pills" aria-label="Primary profile actions">
                     <li><button type="button" id="add-section-button" class="pill pill-outline"></button></li>
@@ -310,15 +306,6 @@
                 <legend>Profile</legend>
                 <label class="form-field" for="profile-name-input">Full name
                     <input id="profile-name-input" name="profileName" type="text" maxlength="80" required>
-                </label>
-                <label class="form-field" for="headline-input">Headline
-                    <textarea id="headline-input" name="headline" rows="3" maxlength="220" required></textarea>
-                </label>
-                <label class="form-field" for="institution-input">Institution
-                    <input id="institution-input" name="institution" type="text" maxlength="120" required>
-                </label>
-                <label class="form-field" for="location-input">Location
-                    <input id="location-input" name="location" type="text" maxlength="120" required>
                 </label>
             </fieldset>
 
