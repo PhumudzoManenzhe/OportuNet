@@ -1,4 +1,4 @@
-// ========== DATA STORAGE =========
+// ========== DATA STORAGE ==========
 let jobs = [];
 let applications = [];
 let notifications = [];
@@ -10,11 +10,146 @@ const jobsPerPage = 5;
 let selectedJobs = new Set();
 let bulkMode = false;
 let editingJobId = null;
+let currentUser = null;
 
-// Sample notifications
-notifications = [
-    { id: 1, title: "Welcome!", message: "Post your first opportunity using the button above", time: "Just now", read: false }
-];
+// ========== FIREBASE AUTH CHECK ==========
+function checkAuthAndLoad() {
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        currentUser = user;
+        
+        // Check if user has recruiter role
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const userRole = userDoc.data()?.role;
+            
+            if (userRole !== 'recruiter') {
+                window.location.href = 'applicant.html';
+                return;
+            }
+            
+            // Update welcome message with company name
+            const companyName = userDoc.data()?.companyName || 'Provider Co.';
+            const recruiterNameSpan = document.getElementById('recruiterName');
+            if (recruiterNameSpan) {
+                recruiterNameSpan.textContent = companyName;
+            }
+            
+            // Load data from Firebase
+            await loadJobsFromFirebase();
+            await loadApplicationsFromFirebase();
+            await loadNotificationsFromFirebase();
+            
+            renderOpportunities();
+            renderApplications();
+            renderNotifications();
+            
+        } catch (error) {
+            console.error("Error checking user role:", error);
+        }
+    });
+}
+
+// ========== FIREBASE CRUD OPERATIONS ==========
+async function loadJobsFromFirebase() {
+    try {
+        const snapshot = await db.collection('jobs')
+            .where('recruiterId', '==', currentUser.uid)
+            .get();
+        
+        jobs = [];
+        snapshot.forEach(doc => {
+            jobs.push({ id: doc.id, ...doc.data() });
+        });
+        
+        renderOpportunities();
+    } catch (error) {
+        console.error("Error loading jobs:", error);
+    }
+}
+
+async function loadApplicationsFromFirebase() {
+    try {
+        const snapshot = await db.collection('applications').get();
+        applications = [];
+        snapshot.forEach(doc => {
+            applications.push({ id: doc.id, ...doc.data() });
+        });
+        renderApplications();
+    } catch (error) {
+        console.error("Error loading applications:", error);
+    }
+}
+
+async function loadNotificationsFromFirebase() {
+    try {
+        const snapshot = await db.collection('notifications')
+            .where('userId', '==', currentUser.uid)
+            .get();
+        
+        notifications = [];
+        snapshot.forEach(doc => {
+            notifications.push({ id: doc.id, ...doc.data() });
+        });
+        renderNotifications();
+    } catch (error) {
+        console.error("Error loading notifications:", error);
+    }
+}
+
+async function saveJobToFirebase(jobData) {
+    try {
+        if (jobData.id && jobData.id.length > 10) {
+            // Update existing job
+            await db.collection('jobs').doc(jobData.id).update(jobData);
+        } else {
+            // Create new job
+            const docRef = await db.collection('jobs').add(jobData);
+            jobData.id = docRef.id;
+        }
+        await loadJobsFromFirebase();
+        return true;
+    } catch (error) {
+        console.error("Error saving job:", error);
+        alert("Error saving job. Please try again.");
+        return false;
+    }
+}
+
+async function deleteJobFromFirebase(jobId) {
+    try {
+        await db.collection('jobs').doc(jobId).delete();
+        
+        // Also delete related applications
+        const appsSnapshot = await db.collection('applications').where('jobId', '==', jobId).get();
+        appsSnapshot.forEach(async (doc) => {
+            await db.collection('applications').doc(doc.id).delete();
+        });
+        
+        await loadJobsFromFirebase();
+        await loadApplicationsFromFirebase();
+        return true;
+    } catch (error) {
+        console.error("Error deleting job:", error);
+        alert("Error deleting job. Please try again.");
+        return false;
+    }
+}
+
+async function updateApplicationStatus(applicationId, newStatus) {
+    try {
+        await db.collection('applications').doc(applicationId).update({ status: newStatus });
+        await loadApplicationsFromFirebase();
+        return true;
+    } catch (error) {
+        console.error("Error updating application:", error);
+        return false;
+    }
+}
 
 // ========== HELPER FUNCTIONS ==========
 function escapeHtml(text) {
@@ -26,45 +161,12 @@ function escapeHtml(text) {
     });
 }
 
-function formatJobTitle(field, type) {
-    return `${field} ${type}`;
-}
-
-function getPaginatedJobs(jobs, currentPage) {
-    const startIndex = (currentPage - 1) * jobsPerPage;
-    return jobs.slice(startIndex, startIndex + jobsPerPage);
-}
-
-function getTotalPages(jobs) {
-    return Math.ceil(jobs.length / jobsPerPage);
-}
-
-function filterJobsBySearch(jobs, searchTerm) {
-    if (!searchTerm) return jobs;
-    return jobs.filter(job => 
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-}
-
 function getApplicantCount(jobId) {
     return applications.filter(app => app.jobId === jobId).length;
 }
 
 function getPendingApplicantCount(jobId) {
     return applications.filter(app => app.jobId === jobId && app.status === "pending").length;
-}
-
-function saveToLocalStorage() {
-    localStorage.setItem("recruiter_jobs", JSON.stringify(jobs));
-    localStorage.setItem("recruiter_applications", JSON.stringify(applications));
-}
-
-function loadFromLocalStorage() {
-    const savedJobs = localStorage.getItem("recruiter_jobs");
-    const savedApps = localStorage.getItem("recruiter_applications");
-    if (savedJobs) jobs = JSON.parse(savedJobs);
-    if (savedApps) applications = JSON.parse(savedApps);
 }
 
 function sortJobs(jobsArray) {
@@ -126,7 +228,7 @@ function renderOpportunities() {
         const pendingCount = getPendingApplicantCount(job.id);
         const needsAttention = applicantCount > 0 && job.status === 'active';
         const attentionBadge = needsAttention ? '<span class="status-badge needs-attention">⚠️ Needs Attention</span>' : '';
-        const reviewButton = applicantCount > 0 ? `<button class="review-btn" onclick="reviewApplicants(${job.id})">📋 Review ${applicantCount} Applicant${applicantCount !== 1 ? 's' : ''}</button>` : '<button class="review-btn" disabled style="background:#94a3b8; cursor:not-allowed;">No applicants yet</button>';
+        const reviewButton = applicantCount > 0 ? `<button class="review-btn" onclick="reviewApplicants('${job.id}')">📋 Review ${applicantCount} Applicant${applicantCount !== 1 ? 's' : ''}</button>` : '<button class="review-btn" disabled style="background:#94a3b8; cursor:not-allowed;">No applicants yet</button>';
 
         html += `
             <article class="opportunity-card ${statusClass}">
@@ -136,9 +238,9 @@ function renderOpportunities() {
                         <h3>${escapeHtml(job.title)}</h3>
                     </div>
                     <div>
-                        <button class="duplicate-job-btn" onclick="duplicateJob(${job.id})">📋 Copy</button>
-                        <button class="edit-job-btn" onclick="editJob(${job.id})">✏️ Edit</button>
-                        <button class="delete-job-btn" onclick="confirmDeleteJob(${job.id})">🗑️ Delete</button>
+                        <button class="duplicate-job-btn" onclick="duplicateJob('${job.id}')">📋 Copy</button>
+                        <button class="edit-job-btn" onclick="editJob('${job.id}')">✏️ Edit</button>
+                        <button class="delete-job-btn" onclick="confirmDeleteJob('${job.id}')">🗑️ Delete</button>
                     </div>
                 </header>
                 <div class="opportunity-meta">
@@ -146,13 +248,13 @@ function renderOpportunities() {
                     <span class="applicant-count">👥 ${applicantCount} applicant${applicantCount !== 1 ? 's' : ''}</span>
                     ${pendingCount > 0 ? `<span class="pending-count">⏳ ${pendingCount} pending</span>` : ''}
                     ${attentionBadge}
-                    <button class="status-toggle" onclick="toggleJobStatus(${job.id})">${job.status === "active" ? "🔒 Close" : (job.status === "draft" ? "✅ Publish" : "✅ Reactivate")}</button>
+                    <button class="status-toggle" onclick="toggleJobStatus('${job.id}')">${job.status === "active" ? "🔒 Close" : (job.status === "draft" ? "✅ Publish" : "✅ Reactivate")}</button>
                 </div>
                 <div class="location-info">📍 ${escapeHtml(job.location)}</div>
                 <div class="stipend-info">💰 ${escapeHtml(job.stipend)}</div>
                 <div class="closing-date">📅 Closing: ${job.closingDate}</div>
                 <div class="action-buttons-group">
-                    <button class="view-details-btn" onclick="viewJobDetails(${job.id})">View Details</button>
+                    <button class="view-details-btn" onclick="viewJobDetails('${job.id}')">View Details</button>
                     ${reviewButton}
                 </div>
             </article>
@@ -164,7 +266,7 @@ function renderOpportunities() {
     if (bulkMode) {
         document.querySelectorAll(".card-checkbox").forEach(cb => {
             cb.addEventListener("change", function() {
-                const id = parseInt(this.dataset.id);
+                const id = this.dataset.id;
                 if (this.checked) {
                     selectedJobs.add(id);
                 } else {
@@ -211,71 +313,72 @@ function toggleBulkMode() {
     renderOpportunities();
 }
 
-function bulkDelete() {
+async function bulkDelete() {
     if (selectedJobs.size === 0) return;
 
     const deletedCount = selectedJobs.size;
-    jobs = jobs.filter(job => !selectedJobs.has(job.id));
-    applications = applications.filter(app => !selectedJobs.has(app.jobId));
-
-    notifications.unshift({
-        id: Date.now(),
-        title: "Bulk Delete",
-        message: `You deleted ${deletedCount} opportunities`,
-        time: "Just now",
-        read: false
-    });
-
-    selectedJobs.clear();
-    bulkMode = false;
-    updateBulkDeleteBar();
-    renderOpportunities();
-    renderApplications();
-    renderNotifications();
-    saveToLocalStorage();
-    alert(`✅ Deleted ${deletedCount} opportunities`);
+    const confirmed = confirm(`Are you sure you want to delete ${deletedCount} opportunities?`);
+    
+    if (confirmed) {
+        for (const jobId of selectedJobs) {
+            await deleteJobFromFirebase(jobId);
+        }
+        
+        selectedJobs.clear();
+        bulkMode = false;
+        updateBulkDeleteBar();
+        alert(`✅ Deleted ${deletedCount} opportunities`);
+    }
 }
 
-function toggleJobStatus(jobId) {
+async function toggleJobStatus(jobId) {
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
 
+    let newStatus;
+    let message;
+    
     if (job.status === "active") {
-        job.status = "closed";
-        notifications.unshift({ id: Date.now(), title: "Job Closed", message: `You closed "${job.title}"`, time: "Just now", read: false });
-        alert(`🔒 "${job.title}" has been closed.`);
+        newStatus = "closed";
+        message = `🔒 "${job.title}" has been closed.`;
     } else if (job.status === "closed") {
-        job.status = "active";
-        notifications.unshift({ id: Date.now(), title: "Job Reactivated", message: `You reactivated "${job.title}"`, time: "Just now", read: false });
-        alert(`✅ "${job.title}" has been reactivated.`);
+        newStatus = "active";
+        message = `✅ "${job.title}" has been reactivated.`;
     } else {
-        job.status = "active";
-        notifications.unshift({ id: Date.now(), title: "Job Published", message: `You published "${job.title}"`, time: "Just now", read: false });
-        alert(`✅ "${job.title}" has been published.`);
+        newStatus = "active";
+        message = `✅ "${job.title}" has been published.`;
     }
-
-    saveToLocalStorage();
-    renderOpportunities();
-    renderNotifications();
+    
+    try {
+        await db.collection('jobs').doc(jobId).update({ status: newStatus });
+        await loadJobsFromFirebase();
+        alert(message);
+    } catch (error) {
+        console.error("Error updating job status:", error);
+        alert("Error updating job status. Please try again.");
+    }
 }
 
-function duplicateJob(jobId) {
+async function duplicateJob(jobId) {
     const original = jobs.find(j => j.id === jobId);
     if (!original) return;
 
     const newJob = {
-        ...original,
-        id: Date.now(),
         title: `${original.title} (Copy)`,
+        location: original.location,
+        stipend: original.stipend,
+        duration: original.duration,
+        closingDate: original.closingDate,
+        requirements: original.requirements,
+        description: original.description,
         postedDate: new Date().toISOString().split("T")[0],
-        status: "draft"
+        status: "draft",
+        recruiterId: currentUser.uid,
+        recruiterEmail: currentUser.email,
+        type: original.type
     };
-
-    jobs.push(newJob);
-    saveToLocalStorage();
-    renderOpportunities();
-    notifications.unshift({ id: Date.now(), title: "Job Duplicated", message: `You duplicated "${original.title}"`, time: "Just now", read: false });
-    renderNotifications();
+    
+    await saveJobToFirebase(newJob);
     alert(`✅ "${original.title}" has been duplicated as a draft.`);
 }
 
@@ -298,7 +401,7 @@ function renderApplications() {
     let html = '<table><thead><tr><th>Name</th><th>Opportunity</th><th>Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
     filteredApps.forEach(app => {
         const job = jobs.find(j => j.id === app.jobId);
-        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(job?.title || 'Unknown')}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${app.status}</td><td class="action-buttons"><button onclick="viewApplicant(${app.id})">👤 View</button><button onclick="shortlistApplicant(${app.id})">✓ Shortlist</button><button onclick="rejectApplicant(${app.id})">✗ Reject</button>NonNullable侧`;
+        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(job?.title || 'Unknown')}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${app.status}</td><td class="action-buttons"><button onclick="viewApplicant('${app.id}')">👤 View</button><button onclick="shortlistApplicant('${app.id}')">✓ Shortlist</button><button onclick="rejectApplicant('${app.id}')">✗ Reject</button></td></tr>`;
     });
     html += "</tbody></table>";
     container.innerHTML = html;
@@ -315,7 +418,7 @@ function renderNotifications() {
 
     let html = "";
     notifications.forEach(n => {
-        html += `<div class="notification-item ${n.read ? "" : "unread"}"><div><div class="notification-title">${escapeHtml(n.title)}</div><div class="notification-message">${escapeHtml(n.message)}</div><div class="notification-time">${n.time}</div></div>${!n.read ? `<button class="notification-read-btn" onclick="markNotificationRead(${n.id})">Mark read</button>` : ""}</div>`;
+        html += `<div class="notification-item ${n.read ? "" : "unread"}"><div><div class="notification-title">${escapeHtml(n.title)}</div><div class="notification-message">${escapeHtml(n.message)}</div><div class="notification-time">${n.time}</div></div>${!n.read ? `<button class="notification-read-btn" onclick="markNotificationRead('${n.id}')">Mark read</button>` : ""}</div>`;
     });
     container.innerHTML = html;
 }
@@ -408,13 +511,12 @@ function closePostJobModal() {
     document.getElementById("postJobModal").style.display = "none";
 }
 
-function saveAsDraft() {
+async function saveAsDraft() {
     const titleField = document.getElementById("jobTitleField").value.trim();
     const titleType = document.getElementById("jobTitleType").value;
     const fullTitle = titleField && titleType ? `${titleField} ${titleType}` : (titleField || "Untitled Draft");
     
     const draftJob = {
-        id: editingJobId || Date.now(),
         title: fullTitle,
         location: document.getElementById("jobLocation").value.trim() || "TBD",
         stipend: document.getElementById("jobStipend").value.trim() || "TBD",
@@ -423,25 +525,26 @@ function saveAsDraft() {
         requirements: document.getElementById("jobRequirements").value.trim().split("\n").filter(l => l.trim()),
         description: document.getElementById("jobDescription").value,
         postedDate: new Date().toISOString().split("T")[0],
-        status: "draft"
+        status: "draft",
+        recruiterId: currentUser.uid,
+        recruiterEmail: currentUser.email,
+        type: titleType
     };
     
     if (editingJobId) {
-        const idx = jobs.findIndex(j => j.id === editingJobId);
-        if (idx !== -1) jobs[idx] = draftJob;
+        await db.collection('jobs').doc(editingJobId).update(draftJob);
         alert("💾 Draft updated successfully");
     } else {
-        jobs.push(draftJob);
+        await db.collection('jobs').add(draftJob);
         alert("💾 Job saved as draft");
     }
     
-    saveToLocalStorage();
+    await loadJobsFromFirebase();
     closePostJobModal();
     switchTab("opportunities");
-    renderNotifications();
 }
 
-function postJob(event) {
+async function postJob(event) {
     event.preventDefault();
     if (!validateJobForm()) return;
     
@@ -450,7 +553,6 @@ function postJob(event) {
     const fullTitle = `${titleField} ${titleType}`;
     
     const jobData = {
-        id: editingJobId || Date.now(),
         title: fullTitle,
         location: document.getElementById("jobLocation").value.trim(),
         stipend: document.getElementById("jobStipend").value.trim(),
@@ -459,26 +561,27 @@ function postJob(event) {
         requirements: document.getElementById("jobRequirements").value.trim().split("\n").filter(l => l.trim()),
         description: document.getElementById("jobDescription").value,
         postedDate: new Date().toISOString().split("T")[0],
-        status: document.getElementById("jobStatus").value === "draft" ? "draft" : "active"
+        status: document.getElementById("jobStatus").value === "draft" ? "draft" : "active",
+        recruiterId: currentUser.uid,
+        recruiterEmail: currentUser.email,
+        type: titleType
     };
     
     if (editingJobId) {
-        const idx = jobs.findIndex(j => j.id === editingJobId);
-        if (idx !== -1) jobs[idx] = jobData;
+        await db.collection('jobs').doc(editingJobId).update(jobData);
         alert(`✅ Job updated successfully: ${fullTitle}`);
     } else {
-        jobs.push(jobData);
+        await db.collection('jobs').add(jobData);
         alert(`✅ Job posted successfully: ${fullTitle}`);
     }
     
-    saveToLocalStorage();
+    await loadJobsFromFirebase();
     closePostJobModal();
     switchTab("opportunities");
-    renderNotifications();
     editingJobId = null;
 }
 
-function editJob(jobId) {
+async function editJob(jobId) {
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
     
@@ -512,16 +615,10 @@ function editJob(jobId) {
     document.getElementById("postJobModal").style.display = "flex";
 }
 
-function confirmDeleteJob(jobId) {
+async function confirmDeleteJob(jobId) {
     const job = jobs.find(j => j.id === jobId);
     if (job && confirm(`Are you sure you want to delete "${job.title}"?`)) {
-        jobs = jobs.filter(j => j.id !== jobId);
-        applications = applications.filter(a => a.jobId !== jobId);
-        saveToLocalStorage();
-        renderOpportunities();
-        renderApplications();
-        notifications.unshift({ id: Date.now(), title: "Job Deleted", message: `You deleted "${job.title}"`, time: "Just now", read: false });
-        renderNotifications();
+        await deleteJobFromFirebase(jobId);
         alert(`✅ "${job.title}" deleted`);
     }
 }
@@ -541,39 +638,38 @@ function viewApplicant(id) {
     }
 }
 
-function shortlistApplicant(id) {
+async function shortlistApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
-        app.status = "shortlisted";
-        renderApplications();
-        notifications.unshift({ id: Date.now(), title: "Shortlisted", message: `You shortlisted ${app.applicantName}`, time: "Just now", read: false });
-        renderNotifications();
+        await updateApplicationStatus(id, "shortlisted");
         alert(`✅ ${app.applicantName} shortlisted`);
     }
 }
 
-function rejectApplicant(id) {
+async function rejectApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
-        app.status = "rejected";
-        renderApplications();
-        notifications.unshift({ id: Date.now(), title: "Rejected", message: `You rejected ${app.applicantName}`, time: "Just now", read: false });
-        renderNotifications();
+        await updateApplicationStatus(id, "rejected");
         alert(`❌ ${app.applicantName} rejected`);
     }
 }
 
-function markNotificationRead(id) {
-    const n = notifications.find(n => n.id === id);
-    if (n) {
-        n.read = true;
-        renderNotifications();
+async function markNotificationRead(id) {
+    try {
+        await db.collection('notifications').doc(id).update({ read: true });
+        await loadNotificationsFromFirebase();
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
     }
 }
 
-function markAllNotificationsRead() {
-    notifications.forEach(n => n.read = true);
-    renderNotifications();
+async function markAllNotificationsRead() {
+    for (const notif of notifications) {
+        if (!notif.read) {
+            await db.collection('notifications').doc(notif.id).update({ read: true });
+        }
+    }
+    await loadNotificationsFromFirebase();
     alert("All notifications marked as read");
 }
 
@@ -609,27 +705,10 @@ function setupCharCounter() {
     }
 }
 
-// ========== EXPORT FUNCTIONS FOR TESTING ==========
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        escapeHtml,
-        formatJobTitle,
-        getPaginatedJobs,
-        getTotalPages,
-        filterJobsBySearch,
-        getApplicantCount,
-        getPendingApplicantCount,
-        sortJobs,
-        validateJobForm,
-        saveToLocalStorage,
-        loadFromLocalStorage
-    };
-}
-
 // ========== EVENT LISTENERS ==========
 document.addEventListener("DOMContentLoaded", () => {
-    loadFromLocalStorage();
     setupCharCounter();
+    checkAuthAndLoad();
     
     const opportunitiesBtn = document.getElementById("opportunitiesBtn");
     const applicationsBtn = document.getElementById("applicationsBtn");
@@ -638,24 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const settingsNavBtn = document.getElementById("settingsNavBtn");
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const hamburgerMenu = document.getElementById("hamburgerMenu");
-    
-    if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
-    if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
-    if (topNotificationBtn) topNotificationBtn.addEventListener("click", () => alert("🔔 Notifications - Full functionality coming in Sprint 2"));
-    if (settingsOnlyBtn) settingsOnlyBtn.addEventListener("click", (e) => { e.preventDefault(); alert("⚙️ Settings - Coming in Sprint 2"); });
-    if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("⚙️ Settings - Coming in Sprint 2"));
-    
-    if (hamburgerBtn && hamburgerMenu) {
-        hamburgerBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            hamburgerMenu.classList.toggle("show");
-        });
-        document.addEventListener("click", () => hamburgerMenu.classList.remove("show"));
-    }
-    
     const searchInput = document.getElementById("searchInput");
-    if (searchInput) searchInput.addEventListener("input", searchOpportunities);
-    
     const postJobBtn = document.getElementById("postJobBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const cancelModalBtn = document.getElementById("cancelModalBtn");
@@ -673,6 +735,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterPending = document.getElementById("filterPending");
     const filterReviewed = document.getElementById("filterReviewed");
     
+    if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
+    if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
+    if (topNotificationBtn) topNotificationBtn.addEventListener("click", () => alert("🔔 Notifications - Full functionality coming in Sprint 2"));
+    if (settingsOnlyBtn) settingsOnlyBtn.addEventListener("click", (e) => { e.preventDefault(); alert("⚙️ Settings - Coming in Sprint 2"); });
+    if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("⚙️ Settings - Coming in Sprint 2"));
+    
+    if (hamburgerBtn && hamburgerMenu) {
+        hamburgerBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            hamburgerMenu.classList.toggle("show");
+        });
+        document.addEventListener("click", () => hamburgerMenu.classList.remove("show"));
+    }
+    
+    if (searchInput) searchInput.addEventListener("input", searchOpportunities);
     if (postJobBtn) postJobBtn.addEventListener("click", openPostJobModal);
     if (closeModalBtn) closeModalBtn.addEventListener("click", closePostJobModal);
     if (cancelModalBtn) cancelModalBtn.addEventListener("click", closePostJobModal);
@@ -707,6 +784,4 @@ document.addEventListener("DOMContentLoaded", () => {
         filterReviewed.classList.add("active");
         renderApplications();
     });
-    
-    switchTab("opportunities");
 });
