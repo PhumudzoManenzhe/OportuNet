@@ -1,5 +1,5 @@
 :root {
-    --bg: #edf2f8;
+    --bg: #f3f2ef;
     --bg-soft: #f8fbff;
     --surface: rgba(255, 255, 255, 0.96);
     --surface-strong: #ffffff;
@@ -25,22 +25,14 @@
 
 body {
     min-height: 100vh;
-    background: radial-gradient(circle at top right, rgba(191, 219, 254, 0.9), transparent 28%),
-                linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
+    background: var(--bg);
     color: var(--text);
     font-family: "Manrope", sans-serif;
     padding: 96px 0 118px;
 }
 
 body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-    background-size: 34px 34px;
-    pointer-events: none;
-    z-index: -1;
+    content: none;
 }
 
 header.navbar {
@@ -64,29 +56,6 @@ header.navbar {
     display: flex;
     align-items: center;
     gap: 20px;
-}
-
-.profile-static {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 12px;
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.profile-info .user-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--text);
-}
-
-.profile-info .profile-caption {
-    font-size: 11px;
-    color: var(--muted);
 }
 
 .avatar-sm {
@@ -143,6 +112,10 @@ header.navbar {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.menu-btn {
+    border: none;
 }
 
 .icon-btn {
@@ -217,6 +190,81 @@ header.navbar {
 .hamburger-item i {
     width: 20px;
     color: var(--brand);
+}
+
+.app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, 82vw);
+    height: 100vh;
+    padding: 24px 18px;
+    background: rgba(16, 27, 59, 0.98);
+    color: white;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 1200;
+    box-shadow: var(--shadow-lg);
+}
+
+.app-sidebar.is-open {
+    transform: translateX(0);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-close {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(219, 227, 239, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-link {
+    color: white;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: rgba(96, 165, 250, 0.2);
+    transform: translateX(4px);
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.36);
+    z-index: 1100;
+}
+
+body.sidebar-open {
+    overflow: hidden;
 }
 
 .container {
@@ -695,4 +743,5 @@ dialog.modal[open] {
     header.navbar { flex-wrap: wrap; height: auto; padding: 12px; }
     .nav-left, .nav-center, .nav-right { width: 100%; justify-content: center; }
     .opportunities-grid { grid-template-columns: 1fr; }
+    .profile-static .profile-info { display: none; }
 }

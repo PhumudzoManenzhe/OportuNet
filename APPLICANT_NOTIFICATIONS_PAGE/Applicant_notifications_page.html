@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicant Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="Applicant_notifications_page.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+</head>
+<body data-shell-role="applicant" data-shell-active="notifications" data-shell-base="..">
+  <main class="container">
+    <header class="page-header">
+      <a href="../Applicant_homepage/index.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+      </a>
+      <h1>Notifications</h1>
+      <a href="../Applicant_profile_page/global_profile.html" class="profile-link" aria-label="Go to profile page">
+        <i class="fa-regular fa-user"></i>
+      </a>
+    </header>
+
+    <section class="notification-list" aria-label="Applicant notifications">
+      <article class="notification-card unread">
+        <h2>Profile reminder</h2>
+        <p>Complete your applicant profile so recruiters can review your information faster.</p>
+      </article>
+
+      <article class="notification-card">
+        <h2>New opportunities available</h2>
+        <p>Fresh internships, learnerships, and apprenticeships have been added to your dashboard.</p>
+      </article>
+
+      <article class="notification-card">
+        <h2>Application tips</h2>
+        <p>Keep your CV and supporting documents updated before submitting new applications.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

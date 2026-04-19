@@ -3,12 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <meta name="description" content="Editable applicant profile with profile, about, education, qualifications, skills, personal details, and CV upload sections.">
     <title>Applicant Profile</title>
+=======
+    <meta name="description" content="A mobile-first LinkedIn-style profile page with editable profile sections and future-ready backend placeholders.">
+    <title>LinkedIn-Style Profile</title>
+    <link rel="stylesheet" href="../shared/app-shell.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+>>>>>>> my_branch
     <link rel="stylesheet" href="profile_style.css">
+    <script src="../shared/app-shell.js" defer></script>
     <script src="profile_script.js" defer></script>
 </head>
+<<<<<<< HEAD
 <body>
+=======
+<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
+    <header class="app-header">
+        <nav class="toolbar" aria-label="Profile navigation">
+            <button type="button" class="toolbar-button" data-feedback="Back navigation will be connected when this page is attached to the wider app.">
+                <span aria-hidden="true">&larr;</span>
+                <span class="sr-only">Go back</span>
+            </button>
+
+            <form class="toolbar-search" role="search" aria-label="Search">
+                <label class="sr-only" for="profile-search">Search</label>
+                <input id="profile-search" name="profile-search" type="search" placeholder="Search">
+            </form>
+
+            <button type="button" class="toolbar-button" data-feedback="Settings will be connected to the wider application shell.">
+                <span aria-hidden="true">&#9881;</span>
+                <span class="sr-only">Open settings</span>
+            </button>
+        </nav>
+    </header>
+
+>>>>>>> my_branch
     <main class="profile-app">
         <section class="cover-panel" aria-label="Profile cover"></section>
 

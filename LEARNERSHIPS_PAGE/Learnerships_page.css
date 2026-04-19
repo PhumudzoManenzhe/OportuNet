@@ -168,11 +168,14 @@ body {
   gap: 10px;
   margin-top: 16px;
 }
-s.card-footer button {
+
+.card-footer button {
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .card-footer button:first-child {
@@ -183,6 +186,11 @@ s.card-footer button {
 .card-footer button:last-child {
   background-color: #16a34a;
   color: white;
+}
+
+.card-footer button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
 .visually-hidden {
