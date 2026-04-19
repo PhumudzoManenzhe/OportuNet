@@ -227,7 +227,7 @@ header.navbar {
 .welcome {
     padding: 28px;
     border-radius: var(--radius-xl);
-    background: linear-gradient(135deg, rgba(29, 78, 216, 0.95), rgba(96, 165, 250, 0.92));
+    background: linear-gradient(to right, #2b3d8c, #2e64d9, #396ee0);
     color: white;
     margin-bottom: 22px;
 }

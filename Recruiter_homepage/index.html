@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="recruiter_homepage.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body data-theme="light">
@@ -20,37 +20,23 @@
                 <div class="avatar-sm">PC</div>
                 <div class="profile-info">
                     <span class="user-name">Provider Co.</span>
-                    <span class="profile-caption">Recruiter</span>
                 </div>
-            </div>
+            </div>  
         </div>
 
-        <!-- Center - Logo/Brand -->
-        <div class="nav-center">
-            <div class="brand-mark">SA</div>
-            <div class="brand-text">
-                <span class="brand-label">SA Skills Portal</span>
-                <p class="brand-subtitle">Connecting talent with opportunities</p>
-            </div>
-        </div>
-
-        <!-- Top Right: Notification Bell + Three Lines (Hamburger Menu) -->
         <div class="nav-right">
             <!-- Notification Bell -->
             <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
                 <i class="fa-regular fa-bell"></i>
             </button>
-
-            <!-- Three Lines (Hamburger Menu) -->
             <div class="hamburger-menu">
+                
                 <button class="hamburger-btn" id="hamburgerBtn" type="button">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <nav class="hamburger-dropdown" id="hamburgerMenu">
-                    <a href="#" class="hamburger-item" id="settingsOnlyBtn"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-                </nav>
             </div>
         </div>
+        
     </header>
 
     <!-- ========== MAIN CONTENT ========== -->
@@ -197,23 +183,6 @@
             </footer>
         </div>
     </dialog>
-
-    <!-- ========== FOOTER ========== -->
-    <footer class="page-footer">
-        <p>&copy; 2026 SA Skills Portal | Connecting South African talent with opportunities</p>
-    </footer>
-
-    <!-- ========== BOTTOM NAVIGATION ========== -->
-    <nav class="bottom-nav">
-        <button class="nav-item active" id="opportunitiesBtn" type="button">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </button>
-        <button class="nav-item" id="applicationsBtn" type="button">
-            <i class="fa-solid fa-file-lines"></i>
-            <span>Applications</span>
-        </button>
-    </nav>
 
     <script src="recruiter_homepage.js"></script>
 </body>
