@@ -6,10 +6,12 @@
     <meta name="description" content="A mobile-first LinkedIn-style profile page in view-only mode with future-ready backend placeholders.">
     <title>Applicant Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/app-shell.css">
     <link rel="stylesheet" href="global_profile.css">
+    <script src="../shared/app-shell.js" defer></script>
     <script src="global_profile.js" defer></script>
 </head>
-<body>
+<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
     <header class="app-header">
         <nav class="toolbar toolbar-profile" aria-label="Profile navigation">
             <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">
@@ -107,25 +109,6 @@
     </main>
 
     <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
-
-    <nav class="bottom-nav" aria-label="Primary">
-        <a href="../Applicant_homepage/index.html" class="nav-item">
-            <i class="fa-solid fa-house" aria-hidden="true"></i>
-            <span>Home</span>
-        </a>
-        <a href="global_profile.html" class="nav-item active" aria-current="page">
-            <i class="fa-solid fa-user" aria-hidden="true"></i>
-            <span>Profile</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
-            <span>Jobs</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-gear" aria-hidden="true"></i>
-            <span>Settings</span>
-        </a>
-    </nav>
 
     <template id="activity-post-template">
         <li>
