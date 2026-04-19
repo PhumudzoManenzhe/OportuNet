@@ -1,4 +1,6 @@
-
+import { auth, db } from "../FireStore_db/firebase.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDyIr2fg2uUtJPeHmvTJhePkt6DWti12Vw",
@@ -37,47 +39,47 @@ function signUpUser(email, password) {
 }
 
 //EMAIL LOG IN FUNCTION
-function logInUser(email, password) {
-    auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-        window.location.href = "../Applicant_homepage/index.html"; 
-    }).catch((error) => {
-        alert(error.message);
-    });
-}
-// for when we actually have a database and need to check if the user is new or not.
 // function logInUser(email, password) {
 //     auth.signInWithEmailAndPassword(email, password)
 //     .then((userCredential) => {
-//         const user = userCredential.user;
-
-//         const db = firebase.firestore();
-
-//         db.collection("users").doc(user.uid).get()
-//         .then((doc) => {
-//             if (!doc.exists) {
-//                 // New user → send to role selection
-//                 window.location.href = "chooseRole.html";
-//             } else {
-//                 const role = doc.data().role;
-
-//                 if (role === "applicant") {
-//                     window.location.href = "applicantDashboard.html";
-//                 } else {
-//                     window.location.href = "recruiterDashboard.html";
-//                 }
-//             }
-//         })
-//         .catch((error) => {
-//             console.error("Firestore error:", error);
-//             alert("Failed to load user data");
-//         });
-
-//     })
-//     .catch((error) => {
+//         window.location.href = "../Applicant_homepage/index.html"; 
+//     }).catch((error) => {
 //         alert(error.message);
 //     });
 // }
+// for when we actually have a database and need to check if the user is new or not.
+function logInUser(email, password) {
+    auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        const user = userCredential.user;
+
+        const db = firebase.firestore();
+
+        db.collection("users").doc(user.uid).get()
+        .then((doc) => {
+            if (!doc.exists) {
+                // New user → send to role selection
+                window.location.href = "chooseRoles.html";
+            } else {
+                const role = doc.data().role;
+
+                if (role === "applicant") {
+                    window.location.href = "../Applicant_homepage/index.html";
+                } else {
+                    window.location.href = "../Recruiter_homepage/index.html";
+                }
+            }
+        })
+        .catch((error) => {
+            console.error("Firestore error:", error);
+            alert("Failed to load user data");
+        });
+
+    })
+    .catch((error) => {
+        alert(error.message);
+    });
+}
 
 
 function forgotPassword(email) {
