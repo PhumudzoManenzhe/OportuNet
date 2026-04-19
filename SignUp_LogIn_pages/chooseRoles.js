@@ -1,23 +1,25 @@
-// Initialize Firestore
-const db = firebase.firestore();
+import { auth, db } from "../FireStore_db/firebase.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 
 const applicantBtn = document.getElementById("applicantBtn");
 const recruiterBtn = document.getElementById("recruiterBtn");
 
 function setRole(role) {
-    const user = firebase.auth().currentUser;
+    const user = auth.currentUser;
 
     if (!user) {
         alert("User not logged in");
         return;
     }
 
-    db.collection("users").doc(user.uid).set({
+    const docRef = doc(db, "users", user.uid);
+
+    setDoc(docRef, {
         email: user.email,
         role: role
     })
     .then(() => {
-        // Redirect based on role
         if (role === "applicant") {
             window.location.href = "../Applicant_homepage/index.html";
         } else {
@@ -29,6 +31,5 @@ function setRole(role) {
         alert("Error saving role");
     });
 }
-
 applicantBtn.addEventListener("click", () => setRole("applicant"));
 recruiterBtn.addEventListener("click", () => setRole("recruiter"));

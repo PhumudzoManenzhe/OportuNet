@@ -1,35 +1,65 @@
 import { auth, db } from "../FireStore_db/firebase.js";
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDyIr2fg2uUtJPeHmvTJhePkt6DWti12Vw",
-  authDomain: "page-not-found-a7dcb.firebaseapp.com",
-  projectId: "page-not-found-a7dcb",
-  storageBucket: "page-not-found-a7dcb.firebasestorage.app",
-  messagingSenderId: "59141562173",
-  appId: "1:59141562173:web:a724b5c22145e2b974ef54"
-};
+import { 
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+//Firebase Configuration
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDyIr2fg2uUtJPeHmvTJhePkt6DWti12Vw",
+//   authDomain: "page-not-found-a7dcb.firebaseapp.com",
+//   projectId: "page-not-found-a7dcb",
+//   storageBucket: "page-not-found-a7dcb.firebasestorage.app",
+//   messagingSenderId: "59141562173",
+//   appId: "1:59141562173:web:a724b5c22145e2b974ef54"
+// };
 
 // Initialize Firebase (Compat version)
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+// firebase.initializeApp(firebaseConfig);
+// const auth = firebase.auth();
+const googleProvider = new GoogleAuthProvider();
 
 // GOOGLE LOGIN FUNCTION
 function googleLogin() {
-    auth.signInWithPopup(googleProvider)
+    signInWithPopup(auth, googleProvider)
     .then((result) => {
-        console.log("Google User:", result.user);
-        window.location.href = "../Applicant_homepage/index.html"; // Redirect to your homepage
-    }).catch((error) => {
+        const user = result.user;
+
+        const docRef = doc(db, "users", user.uid);
+
+        getDoc(docRef)
+        .then((docSnap) => {
+
+            // FIRST TIME GOOGLE SIGN-UP
+            if (!docSnap.exists()) {
+                window.location.href = "chooseRoles.html";
+            }
+
+            // EXISTING USER
+            else {
+                const role = docSnap.data().role;
+
+                if (role === "applicant") {
+                    window.location.href = "../Applicant_homepage/index.html";
+                } else {
+                    window.location.href = "../Recruiter_homepage/index.html";
+                }
+            }
+        });
+
+    })
+    .catch((error) => {
         alert("Google Error: " + error.message);
     });
 }
 
 // EMAIL SIGN UP FUNCTION
 function signUpUser(email, password) {
-    auth.createUserWithEmailAndPassword(email, password)
+    createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         alert("Account Created!");
         window.location.href = "logIn.html";
@@ -39,29 +69,20 @@ function signUpUser(email, password) {
 }
 
 //EMAIL LOG IN FUNCTION
-// function logInUser(email, password) {
-//     auth.signInWithEmailAndPassword(email, password)
-//     .then((userCredential) => {
-//         window.location.href = "../Applicant_homepage/index.html"; 
-//     }).catch((error) => {
-//         alert(error.message);
-//     });
-// }
 // for when we actually have a database and need to check if the user is new or not.
 function logInUser(email, password) {
-    auth.signInWithEmailAndPassword(email, password)
+    signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         const user = userCredential.user;
 
-        const db = firebase.firestore();
+        const docRef = doc(db, "users", user.uid);
 
-        db.collection("users").doc(user.uid).get()
-        .then((doc) => {
-            if (!doc.exists) {
-                // New user → send to role selection
+        getDoc(docRef)
+        .then((docSnap) => {
+            if (!docSnap.exists()) {
                 window.location.href = "chooseRoles.html";
             } else {
-                const role = doc.data().role;
+                const role = docSnap.data().role;
 
                 if (role === "applicant") {
                     window.location.href = "../Applicant_homepage/index.html";
@@ -81,6 +102,38 @@ function logInUser(email, password) {
     });
 }
 
+// function logInUser(email, password) {
+//     signInWithEmailAndPassword(auth ,email, password)
+//     .then((userCredential) => {
+//         const user = userCredential.user;
+
+//         //const db = firebase.firestore();
+
+//         db.collection("users").doc(user.uid).get()
+//         .then((doc) => {
+//             if (!doc.exists) {
+//                 // New user → send to role selection
+//                 window.location.href = "chooseRoles.html";
+//             } else {
+//                 const role = doc.data().role;
+
+//                 if (role === "applicant") {
+//                     window.location.href = "../Applicant_homepage/index.html";
+//                 } else {
+//                     window.location.href = "../Recruiter_homepage/index.html";
+//                 }
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Firestore error:", error);
+//             alert("Failed to load user data");
+//         });
+
+//     })
+//     .catch((error) => {
+//         alert(error.message);
+//     });
+// }
 
 function forgotPassword(email) {
     if (!email) {
@@ -88,7 +141,7 @@ function forgotPassword(email) {
         return;
     }
 
-    auth.sendPasswordResetEmail(email)
+    sendPasswordResetEmail(auth,email)
     .then(() => {
         alert("If an account exists, a reset email has been sent.");
     })
@@ -106,7 +159,6 @@ function forgotPassword(email) {
         }
     });
 }
-
 // Attach Event Listeners (Once the DOM is ready)
 document.addEventListener("DOMContentLoaded", () => {
     // Handle Sign Up Form
