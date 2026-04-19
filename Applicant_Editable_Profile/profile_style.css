@@ -125,6 +125,7 @@ img {
 
 .profile-card {
     position: relative;
+    z-index: 3;
     margin-top: -2.5rem;
     margin-inline: 0.65rem;
     padding: 0 1rem 1.15rem;
@@ -284,29 +285,10 @@ img {
     line-height: 1.08;
     font-weight: 700;
 }
-
-.profile-headline {
-    margin: 0.45rem 0 0;
-    font-size: 1rem;
-    line-height: 1.25;
-    font-weight: 600;
-}
-
-.profile-meta,
-.profile-location,
 .body-copy,
 .resume-meta {
     margin: 0.25rem 0 0;
     color: #46413c;
-}
-
-.profile-meta,
-.profile-location {
-    font-size: 0.98rem;
-}
-
-.profile-location {
-    color: var(--muted);
 }
 
 .action-pills,
@@ -354,6 +336,8 @@ img {
 }
 
 .screen-section {
+    position: relative;
+    z-index: 1;
     margin: 0.85rem 0.65rem 0;
     padding: 1.2rem 1rem;
     border: 1px solid var(--brand-line);
@@ -386,6 +370,10 @@ img {
 
 .body-copy {
     line-height: 1.55;
+}
+
+.about-copy {
+    white-space: pre-line;
 }
 
 .body-copy + .body-copy {

@@ -1,149 +1,41 @@
+import { auth, db } from "../FireStore_db/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const PROFILE_FIELD = "applicantProfile";
+
 const initialPageData = Object.freeze({
     profile: {
-        name: "Naledi Mokoena",
-        headline: "Frontend Developer and UX Research Enthusiast | Building accessible digital tools for students and small teams",
-        institution: "Northstar Digital Studio",
-        location: "Pretoria, Gauteng, South Africa",
+        name: "",
         photoUrl: ""
     },
     about: {
-        intro: "I am a frontend developer with a growing focus on UX research and interface design. I enjoy turning complex workflows into simple, welcoming experiences that people can use with confidence.",
-        passion: "Most of my work revolves around education, community tools, and accessible web interfaces. I like combining structure, visual polish, and practical problem solving."
+        intro: "",
+        passion: ""
     },
-    activity: {
-        title: "Recent posts are available",
-        copy: "Posts shared from this profile will appear here. Use Show all to view the full list."
+    personalDetails: {
+        phone: "",
+        email: "",
+        address: ""
     },
-    posts: [
-        {
-            id: "post-1",
-            content: "Spent the morning refining a student dashboard prototype. Small layout changes made the navigation feel much calmer and easier to scan.",
-            timestamp: "2026-04-10T09:15:00+02:00"
-        },
-        {
-            id: "post-2",
-            content: "I have been enjoying the balance between design research and frontend implementation lately. Seeing user notes turn into working UI is still my favorite part of the process.",
-            timestamp: "2026-04-07T16:40:00+02:00"
-        },
-        {
-            id: "post-3",
-            content: "Wrapped up a lightweight resource hub for peer mentors this week. Proud of how much clarity we got from keeping the interface simple.",
-            timestamp: "2026-04-04T13:05:00+02:00"
-        }
-    ],
-    experience: [
-        {
-            id: "experience-1",
-            logo: "F",
-            title: "Frontend Developer Intern",
-            company: "Northstar Digital Studio",
-            employmentType: "Contract",
-            dates: "Jan 2026 - Present",
-            duration: "4 mos",
-            locationType: "Hybrid",
-            description: "Builds responsive interfaces, translates wireframes into reusable UI, and supports usability improvements across client-facing products."
-        },
-        {
-            id: "experience-2",
-            logo: "U",
-            title: "UX Research Assistant",
-            company: "Campus Innovation Lab",
-            employmentType: "Part-time",
-            dates: "Aug 2025 - Dec 2025",
-            duration: "5 mos",
-            locationType: "On-site",
-            description: "Ran student interviews, summarized usability findings, and helped test early prototypes for academic support tools."
-        }
-    ],
-    education: [
-        {
-            id: "education-1",
-            logo: "U",
-            school: "University of Pretoria",
-            field: "BSc Information and Knowledge Systems",
-            dates: "2022 - 2025"
-        },
-        {
-            id: "education-2",
-            logo: "O",
-            school: "Open Design Academy",
-            field: "Short Course in Product Design",
-            dates: "2025"
-        }
-    ],
+    cv: {
+        fileName: "",
+        fileUrl: ""
+    },
+    experience: [],
+    education: [],
     qualifications: {
-        items: [
-            {
-                id: "qualification-1",
-                logo: "G",
-                title: "Google UX Design Certificate",
-                subtitle: "Coursera · Google",
-                dates: "2025",
-                description: "Completed training in user research, wireframing, prototyping, and usability testing."
-            },
-            {
-                id: "qualification-2",
-                logo: "R",
-                title: "Responsive Web Design Certification",
-                subtitle: "freeCodeCamp",
-                dates: "2024",
-                description: "Covered semantic HTML, modern CSS layouts, and accessibility-focused frontend practice."
-            }
-        ]
+        items: []
     },
     skills: {
-        softSkills: [
-            "Facilitation",
-            "Active listening",
-            "Collaboration",
-            "Presentation design"
-        ],
-        technicalSkills: [
-            "HTML & CSS",
-            "JavaScript",
-            "Figma",
-            "User research"
-        ]
+        softSkills: [],
+        technicalSkills: []
     },
     projects: {
-        items: [
-            {
-                id: "project-1",
-                logo: "S",
-                title: "StudyFlow Dashboard",
-                subtitle: "Lead designer and frontend builder",
-                dates: "2026",
-                description: "Designed and built a progress dashboard concept that helps students track deadlines, tasks, and weekly priorities."
-            },
-            {
-                id: "project-2",
-                logo: "M",
-                title: "MentorLink Resource Hub",
-                subtitle: "UX research and UI implementation",
-                dates: "2025",
-                description: "Created a simple internal portal for peer mentors to share guides, announcements, and support resources."
-            }
-        ]
+        items: []
     },
     achievements: {
-        items: [
-            {
-                id: "achievement-1",
-                logo: "T",
-                title: "Top 5 at Pretoria Design Jam",
-                subtitle: "Community innovation challenge",
-                dates: "2025",
-                description: "Recognized for a student-support prototype focused on first-year onboarding."
-            },
-            {
-                id: "achievement-2",
-                logo: "D",
-                title: "Dean's Merit Recognition",
-                subtitle: "University of Pretoria",
-                dates: "2024",
-                description: "Awarded for consistent academic performance and participation in collaborative tech initiatives."
-            }
-        ]
+        items: []
     }
 });
 
@@ -157,40 +49,55 @@ function cloneData(value) {
 
 const profileGateway = {
     async fetchPageData() {
-        // TODO: Connect to global database when shared profile data is available.
-        return cloneData(initialPageData);
+        const defaultPageData = cloneData(initialPageData);
+
+        try {
+            const user = await resolveCurrentUser();
+
+            if (!user) {
+                return defaultPageData;
+            }
+
+            const userSnapshot = await getDoc(doc(db, "users", user.uid));
+
+            if (!userSnapshot.exists()) {
+                return defaultPageData;
+            }
+
+            return mergeProfileData(defaultPageData, userSnapshot.data()?.[PROFILE_FIELD]);
+        } catch (error) {
+            console.error("Unable to load applicant profile data from Firebase.", error);
+            return defaultPageData;
+        }
     }
 };
 
 const state = {
-    activityExpanded: false,
     feedbackTimer: null,
     pageData: null
 };
 
 const elements = {
+    aboutSection: document.getElementById("about-section"),
     aboutIntro: document.getElementById("about-intro"),
     aboutPassion: document.getElementById("about-passion"),
     achievementsList: document.getElementById("achievements-list"),
     achievementsSection: document.getElementById("achievements-section"),
-    activityCount: document.getElementById("activity-count"),
-    activityEmptyCopy: document.getElementById("activity-empty-copy"),
-    activityEmptyTitle: document.getElementById("activity-empty-title"),
-    activityFooter: document.getElementById("activity-footer"),
-    activityPostsList: document.getElementById("activity-posts-list"),
-    activityPostTemplate: document.getElementById("activity-post-template"),
-    activityShowAllButton: document.getElementById("activity-show-all-button"),
     avatarFallback: document.getElementById("avatar-fallback"),
+    cvFileName: document.getElementById("cv-file-name"),
+    cvFileNote: document.getElementById("cv-file-note"),
+    cvSection: document.getElementById("cv-section"),
     educationList: document.getElementById("education-list"),
     educationSection: document.getElementById("education-section"),
     educationTemplate: document.getElementById("education-item-template"),
     experienceList: document.getElementById("experience-list"),
     experienceSection: document.getElementById("experience-section"),
     feedback: document.getElementById("page-feedback"),
+    personalAddress: document.getElementById("personal-address"),
+    personalDetailsSection: document.getElementById("personal-details-section"),
+    personalEmail: document.getElementById("personal-email"),
+    personalPhone: document.getElementById("personal-phone"),
     profileBackButton: document.getElementById("profile-back-button"),
-    profileHeadline: document.getElementById("profile-headline"),
-    profileInstitution: document.getElementById("profile-institution"),
-    profileLocation: document.getElementById("profile-location"),
     profileName: document.getElementById("profile-name"),
     profilePhoto: document.getElementById("profile-photo"),
     profileSearchForm: document.getElementById("profile-search-form"),
@@ -201,7 +108,8 @@ const elements = {
     resumeTemplate: document.getElementById("resume-item-template"),
     skillsList: document.getElementById("skills-list"),
     skillsSection: document.getElementById("skills-section"),
-    skillGroupTemplate: document.getElementById("skill-group-template")
+    skillGroupTemplate: document.getElementById("skill-group-template"),
+    viewCvLink: document.getElementById("view-cv-link")
 };
 
 document.addEventListener("DOMContentLoaded", initializePage);
@@ -221,10 +129,6 @@ async function initializePage() {
 function bindEvents() {
     if (elements.profileBackButton) {
         elements.profileBackButton.addEventListener("click", handleBackNavigation);
-    }
-
-    if (elements.activityShowAllButton) {
-        elements.activityShowAllButton.addEventListener("click", handleToggleActivityPosts);
     }
 
     if (elements.profileSearchForm) {
@@ -259,16 +163,14 @@ function renderPage() {
     renderSkills();
     renderSupplementalSection("projects", elements.projectsSection, elements.projectsList);
     renderSupplementalSection("achievements", elements.achievementsSection, elements.achievementsList);
-    renderActivity();
+    renderPersonalDetails();
+    renderCv();
 }
 
 function renderProfile() {
     const { profile } = state.pageData;
 
     elements.profileName.textContent = profile.name;
-    elements.profileHeadline.textContent = profile.headline;
-    elements.profileInstitution.textContent = profile.institution;
-    elements.profileLocation.textContent = profile.location;
 
     if (profile.photoUrl) {
         elements.profilePhoto.src = profile.photoUrl;
@@ -284,8 +186,11 @@ function renderProfile() {
 }
 
 function renderAbout() {
-    elements.aboutIntro.textContent = state.pageData.about.intro;
-    elements.aboutPassion.textContent = state.pageData.about.passion;
+    const aboutText = [state.pageData.about.intro, state.pageData.about.passion].filter(Boolean).join("\n\n");
+    elements.aboutSection.hidden = !aboutText;
+    elements.aboutIntro.textContent = aboutText;
+    elements.aboutIntro.hidden = !aboutText;
+    elements.aboutPassion.hidden = Boolean(aboutText);
 }
 
 function renderEducation() {
@@ -352,34 +257,33 @@ function renderSkills() {
     });
 }
 
-function renderActivity() {
-    const posts = Array.isArray(state.pageData.posts) ? state.pageData.posts : [];
+function renderPersonalDetails() {
+    const { phone, email, address } = state.pageData.personalDetails;
+    const hasDetails = Boolean(phone || email || address);
 
-    elements.activityCount.textContent = formatPostCount(posts.length);
+    elements.personalDetailsSection.hidden = !hasDetails;
+    setDetailText(elements.personalPhone, phone);
+    setDetailText(elements.personalEmail, email);
+    setDetailText(elements.personalAddress, address);
+}
 
-    if (posts.length === 0) {
-        elements.activityEmptyTitle.textContent = "No posts yet";
-        elements.activityEmptyCopy.textContent = "This profile has not shared any public posts yet.";
-        elements.activityFooter.hidden = true;
-        elements.activityPostsList.hidden = true;
-        elements.activityPostsList.replaceChildren();
-        state.activityExpanded = false;
+function renderCv() {
+    const { fileName, fileUrl } = state.pageData.cv;
+    const hasCv = Boolean(fileUrl);
+
+    elements.cvSection.hidden = !hasCv;
+    elements.viewCvLink.hidden = !hasCv;
+
+    if (!hasCv) {
+        elements.viewCvLink.removeAttribute("href");
+        elements.viewCvLink.removeAttribute("download");
         return;
     }
 
-    elements.activityEmptyTitle.textContent = state.pageData.activity.title;
-    elements.activityEmptyCopy.textContent = state.pageData.activity.copy;
-    elements.activityFooter.hidden = false;
-    elements.activityShowAllButton.textContent = state.activityExpanded ? "Show less ↑" : "Show all →";
-
-    if (!state.activityExpanded) {
-        elements.activityPostsList.hidden = true;
-        elements.activityPostsList.replaceChildren();
-        return;
-    }
-
-    renderPosts(posts);
-    elements.activityPostsList.hidden = false;
+    elements.cvFileName.textContent = fileName || "View uploaded CV";
+    elements.cvFileNote.textContent = "PDF uploaded and ready to view.";
+    elements.viewCvLink.href = fileUrl;
+    elements.viewCvLink.download = fileName || "";
 }
 
 function renderEducationItems(items, targetList) {
@@ -453,67 +357,16 @@ function renderSharedItems(items, targetList) {
     });
 }
 
-function renderPosts(posts) {
-    elements.activityPostsList.replaceChildren();
-
-    posts.forEach((post) => {
-        const fragment = elements.activityPostTemplate.content.cloneNode(true);
-        const listItem = fragment.querySelector("li");
-        const author = fragment.querySelector(".activity-post-author");
-        const timestamp = fragment.querySelector(".activity-post-time");
-        const content = fragment.querySelector(".activity-post-content");
-
-        listItem.dataset.postId = post.id;
-        author.textContent = state.pageData.profile.name;
-        timestamp.textContent = formatPostTimestamp(post.timestamp);
-        timestamp.dateTime = post.timestamp;
-        content.textContent = post.content;
-
-        elements.activityPostsList.append(fragment);
-    });
-}
-
-function handleToggleActivityPosts() {
-    if (!state.pageData || state.pageData.posts.length === 0) {
-        setFeedback("There are no posts available yet.");
-        return;
-    }
-
-    state.activityExpanded = !state.activityExpanded;
-    renderActivity();
-
-    if (state.activityExpanded) {
-        elements.activityPostsList.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-    }
-}
-
 function setOptionalText(element, value) {
     const hasValue = Boolean(value);
     element.textContent = hasValue ? value : "";
     element.hidden = !hasValue;
 }
 
-function formatPostCount(count) {
-    return `${count} ${count === 1 ? "post" : "posts"} available`;
-}
-
-function formatPostTimestamp(timestamp) {
-    const parsedDate = new Date(timestamp);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        return timestamp;
-    }
-
-    return new Intl.DateTimeFormat("en-ZA", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-    }).format(parsedDate);
+function setDetailText(element, value) {
+    const hasValue = Boolean(value);
+    element.textContent = hasValue ? value : "";
+    element.hidden = !hasValue;
 }
 
 function createLogoFromText(value) {
@@ -543,4 +396,54 @@ function setFeedback(message) {
         elements.feedback.hidden = true;
         elements.feedback.textContent = "";
     }, 3200);
+}
+
+async function resolveCurrentUser() {
+    if (auth.currentUser) {
+        return auth.currentUser;
+    }
+
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        }, (error) => {
+            unsubscribe();
+            reject(error);
+        });
+    });
+}
+
+function mergeProfileData(base, override) {
+    if (!override || typeof override !== "object" || Array.isArray(override)) {
+        return cloneData(base);
+    }
+
+    const merged = cloneData(base);
+    mergeInto(merged, override);
+    return merged;
+}
+
+function mergeInto(target, source) {
+    Object.entries(source).forEach(([key, value]) => {
+        if (!(key in target)) {
+            return;
+        }
+
+        if (Array.isArray(value)) {
+            target[key] = cloneData(value);
+            return;
+        }
+
+        if (isPlainObject(value) && isPlainObject(target[key])) {
+            mergeInto(target[key], value);
+            return;
+        }
+
+        target[key] = value;
+    });
+}
+
+function isPlainObject(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
