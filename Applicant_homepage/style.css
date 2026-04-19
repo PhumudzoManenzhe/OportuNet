@@ -1,7 +1,6 @@
 :root {
-    --bg: #edf2f8;
-    --bg-soft: #f8fbff;
-    --surface: rgba(255, 255, 255, 0.96);
+    --bg: #f3f2ef;
+    --surface: rgba(255, 255, 255, 0.94);
     --surface-strong: #ffffff;
     --text: #162033;
     --muted: #64748b;
@@ -9,8 +8,7 @@
     --brand: #2563eb;
     --brand-deep: #1d4ed8;
     --brand-soft: #dbeafe;
-    --gray-soft: #eef2f7;
-    --shadow-lg: 0 24px 60px rgba(37, 99, 235, 0.10);
+    --shadow-lg: 0 24px 60px rgba(37, 99, 235, 0.14);
     --shadow-md: 0 16px 36px rgba(15, 23, 42, 0.08);
     --radius-xl: 30px;
     --radius-lg: 22px;
@@ -18,18 +16,21 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-   min-height: 100vh;
-    background: radial-gradient(circle at top right, rgba(191, 219, 254, 0.9), transparent 28%),
-                linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
+    min-height: 100vh;
+    background: var(--bg);
     color: var(--text);
     font-family: "Manrope", sans-serif;
-    padding: 96px 0 118px;
+    padding: 96px 0 48px;
+}
+
+body::before {
+    content: none;
 }
 
 header.navbar {
@@ -38,47 +39,37 @@ header.navbar {
     left: 0;
     width: 100%;
     height: 78px;
-    padding: 0 5%; /* Using % keeps it consistent with your Welcome section */
+    padding: 0 28px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* This forces left and right to the edges */
-    background: rgba(255, 255, 255, 0.95);
+    justify-content: space-between;
+    gap: 18px;
+    background: rgba(255, 255, 255, 0.84);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(219, 227, 239, 0.9);
     z-index: 1000;
 }
 
-.nav-left {
+.nav-left,
+.nav-right {
     display: flex;
     align-items: center;
-    gap: 20px;
-    justify-content: flex-start;
-    flex: 1;
 }
 
-.profile-static {
+.nav-left {
+    gap: 14px;
+}
+
+.nav-right {
+    gap: 12px;
+}
+
+.profile-static,
+.sidebar-brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 6px 12px;
 }
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.profile-info .user-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--text);
-}
-
-.profile-info .profile-caption {
-    font-size: 11px;
-    color: var(--muted);
-}
-
 .avatar-sm {
     width: 40px;
     height: 40px;
@@ -87,103 +78,39 @@ header.navbar {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
+    color: #fff;
+    font-weight: 700;
     font-size: 14px;
 }
 
-.brand-mark {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, var(--brand), #60a5fa);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-end;
-    flex: 1;
-}
-
 .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.96);
     color: var(--brand-deep);
     border: 1px solid var(--line);
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
+
 .icon-btn:hover {
     background: var(--brand-soft);
+    transform: translateY(-1px);
 }
 
-.hamburger-menu {
-    position: relative;
-}
-
-.hamburger-btn {
-    background: none;
+.menu-btn {
     border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--brand-deep);
-    padding: 8px;
-    border-radius: 12px;
 }
 
-.hamburger-btn:hover {
-    background: var(--brand-soft);
-}
-
-.hamburger-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    min-width: 180px;
-    overflow: hidden;
-    display: none;
-    z-index: 1000;
-    border: 1px solid var(--line);
-    margin-top: 8px;
-}
-
-.hamburger-dropdown.show {
-    display: block;
-}
-
-.hamburger-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--text);
-    text-decoration: none;
-    transition: background 0.2s;
-}
-
-.hamburger-item:hover {
-    background: var(--brand-soft);
-}
-
-.hamburger-item i {
-    width: 20px;
-    color: var(--brand);
+.container {
+    width: min(1180px, calc(100% - 28px));
+    margin: 0 auto;
 }
 
 .welcome {
@@ -192,98 +119,133 @@ header.navbar {
     background: linear-gradient(to right, #2b3d8c, #2e64d9, #396ee0);
     color: white;
     margin-bottom: 22px;
-}
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin: 20px 0 16px;
-    flex-wrap: wrap;
-}
-
-.dashboard {
-  padding: 24px;
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-}
-
-.profile-static {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.avatar-sm {
-    width: 40px;
-    height: 40px;
-    background-color: #2b3d8c;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.profile-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.user-name {
-    font-weight: 700;
-    font-size: 14px;
-    color: #333;
-}
-
-.profile-caption {
-    font-size: 12px;
-    color: #777;
-}
-
-/* Brand and Actions (Right) */
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    box-shadow: var(--shadow-md);
 }
 
 
-.Welcome {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 60px 5%;
-  border-radius: 20px;
-  margin-bottom: 30px;
-  background: linear-gradient(to right, #2b3d8c, #2e64d9, #396ee0);
+.welcome h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 12px;
 }
 
 .overview {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 0 5% 40px 5%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.card-link {
+    text-decoration: none;
 }
 
 .card-btn {
-  display: block;
-  background: #f0f2f2;
-  padding: 24px;
-  border-radius: 12px;
-  text-align: left;
-  transition: 0.2s;
-  color: black;
-  text-decoration: none;
-  font-size: 24px;
-  font-weight: 500;
+    width: 100%;
+    border: 1px solid transparent;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: left;
+    color: #000;
+    font-size: 24px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-btn:hover {
-  border: 2px solid #4276e8;
-  transform: translateY(-3px);
+    border-color: #4276e8;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(66, 118, 232, 0.12);
+}
+
+.app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(300px, 82vw);
+    height: 100vh;
+    padding: 24px 18px;
+    background: rgba(16, 27, 59, 0.98);
+    color: white;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 1200;
+    box-shadow: var(--shadow-lg);
+}
+
+.app-sidebar.is-open {
+    transform: translateX(0);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.sidebar-close {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(219, 227, 239, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-link {
+    color: white;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: rgba(96, 165, 250, 0.2);
+    transform: translateX(4px);
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.36);
+    z-index: 1100;
+}
+
+body.sidebar-open {
+    overflow: hidden;
+}
+
+@media (max-width: 720px) {
+    header.navbar {
+        padding: 0 16px;
+    }
+
+    .container {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .profile-static .profile-info {
+        display: none;
+    }
+
+    .welcome {
+        padding: 24px 20px;
+    }
+
+    .card-btn {
+        font-size: 20px;
+        padding: 20px;
+    }
 }

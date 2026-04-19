@@ -633,24 +633,62 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const opportunitiesBtn = document.getElementById("opportunitiesBtn");
     const applicationsBtn = document.getElementById("applicationsBtn");
-    const topNotificationBtn = document.getElementById("topNotificationBtn");
     const settingsOnlyBtn = document.getElementById("settingsOnlyBtn");
     const settingsNavBtn = document.getElementById("settingsNavBtn");
     const hamburgerBtn = document.getElementById("hamburgerBtn");
-    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    const sidebar = document.getElementById("appSidebar");
+    const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+    const sidebarBackdrop = document.getElementById("sidebarBackdrop");
     
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
     if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
-    if (topNotificationBtn) topNotificationBtn.addEventListener("click", () => alert("🔔 Notifications - Full functionality coming in Sprint 2"));
     if (settingsOnlyBtn) settingsOnlyBtn.addEventListener("click", (e) => { e.preventDefault(); alert("⚙️ Settings - Coming in Sprint 2"); });
     if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("⚙️ Settings - Coming in Sprint 2"));
-    
-    if (hamburgerBtn && hamburgerMenu) {
-        hamburgerBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            hamburgerMenu.classList.toggle("show");
+
+    function setSidebarState(isOpen) {
+        if (!sidebar || !sidebarBackdrop) return;
+        sidebar.classList.toggle("is-open", isOpen);
+        sidebar.setAttribute("aria-hidden", String(!isOpen));
+        sidebarBackdrop.hidden = !isOpen;
+        document.body.classList.toggle("sidebar-open", isOpen);
+    }
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener("click", () => setSidebarState(true));
+    }
+
+    if (sidebarCloseBtn) {
+        sidebarCloseBtn.addEventListener("click", () => setSidebarState(false));
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener("click", () => setSidebarState(false));
+    }
+
+    document.querySelectorAll(".sidebar-link[href^='#']").forEach((link) => {
+        link.addEventListener("click", (event) => {
+            const target = event.currentTarget.getAttribute("href");
+            if (target === "#applicationsSection") {
+                event.preventDefault();
+                switchTab("applications");
+            } else if (target === "#opportunitiesSection") {
+                event.preventDefault();
+                switchTab("opportunities");
+            }
+            setSidebarState(false);
         });
-        document.addEventListener("click", () => hamburgerMenu.classList.remove("show"));
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            setSidebarState(false);
+        }
+    });
+
+    if (window.location.hash === "#applicationsSection") {
+        switchTab("applications");
+    } else if (window.location.hash === "#notificationsSection") {
+        switchTab("notifications");
     }
     
     const searchInput = document.getElementById("searchInput");
@@ -708,5 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderApplications();
     });
     
-    switchTab("opportunities");
+    if (!window.location.hash) {
+        switchTab("opportunities");
+    }
 });

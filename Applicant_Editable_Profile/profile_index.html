@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A mobile-first LinkedIn-style profile page with editable profile sections and future-ready backend placeholders.">
     <title>LinkedIn-Style Profile</title>
+    <link rel="stylesheet" href="../shared/app-shell.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="profile_style.css">
+    <script src="../shared/app-shell.js" defer></script>
     <script src="profile_script.js" defer></script>
 </head>
-<body>
+<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
     <header class="app-header">
         <nav class="toolbar" aria-label="Profile navigation">
             <button type="button" class="toolbar-button" data-feedback="Back navigation will be connected when this page is attached to the wider app.">

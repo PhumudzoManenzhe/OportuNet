@@ -11,30 +11,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body data-theme="light">
+    <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+            </div>
+            <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close sidebar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Recruiter navigation">
+            <a href="index.html" class="sidebar-link active">Home</a>
+            <a href="#opportunitiesSection" class="sidebar-link">My Posts</a>
+            <a href="#applicationsSection" class="sidebar-link">Applications</a>
+            <a href="../Applicant_profile_page/global_profile.html" class="sidebar-link">Profile</a>
+            <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link">Notifications</a>
+        </nav>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 
     <!-- ========== HEADER / TOP NAVIGATION ========== -->
     <header class="navbar">
-        <!-- Profile on Top Left (Static - No Dropdown) -->
         <div class="nav-left">
+            <button class="icon-btn menu-btn" id="hamburgerBtn" type="button" aria-label="Open sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="profile-static">
-                <div class="avatar-sm">PC</div>
-                <div class="profile-info">
-                    <span class="user-name">Provider Co.</span>
-                </div>
             </div>  
         </div>
 
         <div class="nav-right">
-            <!-- Notification Bell -->
-            <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
+            <a class="icon-btn nav-link-icon" href="../Applicant_profile_page/global_profile.html" aria-label="Go to profile page">
+                <i class="fa-regular fa-user"></i>
+            </a>
+            <a class="icon-btn nav-link-icon" id="topNotificationBtn" href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" aria-label="Go to notifications page">
                 <i class="fa-regular fa-bell"></i>
-            </button>
-            <div class="hamburger-menu">
-                
-                <button class="hamburger-btn" id="hamburgerBtn" type="button">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
+            </a>
         </div>
         
     </header>
@@ -184,6 +196,6 @@
         </div>
     </dialog>
 
-    <script src="recruiter_homepage.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
