@@ -14,7 +14,6 @@
 
     <!-- ========== HEADER / TOP NAVIGATION ========== -->
     <header class="navbar">
-        <!-- Profile on Top Left (Static - No Dropdown) -->
         <div class="nav-left">
             <div class="profile-static">
                 <div class="avatar-sm">PC</div>
@@ -25,7 +24,6 @@
             </div>
         </div>
 
-        <!-- Center - Logo/Brand -->
         <div class="nav-center">
             <div class="brand-mark">SA</div>
             <div class="brand-text">
@@ -34,14 +32,10 @@
             </div>
         </div>
 
-        <!-- Top Right: Notification Bell + Three Lines (Hamburger Menu) -->
         <div class="nav-right">
-            <!-- Notification Bell -->
             <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
                 <i class="fa-regular fa-bell"></i>
             </button>
-
-            <!-- Three Lines (Hamburger Menu) -->
             <div class="hamburger-menu">
                 <button class="hamburger-btn" id="hamburgerBtn" type="button">
                     <i class="fa-solid fa-bars"></i>
@@ -55,14 +49,12 @@
 
     <!-- ========== MAIN CONTENT ========== -->
     <main class="container">
-        <!-- Welcome Section -->
         <section class="welcome">
             <span class="eyebrow">Recruiter Workspace</span>
-            <h1>Welcome back, Provider Co.</h1>
+            <h1>Welcome back, <span id="recruiterName">Provider Co.</span></h1>
             <p>Track your opportunities, review applications, and find the next great candidate.</p>
         </section>
 
-        <!-- Opportunities Section -->
         <section id="opportunitiesSection" aria-labelledby="opportunitiesHeading">
             <header class="section-header">
                 <h2 id="opportunitiesHeading">My Posts</h2>
@@ -77,7 +69,6 @@
                 </div>
             </header>
 
-            <!-- Bulk Delete Sidebar -->
             <aside id="bulkDeleteBar" class="bulk-delete-bar" style="display: none;">
                 <span><strong id="selectedCount">0</strong> jobs selected</span>
                 <div class="bulk-actions">
@@ -86,10 +77,8 @@
                 </div>
             </aside>
 
-            <!-- Job Listings -->
             <section id="opportunitiesList" class="opportunities-grid"></section>
 
-            <!-- Pagination Navigation -->
             <nav id="paginationControls" class="pagination-controls">
                 <button id="prevPageBtn" class="pagination-btn" disabled>◀ Previous</button>
                 <span id="pageInfo">Page 1 of 1</span>
@@ -97,7 +86,6 @@
             </nav>
         </section>
 
-        <!-- Applications Section (hidden by default) -->
         <section id="applicationsSection" style="display: none;">
             <header class="section-header">
                 <h2 id="applicationsHeading">All Applications</h2>
@@ -110,7 +98,6 @@
             <div id="applicationsList" class="applications-table"></div>
         </section>
 
-        <!-- Notifications Section (hidden by default) -->
         <section id="notificationsSection" style="display: none;">
             <header class="section-header">
                 <h2 id="notificationsHeading">Notifications</h2>
@@ -120,8 +107,7 @@
         </section>
     </main>
 
-    <!-- ========== MODAL DIALOGS ========== -->
-    <!-- Post Job Modal -->
+    <!-- ========== MODALS ========== -->
     <dialog id="postJobModal" class="modal">
         <div class="modal-content">
             <header class="modal-header">
@@ -182,7 +168,6 @@
         </div>
     </dialog>
 
-    <!-- Confirm Delete Modal -->
     <dialog id="confirmModal" class="modal confirm-modal">
         <div class="modal-content confirm-content">
             <header class="modal-header">
@@ -198,12 +183,10 @@
         </div>
     </dialog>
 
-    <!-- ========== FOOTER ========== -->
     <footer class="page-footer">
         <p>&copy; 2026 SA Skills Portal | Connecting South African talent with opportunities</p>
     </footer>
 
-    <!-- ========== BOTTOM NAVIGATION ========== -->
     <nav class="bottom-nav">
         <button class="nav-item active" id="opportunitiesBtn" type="button">
             <i class="fa-solid fa-house"></i>
@@ -215,6 +198,15 @@
         </button>
     </nav>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <!-- Team's shared Firebase config -->
+    <script src="Firestore_db/firebase-config.js"></script>
+    
+    <!-- Recruiter code -->
     <script src="recruiter_homepage.js"></script>
 </body>
 </html>
