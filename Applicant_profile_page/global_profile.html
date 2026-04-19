@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../shared/app-shell.css">
     <link rel="stylesheet" href="global_profile.css">
     <script src="../shared/app-shell.js" defer></script>
-    <script src="global_profile.js" defer></script>
+    <script type="module" src="global_profile.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
     <header class="app-header">
@@ -34,20 +34,15 @@
                 </figure>
 
                 <h1 id="profile-name"></h1>
-                <p id="profile-headline" class="profile-headline"></p>
-                <p class="profile-meta">
-                    <span id="profile-institution"></span>
-                </p>
-                <p id="profile-location" class="profile-location"></p>
             </header>
         </article>
 
-        <section class="screen-section" aria-labelledby="about-heading">
+        <section id="about-section" class="screen-section" aria-labelledby="about-heading">
             <header class="section-heading">
                 <h2 id="about-heading">About</h2>
             </header>
-            <p id="about-intro" class="body-copy"></p>
-            <p id="about-passion" class="body-copy"></p>
+            <p id="about-intro" class="body-copy about-copy"></p>
+            <p id="about-passion" class="body-copy detail-empty" hidden>Tell people about yourself, your background, and the kind of opportunities you are looking for.</p>
         </section>
 
         <section id="education-section" class="screen-section" aria-labelledby="education-heading">
@@ -92,37 +87,42 @@
             <ol id="achievements-list" class="resume-list"></ol>
         </section>
 
-        <section class="screen-section" aria-labelledby="activity-heading">
-            <header class="section-heading section-heading-activity">
-                <section>
-                    <h2 id="activity-heading">Activity</h2>
-                    <p id="activity-count" class="section-count"></p>
-                </section>
+        <section id="personal-details-section" class="screen-section" aria-labelledby="personal-details-heading" hidden>
+            <header class="section-heading">
+                <h2 id="personal-details-heading">Personal details</h2>
             </header>
-            <p id="activity-empty-title" class="activity-title"></p>
-            <p id="activity-empty-copy" class="body-copy"></p>
-            <footer id="activity-footer" class="section-footer">
-                <button type="button" id="activity-show-all-button" class="show-all-button">Show all &rarr;</button>
-            </footer>
-            <ol id="activity-posts-list" class="activity-posts-list" hidden></ol>
+            <dl class="detail-list">
+                <div class="detail-item">
+                    <dt>Phone number</dt>
+                    <dd id="personal-phone"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Email address</dt>
+                    <dd id="personal-email"></dd>
+                </div>
+                <div class="detail-item detail-item-wide">
+                    <dt>Home address</dt>
+                    <dd id="personal-address" class="detail-address"></dd>
+                </div>
+            </dl>
         </section>
+
+        <section id="cv-section" class="screen-section" aria-labelledby="cv-heading" hidden>
+            <header class="section-heading">
+                <h2 id="cv-heading">CV</h2>
+            </header>
+            <article class="document-card">
+                <p id="cv-file-name" class="document-title"></p>
+                <p id="cv-file-note" class="body-copy document-note"></p>
+                <div class="document-actions">
+                    <a id="view-cv-link" class="pill pill-primary" href="#" target="_blank" rel="noopener noreferrer" hidden>View CV</a>
+                </div>
+            </article>
+        </section>
+
     </main>
 
     <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
-
-    <template id="activity-post-template">
-        <li>
-            <article class="activity-post-card">
-                <header class="activity-post-header">
-                    <section class="activity-post-meta">
-                        <h3 class="activity-post-author"></h3>
-                        <time class="activity-post-time"></time>
-                    </section>
-                </header>
-                <p class="activity-post-content"></p>
-            </article>
-        </li>
-    </template>
 
     <template id="resume-item-template">
         <li>

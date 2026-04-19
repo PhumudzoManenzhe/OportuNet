@@ -1,34 +1,28 @@
 const initialPageData = Object.freeze({
     profile: {
-        name: "Naledi Mokoena",
+        name: "",
         addSectionButton: "Add section",
         photoUrl: ""
     },
     about: {
-        intro: "I am a frontend developer with a growing focus on UX research and interface design. I enjoy turning complex workflows into simple, welcoming experiences that people can use with confidence.",
-        passion: "Most of my work revolves around education, community tools, and accessible web interfaces. I like combining structure, visual polish, and practical problem solving."
+        intro: "",
+        passion: ""
     },
-    education: [
-        { id: "education-1", logo: "U", school: "University of Pretoria", field: "BSc Information and Knowledge Systems", dates: "2022 - 2025" },
-        { id: "education-2", logo: "O", school: "Open Design Academy", field: "Short Course in Product Design", dates: "2025" }
-    ],
+    education: [],
     qualifications: {
-        intro: "Highlight certifications and focused learning that strengthen your design and frontend practice.",
+        intro: "",
         buttonLabel: "Add qualifications",
-        items: [
-            { id: "qualification-1", logo: "G", title: "Google UX Design Certificate", subtitle: "Coursera - Google", dates: "2025", description: "Completed training in user research, wireframing, prototyping, and usability testing." },
-            { id: "qualification-2", logo: "R", title: "Responsive Web Design Certification", subtitle: "freeCodeCamp", dates: "2024", description: "Covered semantic HTML, modern CSS layouts, and accessibility-focused frontend practice." }
-        ]
+        items: []
     },
     skills: {
-        intro: "Add the soft and technical skills that reflect how you work and what you build.",
-        softSkills: ["Facilitation", "Active listening", "Collaboration", "Presentation design"],
-        technicalSkills: ["HTML & CSS", "JavaScript", "Figma", "User research"]
+        intro: "",
+        softSkills: [],
+        technicalSkills: []
     },
     personalDetails: {
-        phone: "+27 72 555 0184",
-        email: "naledi.mokoena@example.com",
-        address: "458 Park Street\nArcadia, Pretoria\nGauteng, South Africa"
+        phone: "",
+        email: "",
+        address: ""
     },
     cv: {
         fileName: "",
@@ -46,7 +40,6 @@ const SECTION_LABELS = Object.freeze({
 });
 
 const EDUCATION_EMPTY_STATE = Object.freeze({
-    intro: "Add your school, study field, and dates so people can quickly understand your academic background.",
     buttonLabel: "Add education"
 });
 
@@ -177,7 +170,6 @@ const elements = {
     ]),
     formFields: ids([
         ["aboutIntro", "about-intro-input"],
-        ["aboutPassion", "about-passion-input"],
         ["address", "address-input"],
         ["educationDates", "education-dates-input"],
         ["educationField", "education-field-input"],
@@ -195,7 +187,6 @@ const elements = {
 const editorTargetMap = Object.freeze({
     "profile-name-input": "profile",
     "about-intro-input": "about",
-    "about-passion-input": "about",
     "education-school-input": "education",
     "education-field-input": "education",
     "education-dates-input": "education",
@@ -254,9 +245,16 @@ const saveHandlers = {
         });
     },
     about(pageData) {
+        const aboutText = readValue(elements.formFields.aboutIntro);
+        if (countWords(aboutText) > 500) {
+            setFeedback("Your About section can be up to 500 words.");
+            elements.formFields.aboutIntro.focus();
+            return false;
+        }
+
         Object.assign(pageData.about, {
-            intro: readValue(elements.formFields.aboutIntro),
-            passion: readValue(elements.formFields.aboutPassion)
+            intro: aboutText,
+            passion: ""
         });
     },
     education(pageData) {
@@ -349,9 +347,9 @@ if (HAS_WINDOW) {
 }
 
 if (HAS_DOM) {
-    document.readyState === "loading"
-        ? document.addEventListener("DOMContentLoaded", initializePage, { once: true })
-        : initializePage();
+    // Wait until the full page load so the Firebase bridge has time to
+    // replace the default gateway before the first profile fetch happens.
+    window.addEventListener("load", initializePage, { once: true });
 }
 
 async function initializePage() {
@@ -466,10 +464,10 @@ function renderAvatar(profile) {
 }
 
 function renderAbout(about) {
-    setText(elements.aboutIntro, about.intro);
-    setText(elements.aboutPassion, about.passion);
-    elements.aboutIntro.hidden = !about.intro;
-    elements.aboutPassion.hidden = !about.passion;
+    const aboutText = [about.intro, about.passion].filter(Boolean).join("\n\n");
+    setText(elements.aboutIntro, aboutText);
+    elements.aboutIntro.hidden = !aboutText;
+    elements.aboutPassion.hidden = Boolean(aboutText);
 }
 
 function renderPersonalDetails(personalDetails) {
@@ -577,8 +575,7 @@ function syncEditorForm() {
         phone: state.pageData.personalDetails.phone,
         email: state.pageData.personalDetails.email,
         address: state.pageData.personalDetails.address,
-        aboutIntro: state.pageData.about.intro,
-        aboutPassion: state.pageData.about.passion,
+        aboutIntro: [state.pageData.about.intro, state.pageData.about.passion].filter(Boolean).join("\n\n"),
         educationSchool: education.school || "",
         educationField: education.field || "",
         educationDates: education.dates || "",
@@ -793,6 +790,10 @@ function parseSkillText(value) {
     return value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
 }
 
+function countWords(value) {
+    return value.trim() ? value.trim().split(/\s+/).length : 0;
+}
+
 function mergeUniqueItems(existingItems, newItems) {
     const seen = new Set();
     return [...existingItems, ...newItems].filter((item) => {
@@ -835,7 +836,7 @@ function closeAvatarMenu() {
 
 function handleViewProfile() {
     closeAvatarMenu();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.location.href = "../Applicant_profile_page/global_profile.html";
 }
 
 function triggerPhotoPicker() {

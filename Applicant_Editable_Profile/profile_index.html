@@ -85,8 +85,8 @@
                     </ul>
                 </details>
             </header>
-            <p id="about-intro" class="body-copy"></p>
-            <p id="about-passion" class="body-copy"></p>
+            <p id="about-intro" class="body-copy about-copy"></p>
+            <p id="about-passion" class="body-copy detail-empty" hidden>Tell people about yourself, your background, and the kind of opportunities you are looking for.</p>
         </section>
 
         <section id="education-section" class="screen-section screen-section-muted" aria-label="Education">
@@ -333,11 +333,8 @@
 
             <fieldset class="editor-group" data-editor-section="about">
                 <legend>About</legend>
-                <label class="form-field" for="about-intro-input">About paragraph 1
-                    <textarea id="about-intro-input" name="aboutIntro" rows="4" maxlength="320" required></textarea>
-                </label>
-                <label class="form-field" for="about-passion-input">About paragraph 2
-                    <textarea id="about-passion-input" name="aboutPassion" rows="3" maxlength="220" required></textarea>
+                <label class="form-field" for="about-intro-input">About
+                    <textarea id="about-intro-input" name="aboutIntro" rows="8" placeholder="Write about yourself in up to 500 words." required></textarea>
                 </label>
             </fieldset>
 

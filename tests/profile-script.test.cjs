@@ -96,7 +96,6 @@ function createFakeDocument() {
         "about-intro",
         "about-intro-input",
         "about-passion",
-        "about-passion-input",
         "add-education-dates-input",
         "add-education-field-input",
         "add-education-school-input",
@@ -386,8 +385,8 @@ describe("Applicant editable profile helpers", () => {
         fetched.qualifications.items[0].title = "Updated";
 
         const freshFetch = await app.profileGateway.fetchPageData();
-        expect(freshFetch.profile.name).toBe("Naledi Mokoena");
-        expect(freshFetch.qualifications.items[0].title).toBe("Google UX Design Certificate");
+        expect(freshFetch.profile.name).toBe("");
+        expect(freshFetch.qualifications.items).toEqual([]);
 
         const saved = await app.profileGateway.savePageData(fetched);
         saved.profile.name = "Saved copy only";

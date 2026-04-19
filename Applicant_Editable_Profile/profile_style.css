@@ -125,6 +125,7 @@ img {
 
 .profile-card {
     position: relative;
+    z-index: 3;
     margin-top: -2.5rem;
     margin-inline: 0.65rem;
     padding: 0 1rem 1.15rem;
@@ -335,6 +336,8 @@ img {
 }
 
 .screen-section {
+    position: relative;
+    z-index: 1;
     margin: 0.85rem 0.65rem 0;
     padding: 1.2rem 1rem;
     border: 1px solid var(--brand-line);
@@ -367,6 +370,10 @@ img {
 
 .body-copy {
     line-height: 1.55;
+}
+
+.about-copy {
+    white-space: pre-line;
 }
 
 .body-copy + .body-copy {

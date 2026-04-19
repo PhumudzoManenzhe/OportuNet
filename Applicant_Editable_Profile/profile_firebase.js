@@ -14,19 +14,25 @@ const fallbackFetchPageData = profileApp.profileGateway.fetchPageData.bind(profi
 
 profileApp.profileGateway.fetchPageData = async function fetchPageData() {
     const defaultPageData = await fallbackFetchPageData();
-    const user = await resolveCurrentUser();
 
-    if (!user) {
+    try {
+        const user = await resolveCurrentUser();
+
+        if (!user) {
+            return defaultPageData;
+        }
+
+        const userSnapshot = await getDoc(doc(db, "users", user.uid));
+
+        if (!userSnapshot.exists()) {
+            return defaultPageData;
+        }
+
+        return mergeProfileData(defaultPageData, userSnapshot.data()?.[PROFILE_FIELD]);
+    } catch (error) {
+        console.error("Unable to load applicant profile data from Firebase.", error);
         return defaultPageData;
     }
-
-    const userSnapshot = await getDoc(doc(db, "users", user.uid));
-
-    if (!userSnapshot.exists()) {
-        return defaultPageData;
-    }
-
-    return mergeProfileData(defaultPageData, userSnapshot.data()?.[PROFILE_FIELD]);
 };
 
 profileApp.profileGateway.savePageData = async function savePageData(pageData) {
