@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="Apprenticeships_page.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="../shared/app-shell.js" defer></script>
-  <script src="../shared/opportunity-actions.js" defer></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="apprenticeships" data-shell-base="..">
   <main class="page-content">
@@ -35,104 +35,8 @@
         <p>Browse currently available positions</p>
       </header>
 
-      <section class="Apprenticeships-list" aria-label="Apprenticeships results">
-
-        <article class="Apprenticeships-card">
-          <header class="card-header">
-            <h4>Software Developer Apprenticeships</h4>
-            <p>TechSA Solutions</p>
-          </header>
-
-          <section class="card-details">
-            <p><strong>Location:</strong> Johannesburg</p>
-            <p><strong>Duration:</strong> 12 Months</p>
-            <p><strong>Stipend:</strong> R6 500</p>
-          </section>
-
-          <section class="card-description">
-            <p>
-              Work with a development team to build and maintain modern web applications.
-            </p>
-          </section>
-
-          <footer class="card-footer">
-            <button type="button" class="details-btn" data-role="details">View More Details</button>
-            <button type="button" class="apply-btn" data-role="apply">Apply</button>
-          </footer>
-        </article>
-
-        <article class="Apprenticeships-card">
-          <header class="card-header">
-            <h4>Data Analyst Apprenticeships</h4>
-            <p>Insight Analytics</p>
-          </header>
-
-          <section class="card-details">
-            <p><strong>Location:</strong> Cape Town</p>
-            <p><strong>Duration:</strong> 6 Months</p>
-            <p><strong>Stipend:</strong> R7 000</p>
-          </section>
-
-          <section class="card-description">
-            <p>
-              Support the analytics team by cleaning data, building dashboards, and preparing reports.
-            </p>
-          </section>
-
-          <footer class="card-footer">
-            <button type="button" class="details-btn" data-role="details">View More Details</button>
-            <button type="button" class="apply-btn" data-role="apply">Apply</button>
-          </footer>
-        </article>
-
-        <article class="Apprenticeships-card">
-          <header class="card-header">
-            <h4>IT Support Apprenticeships</h4>
-            <p>Digital Futures</p>
-          </header>
-
-          <section class="card-details">
-            <p><strong>Location:</strong> Durban</p>
-            <p><strong>Duration:</strong> 12 Months</p>
-            <p><strong>Stipend:</strong> R5 500</p>
-          </section>
-
-          <section class="card-description">
-            <p>
-              Assist users with technical issues, hardware setup, and software troubleshooting.
-            </p>
-          </section>
-
-          <footer class="card-footer">
-            <button type="button" class="details-btn" data-role="details">View More Details</button>
-            <button type="button" class="apply-btn" data-role="apply">Apply</button>
-          </footer>
-        </article>
-
-        <article class="Apprenticeships-card">
-          <header class="card-header">
-            <h4>UI/UX Design Apprenticeships</h4>
-            <p>Creative Labs</p>
-          </header>
-
-          <section class="card-details">
-            <p><strong>Location:</strong> Pretoria</p>
-            <p><strong>Duration:</strong> 8 Months</p>
-            <p><strong>Stipend:</strong> R6 000</p>
-          </section>
-
-          <section class="card-description">
-            <p>
-              Help design user-friendly interfaces, wireframes, and prototypes for digital platforms.
-            </p>
-          </section>
-
-          <footer class="card-footer">
-            <button type="button" class="details-btn" data-role="details">View More Details</button>
-            <button type="button" class="apply-btn" data-role="apply">Apply</button>
-          </footer>
-        </article>
-
+      <section class="Apprenticeships-list" id="apprenticeships-list" aria-label="Apprenticeships results">
+        <p class="status-message">Loading apprenticeships...</p>
       </section>
     </section>
   </main>

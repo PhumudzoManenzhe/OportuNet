@@ -145,6 +145,15 @@ body {
   background-color: #f9fafb;
 }
 
+.status-message {
+  padding: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background-color: #f9fafb;
+  color: #6b7280;
+  text-align: center;
+}
+
 .card-header p {
   margin-top: 4px;
   color: #6b7280;

@@ -20,8 +20,8 @@
                     <span class="brand-node"></span>
                 </div>
                 <div class="profile-info">
-                    <span class="user-name">OpportuNet</span>
-                    <span class="profile-caption">Recruiter portal</span>
+                    <span class="user-name">Recruiter</span>
+                    <span class="profile-caption">Recruiter</span>
                 </div>
             </div>
             <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close sidebar">
@@ -61,7 +61,7 @@
     <main class="container">
         <!-- Welcome Section -->
         <section class="welcome">
-            <h1>Welcome back.</h1>
+            <h1>Welcome back, Recruiter</h1>
             <p>Track your opportunities, review applications, and find the next great candidate.</p>
         </section>
 
@@ -168,11 +168,10 @@
                     <label for="jobStatus">Status</label>
                     <select id="jobStatus">
                         <option value="active">Active</option>
-                        <option value="draft">Draft (Save for later)</option>
+                        <option value="closed">Closed</option>
                     </select>
                 </div>
                 <footer class="form-buttons">
-                    <button type="button" class="btn-secondary" id="saveDraftBtn">💾 Save as Draft</button>
                     <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
                     <button type="submit" class="btn-primary" id="submitJobBtn">Post Opportunity</button>
                 </footer>
@@ -196,6 +195,6 @@
         </div>
     </dialog>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
