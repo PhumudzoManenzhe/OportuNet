@@ -1,0 +1,5 @@
+{
+  "routes": [
+    { "src": "/", "dest": "/SignUp_LogIn_pages/index.html" }
+  ]
+}
