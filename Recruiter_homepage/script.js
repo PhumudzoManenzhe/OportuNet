@@ -635,6 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("appSidebar");
     const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
     const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+    const logoutBtn = document.getElementById("sidebarLogoutBtn");
     
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
     if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
@@ -659,6 +660,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (sidebarBackdrop) {
         sidebarBackdrop.addEventListener("click", () => setSidebarState(false));
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            const isConfirmed = window.confirm("Are you sure you want to log out?");
+            if (!isConfirmed) return;
+
+            localStorage.removeItem("recruiter_jobs");
+            localStorage.removeItem("recruiter_applications");
+            sessionStorage.clear();
+            window.location.href = "../SignUp_LogIn_pages/logIn.html";
+        });
     }
 
     document.querySelectorAll(".sidebar-link[href^='#']").forEach((link) => {

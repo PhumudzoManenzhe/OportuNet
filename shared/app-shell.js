@@ -8,6 +8,18 @@
 
     if (!role) return;
 
+    const loginHref = `${base}/SignUp_LogIn_pages/logIn.html`;
+
+    function logOutUser() {
+        const isConfirmed = window.confirm("Are you sure you want to log out?");
+        if (!isConfirmed) return;
+
+        localStorage.removeItem("recruiter_jobs");
+        localStorage.removeItem("recruiter_applications");
+        sessionStorage.clear();
+        window.location.href = loginHref;
+    }
+
     const shellConfig = {
         applicant: {
             caption: "Applicant",
@@ -25,12 +37,11 @@
         recruiter: {
             caption: "Recruiter",
             profileHref: `${base}/Applicant_profile_page/global_profile.html`,
-            notificationHref: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html`,
+            notificationHref: `${base}/RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html`,
             links: [
                 { key: "home", label: "Home", href: `${base}/Recruiter_homepage/index.html` },
                 { key: "posts", label: "My Posts", href: `${base}/Recruiter_homepage/index.html#opportunitiesSection` },
-                { key: "profile", label: "Profile", href: `${base}/Applicant_profile_page/global_profile.html` },
-                { key: "notifications", label: "Notifications", href: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html` }
+                { key: "notifications", label: "Notifications", href: `${base}/RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html` }
             ]
         }
     };
@@ -47,9 +58,11 @@
             </button>
         </div>
         <div class="app-shell-nav-right">
+            ${role === "applicant" ? `
             <a class="app-shell-icon-btn" href="${config.profileHref}" aria-label="Go to profile page">
                 <i class="fa-regular fa-user"></i>
             </a>
+            ` : ""}
             <a class="app-shell-icon-btn" href="${config.notificationHref}" aria-label="Go to notifications page">
                 <i class="fa-regular fa-bell"></i>
             </a>
@@ -62,11 +75,15 @@
     sidebar.setAttribute("aria-hidden", "true");
     sidebar.innerHTML = `
         <div class="app-shell-sidebar-header">
-            <div class="app-shell-profile">
-                <div class="app-shell-avatar">PC</div>
+            <div class="app-shell-profile app-shell-brand">
+                <div class="app-shell-avatar" aria-hidden="true">
+                    <span class="app-shell-orbit app-shell-orbit-one"></span>
+                    <span class="app-shell-orbit app-shell-orbit-two"></span>
+                    <span class="app-shell-node"></span>
+                </div>
                 <div class="app-shell-profile-info">
-                    <span class="app-shell-user-name">Provider Co.</span>
-                    <span class="app-shell-caption">${config.caption}</span>
+                    <span class="app-shell-user-name">OpportuNet</span>
+                    <span class="app-shell-caption">${config.caption} portal</span>
                 </div>
             </div>
             <button class="app-shell-sidebar-close" id="appShellCloseBtn" type="button" aria-label="Close sidebar">
@@ -78,6 +95,9 @@
                 <a href="${link.href}" class="app-shell-sidebar-link${active === link.key ? " active" : ""}">${link.label}</a>
             `).join("")}
         </nav>
+        <div class="app-shell-sidebar-footer">
+            <button class="app-shell-sidebar-link app-shell-logout-btn" id="appShellLogoutBtn" type="button">Log Out</button>
+        </div>
     `;
 
     const backdrop = document.createElement("div");
@@ -95,6 +115,7 @@
 
     const menuBtn = document.getElementById("appShellMenuBtn");
     const closeBtn = document.getElementById("appShellCloseBtn");
+    const logoutBtn = document.getElementById("appShellLogoutBtn");
 
     function setSidebarState(isOpen) {
         sidebar.classList.toggle("is-open", isOpen);
@@ -109,6 +130,10 @@
 
     if (closeBtn) {
         closeBtn.addEventListener("click", () => setSidebarState(false));
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logOutUser);
     }
 
     backdrop.addEventListener("click", () => setSidebarState(false));

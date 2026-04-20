@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const backdrop = document.getElementById("sidebarBackdrop");
     const openBtn = document.getElementById("hamburgerBtn");
     const closeBtn = document.getElementById("sidebarCloseBtn");
+    const logoutBtn = document.getElementById("sidebarLogoutBtn");
 
     function setSidebarState(isOpen) {
         if (!sidebar || !backdrop) return;
@@ -22,6 +23,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (backdrop) {
         backdrop.addEventListener("click", () => setSidebarState(false));
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            const isConfirmed = window.confirm("Are you sure you want to log out?");
+            if (!isConfirmed) return;
+
+            localStorage.removeItem("recruiter_jobs");
+            localStorage.removeItem("recruiter_applications");
+            sessionStorage.clear();
+            window.location.href = "../SignUp_LogIn_pages/logIn.html";
+        });
     }
 
     document.addEventListener("keydown", (event) => {
