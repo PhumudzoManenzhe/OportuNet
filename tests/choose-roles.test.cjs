@@ -15,6 +15,19 @@ function flushAsyncWork(cycles = 5) {
     );
 }
 
+function createResolvedLocation(initialHref) {
+    let currentUrl = new URL(initialHref);
+
+    return {
+        get href() {
+            return `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
+        },
+        set href(value) {
+            currentUrl = new URL(value, currentUrl);
+        }
+    };
+}
+
 function createFakeButton() {
     const listeners = {};
 
@@ -42,7 +55,9 @@ function loadChooseRolesScript(overrides = {}) {
             return null;
         })
     };
-    const windowMock = { location: { href: "about:blank" } };
+    const windowMock = {
+        location: createResolvedLocation("https://example.test/SignUp_LogIn_pages/chooseRoles.html")
+    };
     const alert = jest.fn();
     const consoleMock = { error: jest.fn() };
     const auth = {
@@ -115,7 +130,7 @@ describe("chooseRoles.js", () => {
                 role: "applicant"
             }
         );
-        expect(mocks.windowMock.location.href).toBe("../Applicant_homepage/index.html");
+        expect(mocks.windowMock.location.href).toBe("/Applicant_homepage/index.html");
     });
 
     test("setRole alerts when saving the selected role fails", async () => {

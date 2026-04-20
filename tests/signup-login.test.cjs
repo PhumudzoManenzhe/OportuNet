@@ -15,6 +15,19 @@ function flushAsyncWork(cycles = 5) {
     );
 }
 
+function createResolvedLocation(initialHref) {
+    let currentUrl = new URL(initialHref);
+
+    return {
+        get href() {
+            return `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
+        },
+        set href(value) {
+            currentUrl = new URL(value, currentUrl);
+        }
+    };
+}
+
 function createFakeNode(initial = {}) {
     const listeners = {};
 
@@ -77,7 +90,9 @@ function loadSignupLoginScript(overrides = {}) {
             return [];
         })
     };
-    const windowMock = { location: { href: "about:blank" } };
+    const windowMock = {
+        location: createResolvedLocation("https://example.test/SignUp_LogIn_pages/index.html")
+    };
     const alert = jest.fn();
     const consoleMock = { error: jest.fn() };
     const auth = { service: "auth" };
@@ -166,7 +181,7 @@ describe("signup_logIn.js", () => {
             "abc12345"
         );
         expect(mocks.alert).toHaveBeenCalledWith("Account Created!");
-        expect(mocks.windowMock.location.href).toBe("./logIn.html");
+        expect(mocks.windowMock.location.href).toBe("/SignUp_LogIn_pages/logIn.html");
     });
 
     test("googleLogin sends first-time Google users to role selection", async () => {
@@ -187,7 +202,7 @@ describe("signup_logIn.js", () => {
             mocks.googleProviderInstance
         );
         expect(mocks.doc).toHaveBeenCalledWith(mocks.db, "users", "google-user");
-        expect(mocks.windowMock.location.href).toBe("./chooseRoles.html");
+        expect(mocks.windowMock.location.href).toBe("/SignUp_LogIn_pages/chooseRoles.html");
     });
 
     test("logInUser routes existing recruiters to the recruiter homepage", async () => {
@@ -208,7 +223,7 @@ describe("signup_logIn.js", () => {
             "recruiter@example.com",
             "safe-pass"
         );
-        expect(mocks.windowMock.location.href).toBe("../Recruiter_homepage/index.html");
+        expect(mocks.windowMock.location.href).toBe("/Recruiter_homepage/index.html");
     });
 
     test("logInUser alerts when Firestore user loading fails", async () => {
