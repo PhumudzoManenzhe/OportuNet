@@ -3,6 +3,8 @@ module.exports = {
   coverageProvider: "v8",
   collectCoverageFrom: [
     "**/*.js",
+    "!jest.config.js",
+    "!FireStore_db/firebase.js",
     "!**/node_modules/**",
     "!**/coverage/**"
   ],
