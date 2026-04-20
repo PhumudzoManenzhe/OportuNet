@@ -942,6 +942,7 @@ async function initializeRecruiterHomepage() {
     const sidebar = document.getElementById("appSidebar");
     const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
     const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+    const logoutBtn = document.getElementById("sidebarLogoutBtn");
 
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
     if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
