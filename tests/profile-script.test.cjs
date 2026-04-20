@@ -382,7 +382,7 @@ describe("Applicant editable profile helpers", () => {
 
         const fetched = await app.profileGateway.fetchPageData();
         fetched.profile.name = "Changed";
-        fetched.qualifications.items[0].title = "Updated";
+        fetched.qualifications.items.push({ title: "Updated" });
 
         const freshFetch = await app.profileGateway.fetchPageData();
         expect(freshFetch.profile.name).toBe("");
@@ -497,7 +497,7 @@ describe("Applicant editable profile DOM behavior", () => {
         expect(nodes["view-cv-link"].hidden).toBe(false);
         expect(nodes["view-cv-link"].href).toBe("data:application/pdf;base64,abc");
         expect(nodes["view-cv-link"].download).toBe("Naledi-CV.PDF");
-        expect(nodes["page-feedback"].textContent).toBe("PDF CV uploaded for this demo session.");
+        expect(nodes["page-feedback"].textContent).toBe("PDF CV uploaded.");
         expect(nodes["cv-input"].value).toBe("");
     });
 });
