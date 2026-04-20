@@ -1,4 +1,4 @@
-import { auth, db } from "../FireStore_db/firebase.js";
+import { auth, db } from "/FireStore_db/firebase.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
@@ -21,9 +21,9 @@ function setRole(role) {
     })
     .then(() => {
         if (role === "applicant") {
-            window.location.href = "../Applicant_homepage/index.html";
+            window.location.href = "/Applicant_homepage/index.html";
         } else {
-            window.location.href = "../Recruiter_homepage/index.html";
+            window.location.href = "/Recruiter_homepage/index.html";
         }
     })
     .catch((error) => {
