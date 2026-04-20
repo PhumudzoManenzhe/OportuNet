@@ -5,6 +5,7 @@
   "description": "OportuNet JavaScript project test tooling",
   "scripts": {
     "test": "jest --runInBand",
+    "test:ci": "jest --ci --coverage --runInBand",
     "test:coverage": "jest --coverage --runInBand",
     "coverage": "jest --coverage --runInBand"
   },
