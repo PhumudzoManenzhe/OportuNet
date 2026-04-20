@@ -36,7 +36,7 @@ function googleLogin() {
 
             // FIRST TIME GOOGLE SIGN-UP
             if (!docSnap.exists()) {
-                window.location.href = "chooseRoles.html";
+                window.location.href = "./chooseRoles.html";
             }
 
             // EXISTING USER
@@ -62,7 +62,7 @@ function signUpUser(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         alert("Account Created!");
-        window.location.href = "logIn.html";
+        window.location.href = "./logIn.html";
     }).catch((error) => {
         alert(error.message);
     });
@@ -80,7 +80,7 @@ function logInUser(email, password) {
         getDoc(docRef)
         .then((docSnap) => {
             if (!docSnap.exists()) {
-                window.location.href = "chooseRoles.html";
+                window.location.href = "./chooseRoles.html";
             } else {
                 const role = docSnap.data().role;
 
