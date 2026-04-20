@@ -144,22 +144,53 @@ header.navbar {
 
 .card-btn {
     width: 100%;
-    border: 1px solid transparent;
-    background: #ffffff;
-    padding: 24px;
-    border-radius: 12px;
+    display: grid;
+    gap: 0.55rem;
+    border: 1px solid #d7dee8;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    padding: 24px 24px 22px;
+    border-radius: 18px;
     text-align: left;
-    color: #000;
-    font-size: 24px;
+    color: #162033;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .card-btn:hover {
-    border-color: #4276e8;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(66, 118, 232, 0.12);
+    border-color: #9db3d3;
+    background: linear-gradient(180deg, #ffffff 0%, #f3f6fa 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.card-btn-kicker {
+    color: #64748b;
+    font-size: 0.77rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.card-btn-title {
+    color: #1e293b;
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.card-btn-copy {
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+.card-btn-link {
+    margin-top: 0.35rem;
+    color: #0f4c81;
+    font-size: 0.95rem;
+    font-weight: 700;
 }
 
 .app-sidebar {
@@ -249,7 +280,10 @@ body.sidebar-open {
     }
 
     .card-btn {
-        font-size: 20px;
         padding: 20px;
+    }
+
+    .card-btn-title {
+        font-size: 1.2rem;
     }
 }
