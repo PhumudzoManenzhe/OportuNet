@@ -2,6 +2,7 @@ const path = require("path");
 
 const SCRIPT_PATH = path.resolve(__dirname, "../Applicant_Editable_Profile/profile_script.js");
 const GLOBAL_NAMES = ["window", "document", "FileReader", "structuredClone", "crypto", "URL"];
+const NativeURL = URL;
 
 let restoreEnvironment = null;
 
@@ -89,6 +90,19 @@ function createFakeNode(initial = {}) {
     };
 
     return node;
+}
+
+function createResolvedLocation(initialHref) {
+    let currentUrl = new NativeURL(initialHref);
+
+    return {
+        get href() {
+            return `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
+        },
+        set href(value) {
+            currentUrl = new NativeURL(value, currentUrl);
+        }
+    };
 }
 
 function createFakeDocument() {
@@ -225,12 +239,15 @@ function loadProfileScript(options = {}) {
     const windowMock = {
         addEventListener: jest.fn(),
         clearTimeout: jest.fn(),
+        location: createResolvedLocation("https://example.test/Applicant_Editable_Profile/profile_index.html"),
         scrollTo: jest.fn(),
         setTimeout: jest.fn(() => 1)
     };
 
     setGlobal("window", windowMock);
-    setGlobal("URL", { revokeObjectURL: jest.fn() });
+    setGlobal("URL", Object.assign(class MockURL extends NativeURL {}, {
+        revokeObjectURL: jest.fn()
+    }));
 
     if (Object.prototype.hasOwnProperty.call(options, "structuredClone")) {
         setGlobal("structuredClone", options.structuredClone);
@@ -453,6 +470,21 @@ describe("Applicant editable profile DOM behavior", () => {
         expect(nodes["cv-file-note"].textContent).toBe("Upload a PDF version of your CV. Only PDF files are accepted.");
         expect(nodes["upload-cv-button"].textContent).toBe("Upload PDF CV");
         expect(nodes["view-cv-link"].hidden).toBe(true);
+    });
+
+    test("the view profile action closes the avatar menu and redirects to the global profile page", async () => {
+        const { app, nodes, windowMock } = loadProfileScript({ withDocument: true });
+        const pageData = await createMinimalPageData(app);
+        app.profileGateway.fetchPageData = jest.fn().mockResolvedValue(pageData);
+
+        await app.initializePage();
+
+        nodes["avatar-menu"].hidden = false;
+        nodes["view-profile-option"].listeners.click();
+
+        expect(nodes["avatar-menu"].hidden).toBe(true);
+        expect(nodes["avatar-menu-button"].setAttribute).toHaveBeenCalledWith("aria-expanded", "false");
+        expect(windowMock.location.href).toBe("/Applicant_profile_page/global_profile.html");
     });
 
     test("the CV change handler rejects non-PDF uploads and shows feedback", async () => {
