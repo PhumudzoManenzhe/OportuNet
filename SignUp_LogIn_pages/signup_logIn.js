@@ -1,4 +1,4 @@
-import { auth, db } from "../FireStore_db/firebase.js";
+import { auth, db } from "/FireStore_db/firebase.js";
 import { 
   createUserWithEmailAndPassword,
   signInWithPopup,
@@ -36,7 +36,7 @@ function googleLogin() {
 
             // FIRST TIME GOOGLE SIGN-UP
             if (!docSnap.exists()) {
-                window.location.href = "./chooseRoles.html";
+                window.location.href = "/SignUp_LogIn_pages/chooseRoles.html";
             }
 
             // EXISTING USER
@@ -44,9 +44,9 @@ function googleLogin() {
                 const role = docSnap.data().role;
 
                 if (role === "applicant") {
-                    window.location.href = "../Applicant_homepage/index.html";
+                    window.location.href = "/Applicant_homepage/index.html";
                 } else {
-                    window.location.href = "../Recruiter_homepage/index.html";
+                    window.location.href = "/Recruiter_homepage/index.html";
                 }
             }
         });
@@ -62,7 +62,7 @@ function signUpUser(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         alert("Account Created!");
-        window.location.href = "./logIn.html";
+        window.location.href = "/SignUp_LogIn_pages/logIn.html";
     }).catch((error) => {
         alert(error.message);
     });
@@ -80,14 +80,14 @@ function logInUser(email, password) {
         getDoc(docRef)
         .then((docSnap) => {
             if (!docSnap.exists()) {
-                window.location.href = "./chooseRoles.html";
+                window.location.href = "/SignUp_LogIn_pages/chooseRoles.html";
             } else {
                 const role = docSnap.data().role;
 
                 if (role === "applicant") {
-                    window.location.href = "../Applicant_homepage/index.html";
+                    window.location.href = "/Applicant_homepage/index.html";
                 } else {
-                    window.location.href = "../Recruiter_homepage/index.html";
+                    window.location.href = "/Recruiter_homepage/index.html";
                 }
             }
         })
