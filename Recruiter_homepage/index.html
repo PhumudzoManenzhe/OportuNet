@@ -14,7 +14,11 @@
     <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
         <div class="sidebar-header">
             <div class="sidebar-brand">
-                <div class="avatar-sm">PC</div>
+                <div class="avatar-sm" aria-hidden="true">
+                    <span class="brand-orbit brand-orbit-one"></span>
+                    <span class="brand-orbit brand-orbit-two"></span>
+                    <span class="brand-node"></span>
+                </div>
                 <div class="profile-info">
                     <span class="user-name">Recruiter</span>
                     <span class="profile-caption">Recruiter</span>
@@ -29,9 +33,11 @@
             <a href="index.html" class="sidebar-link active">Home</a>
             <a href="#opportunitiesSection" class="sidebar-link">My Posts</a>
             <a href="#applicationsSection" class="sidebar-link">Applications</a>
-            <a href="../Applicant_profile_page/global_profile.html" class="sidebar-link">Profile</a>
-            <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link">Notifications</a>
+            <a href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" class="sidebar-link">Notifications</a>
         </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
+        </div>
     </aside>
     <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 
@@ -44,7 +50,7 @@
         </div>
 
         <div class="nav-right">
-            <a class="icon-btn nav-link-icon" id="topNotificationBtn" href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" aria-label="Go to notifications page">
+            <a class="icon-btn nav-link-icon" id="topNotificationBtn" href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" aria-label="Go to notifications page">
                 <i class="fa-regular fa-bell"></i>
             </a>
         </div>

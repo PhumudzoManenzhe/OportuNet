@@ -968,6 +968,18 @@ async function initializeRecruiterHomepage() {
         sidebarBackdrop.addEventListener("click", () => setSidebarState(false));
     }
 
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            const isConfirmed = window.confirm("Are you sure you want to log out?");
+            if (!isConfirmed) return;
+
+            localStorage.removeItem("recruiter_jobs");
+            localStorage.removeItem("recruiter_applications");
+            sessionStorage.clear();
+            window.location.href = "../SignUp_LogIn_pages/logIn.html";
+        });
+    }
+
     document.querySelectorAll(".sidebar-link[href^='#']").forEach((link) => {
         link.addEventListener("click", (event) => {
             const target = event.currentTarget.getAttribute("href");
