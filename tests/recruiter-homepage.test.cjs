@@ -305,6 +305,7 @@ globalThis.__testExports = {
     getPendingApplicantCount,
     getPaginatedJobs,
     getRecruiterCompanyName,
+    getRecruiterDisplayName,
     getTotalPages,
     inferOpportunityType,
     initializeRecruiterHomepage,
@@ -398,6 +399,7 @@ describe("Recruiter homepage helpers", () => {
                 escapeAttribute: expect.any(Function),
                 escapeHtml: expect.any(Function),
                 filterJobsBySearch: expect.any(Function),
+                getRecruiterDisplayName: expect.any(Function),
                 initializeRecruiterHomepage: expect.any(Function),
                 loadFromLocalStorage: expect.any(Function),
                 mapApplicationSnapshot: expect.any(Function),
@@ -423,6 +425,10 @@ describe("Recruiter homepage helpers", () => {
         expect(api.inferOpportunityType({ title: "Software Development Apprenticeship" })).toBe("Apprenticeship");
         expect(api.formatIsoDate("2026-04-20T12:00:00Z")).toBe("2026-04-20");
         expect(api.getRecruiterCompanyName({ recruiterProfile: { companyName: "Acme Labs" } }, { email: "owner@example.com" })).toBe("Acme Labs");
+        expect(api.getRecruiterDisplayName({ recruiterProfile: { contactName: "Mpho Dlamini", companyName: "Acme Labs" } }, { email: "owner@example.com" })).toBe("Mpho Dlamini");
+        expect(api.getRecruiterCompanyName({}, { email: "owner@example.com" })).toBe("Recruiter");
+        expect(api.getRecruiterDisplayName({}, { email: "owner@example.com" })).toBe("Recruiter");
+        expect(api.getRecruiterCompanyName({ companyName: "owner@example.com", displayName: "Mpho Dlamini" }, { email: "owner@example.com" })).toBe("Mpho Dlamini");
         expect(api.escapeHtml("A&B<C>")).toBe("A&amp;B&lt;C&gt;");
         expect(api.escapeAttribute(`A&B"'<>`)).toBe("A&amp;B&quot;&#39;&lt;&gt;");
         expect(api.formatJobTitle("Software Development", "Internship")).toBe("Software Development Internship");
@@ -500,6 +506,7 @@ describe("Recruiter homepage helpers", () => {
         expect(api.getNotifications()).toEqual([]);
         expect(api.getCurrentRecruiter()).toEqual({
             companyName: "Recruiter",
+            displayName: "Recruiter",
             email: "",
             uid: ""
         });
@@ -540,6 +547,7 @@ describe("Recruiter homepage helpers", () => {
                     notifications: [{ id: 99, message: "Reminder", read: false, time: "Now", title: "Check applicants" }]
                 },
                 recruiterProfile: {
+                    contactName: "Mpho Dlamini",
                     companyName: "Acme Labs"
                 }
             },
@@ -568,6 +576,7 @@ describe("Recruiter homepage helpers", () => {
         ]);
         expect(api.getCurrentRecruiter()).toEqual({
             companyName: "Acme Labs",
+            displayName: "Mpho Dlamini",
             email: "recruiter@example.com",
             uid: "recruiter-123"
         });
@@ -799,6 +808,8 @@ describe("Recruiter homepage DOM behavior", () => {
                 location: "Johannesburg",
                 opportunityType: "Internship",
                 ownerUid: "recruiter-123",
+                postedByName: "Acme Labs",
+                recruiterName: "Acme Labs",
                 requirements: ["Matric", "CV"],
                 title: "Software Development Internship"
             })

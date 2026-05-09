@@ -76,7 +76,9 @@ function createEducationTemplate() {
                 ".resume-logo-text",
                 ".resume-title",
                 ".education-field-line",
-                ".education-date-line"
+                ".education-date-line",
+                ".education-performance-line",
+                ".education-description-line"
             ]))
         }
     };
@@ -122,6 +124,7 @@ function createFakeDocument(options = {}) {
         "cv-file-name": createFakeNode(),
         "cv-file-note": createFakeNode(),
         "cv-section": createFakeNode({ hidden: true }),
+        "close-profile-picture-button": createFakeNode(),
         "education-item-template": createEducationTemplate(),
         "education-list": createFakeNode(),
         "education-section": createFakeNode(),
@@ -134,6 +137,10 @@ function createFakeDocument(options = {}) {
         "personal-phone": createFakeNode(),
         "profile-back-button": options.withBackButton === false ? null : createFakeNode(),
         "profile-name": createFakeNode(),
+        "profile-picture-button": createFakeNode(),
+        "profile-picture-fallback": createFakeNode({ hidden: true }),
+        "profile-picture-modal": createFakeNode({ hidden: true }),
+        "profile-picture-preview": createFakeNode({ hidden: true }),
         "profile-photo": createFakeNode({ hidden: true }),
         "profile-search-form": options.withSearchForm === false ? null : createFakeNode(),
         "projects-list": createFakeNode(),
