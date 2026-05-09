@@ -1,5 +1,5 @@
 import { db } from "../FireStore_db/firebase.js";
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const OPPORTUNITY_TYPE = "Apprenticeship";
 
@@ -34,15 +34,20 @@ async function loadOpportunities(searchTerm) {
             where("opportunityType", "==", OPPORTUNITY_TYPE)
         )
     );
-    const opportunities = [];
+    const activeJobs = [];
 
     snapshots.forEach((snapshot) => {
         const job = snapshot.data();
         if (job.status !== "active") return;
-        opportunities.push({
-            id: snapshot.id,
+        activeJobs.push({ id: snapshot.id, job });
+    });
+
+    const recruiterNames = await loadRecruiterNames(activeJobs);
+    const opportunities = activeJobs.map(({ id, job }) => {
+        return {
+            id,
             title: job.title || "Apprenticeship Opportunity",
-            companyName: getCompanyName(job),
+            companyName: getCompanyName(job, recruiterNames.get(job.ownerUid)),
             location: job.location || "Not specified",
             duration: job.duration || "Not specified",
             stipend: job.stipend || "Not specified",
@@ -50,7 +55,7 @@ async function loadOpportunities(searchTerm) {
             closingDate: job.closingDate || "Not specified",
             requirements: Array.isArray(job.requirements) ? job.requirements : [],
             postedDate: formatIsoDate(job.postedAt || job.updatedAt || "")
-        });
+        };
     });
 
     allOpportunities = opportunities.sort((left, right) => new Date(right.postedDate || 0) - new Date(left.postedDate || 0));
@@ -154,14 +159,63 @@ function renderStatusMessage(message) {
     container.innerHTML = `<p class="status-message">${escapeHtml(message)}</p>`;
 }
 
-function getCompanyName(job) {
-    return job?.companyName
-        || job?.organisationName
-        || job?.organizationName
-        || job?.displayName
-        || job?.fullName
-        || job?.ownerEmail
-        || "Recruiter";
+async function loadRecruiterNames(activeJobs) {
+    const ownerIds = [...new Set(activeJobs.map(({ job }) => job.ownerUid).filter(Boolean))];
+    const entries = await Promise.all(ownerIds.map(async (ownerUid) => {
+        try {
+            const userSnapshot = await getDoc(doc(db, "users", ownerUid));
+            const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+            return [ownerUid, getRecruiterNameFromUser(userData)];
+        } catch (error) {
+            console.error("Unable to load recruiter name.", error);
+            return [ownerUid, ""];
+        }
+    }));
+
+    return new Map(entries.filter(([, name]) => name));
+}
+
+function getRecruiterNameFromUser(userData) {
+    return getDisplayName(
+        userData?.recruiterProfile?.companyName,
+        userData?.recruiterProfile?.organisationName,
+        userData?.recruiterProfile?.organizationName,
+        userData?.companyName,
+        userData?.recruiterProfile?.contactName,
+        userData?.recruiterProfile?.fullName,
+        userData?.displayName,
+        userData?.fullName
+    );
+}
+
+function getCompanyName(job, resolvedRecruiterName = "") {
+    return getDisplayName(
+        job?.companyName,
+        job?.organisationName,
+        job?.organizationName,
+        job?.recruiterName,
+        job?.postedByName,
+        job?.contactName,
+        job?.displayName,
+        job?.fullName,
+        resolvedRecruiterName
+    );
+}
+
+function getDisplayName(...values) {
+    const name = values
+        .map((value) => String(value || "").trim())
+        .find((value) => value && !isEmailLike(value) && !isGenericRecruiterName(value));
+
+    return name || "Recruiter";
+}
+
+function isEmailLike(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function isGenericRecruiterName(value) {
+    return String(value || "").trim().toLowerCase() === "recruiter";
 }
 
 function escapeHtml(text) {
