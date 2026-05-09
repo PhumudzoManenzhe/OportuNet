@@ -178,11 +178,20 @@ function loadOpportunityPage(config, options = {}) {
     };
     const db = { service: "db" };
     const collection = jest.fn((dbArg, collectionName) => ({ collectionName, db: dbArg }));
+    const doc = jest.fn((dbArg, collectionName, id) => ({ collectionName, db: dbArg, id }));
     const where = jest.fn((field, operator, value) => ({ field, operator, value }));
     const query = jest.fn((collectionRef, whereRef) => ({ collectionRef, whereRef }));
     const getDocs = options.getDocs || jest.fn(() =>
         Promise.resolve(createFirestoreSnapshots(options.snapshots || []))
     );
+    const getDoc = options.getDoc || jest.fn((docRef) => {
+        const userData = options.userDocs?.[docRef.id];
+
+        return Promise.resolve({
+            data: () => userData || {},
+            exists: () => Boolean(userData)
+        });
+    });
     const alert = jest.fn();
     const consoleMock = { error: jest.fn() };
     const source = `${stripImports(fs.readFileSync(scriptPath, "utf8"))}
@@ -205,6 +214,8 @@ globalThis.__testExports = {
         collection,
         console: consoleMock,
         db,
+        doc,
+        getDoc,
         document: documentMock,
         getDocs,
         query,
@@ -223,9 +234,11 @@ globalThis.__testExports = {
             consoleMock,
             container,
             db,
+            doc,
             documentListeners,
             documentMock,
             elements,
+            getDoc,
             getDocs,
             query,
             searchButton,
@@ -241,10 +254,11 @@ describe.each(PAGES)("$name page", (config) => {
             snapshots: [
                 createSnapshot("old", {
                     closingDate: "2026-02-01",
+                    companyName: "Recruiter",
                     description: "First chance",
                     duration: "",
                     location: "Cape Town",
-                    organisationName: "Org One",
+                    ownerUid: "owner-1",
                     postedAt: "2026-01-01T08:00:00Z",
                     requirements: "CV only",
                     status: "active",
@@ -269,7 +283,15 @@ describe.each(PAGES)("$name page", (config) => {
                     status: "closed",
                     title: "Should Not Render"
                 })
-            ]
+            ],
+            userDocs: {
+                "owner-1": {
+                    recruiterProfile: {
+                        contactName: "Mpho Dlamini",
+                        companyName: "Owner Careers"
+                    }
+                }
+            }
         });
 
         await api.loadData("");
@@ -279,10 +301,16 @@ describe.each(PAGES)("$name page", (config) => {
         expect(mocks.where).toHaveBeenCalledWith("opportunityType", "==", config.opportunityType);
         expect(api.items.map((item) => item.id)).toEqual(["new", "old"]);
         expect(api.items[1].title).toBe(config.defaultTitle);
-        expect(api.items[1].companyName).toBe("Org One");
+        expect(api.items[1].companyName).toBe("Owner Careers");
         expect(api.items[1].duration).toBe("Not specified");
         expect(api.items[1].stipend).toBe("Not specified");
         expect(api.items[1].requirements).toEqual([]);
+        expect(mocks.doc).toHaveBeenCalledWith(mocks.db, "users", "owner-1");
+        expect(mocks.getDoc).toHaveBeenCalledWith({
+            collectionName: "users",
+            db: mocks.db,
+            id: "owner-1"
+        });
         expect(mocks.container.innerHTML).toContain("Launch &lt;Build&gt;");
         expect(mocks.container.innerHTML).toContain("A &amp; B");
         expect(mocks.container.innerHTML).toContain("Grow &gt; learn");
@@ -314,6 +342,10 @@ describe.each(PAGES)("$name page", (config) => {
         expect(api.formatIsoDate("2026-04-20T12:34:56Z")).toBe("2026-04-20");
         expect(api.formatIsoDate("")).toBe("");
         expect(api.getCompanyName({ organizationName: "Fallback Org" })).toBe("Fallback Org");
+        expect(api.getCompanyName({ recruiterName: "Mpho Dlamini" })).toBe("Mpho Dlamini");
+        expect(api.getCompanyName({ companyName: "Recruiter" }, "Mpho Dlamini")).toBe("Mpho Dlamini");
+        expect(api.getCompanyName({ companyName: "recruiter@example.com", recruiterName: "Mpho Dlamini" })).toBe("Mpho Dlamini");
+        expect(api.getCompanyName({ ownerEmail: "recruiter@example.com" })).toBe("Recruiter");
         expect(api.getCompanyName({})).toBe("Recruiter");
         expect(api.escapeHtml("A&B<C>")).toBe("A&amp;B&lt;C&gt;");
     });

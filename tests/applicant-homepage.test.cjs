@@ -1,40 +1,18 @@
+const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 
 const SCRIPT_PATH = path.resolve(__dirname, "../Applicant_homepage/script.js");
-const GLOBAL_NAMES = ["window", "document", "localStorage", "sessionStorage"];
 
-let restoreEnvironment = null;
+function stripImports(source) {
+    return source.replace(/^\s*import[\s\S]*?from\s+["'][^"']+["'];\s*$/gm, "");
+}
 
-afterEach(() => {
-    restoreEnvironment?.();
-    restoreEnvironment = null;
-    jest.resetModules();
-    jest.clearAllMocks();
-});
-
-function snapshotGlobals() {
-    return Object.fromEntries(
-        GLOBAL_NAMES.map((name) => [name, Object.getOwnPropertyDescriptor(global, name)])
+function flushAsyncWork(cycles = 5) {
+    return Array.from({ length: cycles }).reduce(
+        (promise) => promise.then(() => Promise.resolve()),
+        Promise.resolve()
     );
-}
-
-function restoreGlobals(snapshot) {
-    Object.entries(snapshot).forEach(([name, descriptor]) => {
-        if (descriptor) {
-            Object.defineProperty(global, name, descriptor);
-            return;
-        }
-
-        delete global[name];
-    });
-}
-
-function setGlobal(name, value) {
-    Object.defineProperty(global, name, {
-        configurable: true,
-        writable: true,
-        value
-    });
 }
 
 function createClassList() {
@@ -60,6 +38,7 @@ function createFakeNode(initial = {}) {
         classList: createClassList(),
         hidden: false,
         listeners,
+        textContent: "",
         addEventListener: jest.fn((type, handler) => {
             listeners[type] = handler;
         }),
@@ -82,23 +61,27 @@ function createFakeDocument(options = {}) {
         sidebarCloseBtn: options.withCloseButton === false ? null : createFakeNode(),
         sidebarLogoutBtn: options.withLogoutButton === false ? null : createFakeNode()
     };
+    const welcomeHeading = createFakeNode();
+    const sidebarName = createFakeNode();
     const documentListeners = {};
     const documentMock = {
         body: createFakeNode(),
         addEventListener: jest.fn((type, handler) => {
             documentListeners[type] = handler;
         }),
-        getElementById: jest.fn((id) => elements[id] || null)
+        getElementById: jest.fn((id) => elements[id] || null),
+        querySelector: jest.fn((selector) => {
+            if (selector === ".welcome h1") return welcomeHeading;
+            if (selector === ".sidebar-brand .user-name") return sidebarName;
+            return null;
+        })
     };
 
-    return { documentListeners, documentMock, elements };
+    return { documentListeners, documentMock, elements, sidebarName, welcomeHeading };
 }
 
 function loadApplicantHomepage(options = {}) {
-    const snapshot = snapshotGlobals();
-    restoreEnvironment = () => restoreGlobals(snapshot);
-
-    const { documentListeners, documentMock, elements } = createFakeDocument(options);
+    const { documentListeners, documentMock, elements, sidebarName, welcomeHeading } = createFakeDocument(options);
     const windowMock = {
         confirm: jest.fn(() => true),
         location: { href: "about:blank" }
@@ -109,29 +92,89 @@ function loadApplicantHomepage(options = {}) {
     const sessionStorageMock = {
         clear: jest.fn()
     };
+    const consoleMock = {
+        error: jest.fn()
+    };
+    const auth = options.auth || {
+        currentUser: Object.prototype.hasOwnProperty.call(options, "currentUser")
+            ? options.currentUser
+            : null
+    };
+    const db = { service: "db" };
+    const doc = jest.fn((dbArg, collectionName, id) => ({ collectionName, db: dbArg, id }));
+    const getDoc = options.getDoc || jest.fn(() =>
+        Promise.resolve({
+            data: () => options.userDocData || {},
+            exists: () => Boolean(options.userDocExists)
+        })
+    );
+    const onAuthStateChanged = options.onAuthStateChanged || jest.fn((_auth, onUser, onError) => {
+        const unsubscribe = jest.fn();
+        Promise.resolve().then(() => {
+            if (options.authStateError) {
+                onError(options.authStateError);
+                return;
+            }
 
-    setGlobal("document", documentMock);
-    setGlobal("window", windowMock);
-    setGlobal("localStorage", localStorageMock);
-    setGlobal("sessionStorage", sessionStorageMock);
-
-    jest.resetModules();
-    jest.isolateModules(() => {
-        require(SCRIPT_PATH);
+            onUser(options.authStateUser ?? null);
+        });
+        return unsubscribe;
+    });
+    const context = vm.createContext({
+        auth,
+        console: consoleMock,
+        db,
+        doc,
+        document: documentMock,
+        getDoc,
+        localStorage: localStorageMock,
+        onAuthStateChanged,
+        sessionStorage: sessionStorageMock,
+        window: windowMock
     });
 
+    context.globalThis = context;
+
+    const source = `${stripImports(fs.readFileSync(SCRIPT_PATH, "utf8"))}
+globalThis.__testExports = {
+    applyApplicantBranding,
+    bindApplicantShell,
+    getApplicantDisplayName,
+    initializeApplicantHomepage,
+    loadApplicantDisplayName,
+    resolveCurrentUser
+};`;
+
+    new vm.Script(source, { filename: SCRIPT_PATH }).runInContext(context);
+
     return {
+        api: context.__testExports,
         documentListeners,
         documentMock,
         elements,
         localStorageMock,
         sessionStorageMock,
-        windowMock
+        windowMock,
+        mocks: {
+            consoleMock,
+            db,
+            doc,
+            documentListeners,
+            documentMock,
+            elements,
+            getDoc,
+            localStorageMock,
+            onAuthStateChanged,
+            sessionStorageMock,
+            sidebarName,
+            welcomeHeading,
+            windowMock
+        }
     };
 }
 
 describe("Applicant homepage script", () => {
-    test("registers the DOMContentLoaded handler and wires the homepage controls", () => {
+    test("registers the DOMContentLoaded handler and wires the homepage controls", async () => {
         const { documentListeners, documentMock, elements } = loadApplicantHomepage();
 
         expect(documentMock.addEventListener).toHaveBeenCalledWith(
@@ -140,6 +183,7 @@ describe("Applicant homepage script", () => {
         );
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
 
         expect(elements.hamburgerBtn.addEventListener).toHaveBeenCalledWith(
             "click",
@@ -163,10 +207,45 @@ describe("Applicant homepage script", () => {
         );
     });
 
-    test("opens the sidebar from the hamburger button and closes it with the close button", () => {
+    test("loads the applicant profile name and applies it to the welcome and sidebar text", async () => {
+        const { api, mocks } = loadApplicantHomepage({
+            currentUser: {
+                displayName: "Auth Name",
+                email: "applicant@example.com",
+                uid: "applicant-123"
+            },
+            userDocData: {
+                applicantProfile: {
+                    profile: {
+                        name: "Naledi Mokoena"
+                    }
+                },
+                displayName: "Stored Name"
+            },
+            userDocExists: true
+        });
+
+        await api.initializeApplicantHomepage();
+
+        expect(mocks.doc).toHaveBeenCalledWith(mocks.db, "users", "applicant-123");
+        expect(mocks.welcomeHeading.textContent).toBe("Welcome Naledi Mokoena");
+        expect(mocks.sidebarName.textContent).toBe("Naledi Mokoena");
+    });
+
+    test("applicant display names never fall back to the user's email address", () => {
+        const { api } = loadApplicantHomepage();
+
+        expect(api.getApplicantDisplayName({ displayName: "Stored Name" })).toBe("Stored Name");
+        expect(api.getApplicantDisplayName({ fullName: "Full Name" })).toBe("Full Name");
+        expect(api.getApplicantDisplayName({}, { displayName: "Auth Name" })).toBe("Auth Name");
+        expect(api.getApplicantDisplayName({ email: "applicant@example.com" }, { email: "applicant@example.com" })).toBe("Applicant");
+    });
+
+    test("opens the sidebar from the hamburger button and closes it with the close button", async () => {
         const { documentListeners, elements, documentMock } = loadApplicantHomepage();
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
 
         elements.hamburgerBtn.listeners.click();
         expect(elements.appSidebar.classList.contains("is-open")).toBe(true);
@@ -181,10 +260,11 @@ describe("Applicant homepage script", () => {
         expect(documentMock.body.classList.contains("sidebar-open")).toBe(false);
     });
 
-    test("closes the sidebar from the backdrop or Escape key and ignores other keys", () => {
+    test("closes the sidebar from the backdrop or Escape key and ignores other keys", async () => {
         const { documentListeners, elements, documentMock } = loadApplicantHomepage();
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
 
         elements.hamburgerBtn.listeners.click();
         documentListeners.keydown({ key: "Enter" });
@@ -201,11 +281,12 @@ describe("Applicant homepage script", () => {
         expect(elements.sidebarBackdrop.hidden).toBe(true);
     });
 
-    test("does not log out when the user cancels the confirmation prompt", () => {
+    test("does not log out when the user cancels the confirmation prompt", async () => {
         const { documentListeners, elements, localStorageMock, sessionStorageMock, windowMock } = loadApplicantHomepage();
         windowMock.confirm.mockReturnValue(false);
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
         elements.sidebarLogoutBtn.listeners.click();
 
         expect(windowMock.confirm).toHaveBeenCalledWith("Are you sure you want to log out?");
@@ -214,10 +295,11 @@ describe("Applicant homepage script", () => {
         expect(windowMock.location.href).toBe("about:blank");
     });
 
-    test("logs out confirmed users, clears applicant session data, and redirects to login", () => {
+    test("logs out confirmed users, clears applicant session data, and redirects to login", async () => {
         const { documentListeners, elements, localStorageMock, sessionStorageMock, windowMock } = loadApplicantHomepage();
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
         elements.sidebarLogoutBtn.listeners.click();
 
         expect(windowMock.confirm).toHaveBeenCalledWith("Are you sure you want to log out?");
@@ -227,13 +309,14 @@ describe("Applicant homepage script", () => {
         expect(windowMock.location.href).toBe("../SignUp_LogIn_pages/logIn.html");
     });
 
-    test("safely no-ops when sidebar state elements are missing", () => {
+    test("safely no-ops when sidebar state elements are missing", async () => {
         const { documentListeners, elements, documentMock } = loadApplicantHomepage({
             withBackdrop: false,
             withSidebar: false
         });
 
         documentListeners.DOMContentLoaded();
+        await flushAsyncWork();
 
         expect(() => elements.hamburgerBtn.listeners.click()).not.toThrow();
         expect(() => documentListeners.keydown({ key: "Escape" })).not.toThrow();

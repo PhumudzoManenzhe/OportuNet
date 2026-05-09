@@ -110,17 +110,29 @@ function createFakeDocument() {
         "about-intro",
         "about-intro-input",
         "about-passion",
+        "add-education-current-input",
         "add-education-dates-input",
+        "add-education-description-input",
+        "add-education-end-date-input",
         "add-education-field-input",
+        "add-education-level-input",
+        "add-education-performance-input",
         "add-education-school-input",
+        "add-education-start-date-input",
         "add-section-button",
         "add-section-form",
         "add-section-panel",
         "add-section-select",
+        "add-shared-credential-id-input",
+        "add-shared-credential-url-input",
         "add-shared-dates-input",
         "add-shared-description-input",
+        "add-shared-expiry-date-input",
+        "add-shared-issue-date-input",
+        "add-shared-no-expiry-input",
         "add-shared-subtitle-input",
         "add-shared-title-input",
+        "add-shared-type-input",
         "add-soft-skills-input",
         "add-technical-skills-input",
         "address-input",
@@ -132,24 +144,32 @@ function createFakeDocument() {
         "change-photo-option",
         "close-add-section-button",
         "close-editor-button",
+        "close-profile-picture-button",
         "cv-file-name",
         "cv-file-note",
         "cv-input",
+        "delete-photo-option",
         "editor-form",
         "editor-heading",
         "editor-panel",
         "education-active-header",
         "education-add-button",
         "education-add-group",
+        "education-current-input",
         "education-dates-input",
+        "education-description-input",
+        "education-end-date-input",
         "education-field-input",
         "education-heading",
         "education-intro",
         "education-item-template",
+        "education-level-input",
         "education-list",
+        "education-performance-input",
         "education-placeholder",
         "education-school-input",
         "education-section",
+        "education-start-date-input",
         "email-input",
         "page-feedback",
         "personal-address",
@@ -159,6 +179,9 @@ function createFakeDocument() {
         "photo-input",
         "profile-name",
         "profile-name-input",
+        "profile-picture-fallback",
+        "profile-picture-modal",
+        "profile-picture-preview",
         "profile-photo",
         "qualifications-active-header",
         "qualifications-add-button",
@@ -169,10 +192,16 @@ function createFakeDocument() {
         "qualifications-placeholder",
         "qualifications-section",
         "resume-item-template",
+        "shared-credential-id-label",
+        "shared-credential-url-label",
         "shared-dates-label",
         "shared-description-label",
+        "shared-expiry-date-label",
+        "shared-issue-date-label",
+        "shared-no-expiry-label",
         "shared-subtitle-label",
         "shared-title-label",
+        "shared-type-label",
         "skill-group-template",
         "skills-active-header",
         "skills-add-button",
@@ -194,6 +223,10 @@ function createFakeDocument() {
 
     nodes["avatar-menu"].hidden = true;
     nodes["profile-photo"].hidden = true;
+    nodes["profile-picture-modal"].hidden = true;
+    nodes["profile-picture-preview"].hidden = true;
+    nodes["profile-picture-fallback"].hidden = true;
+    nodes["delete-photo-option"].hidden = true;
     nodes["view-cv-link"].hidden = true;
     nodes["add-section-panel"].hidden = true;
     nodes["editor-panel"].hidden = true;
@@ -472,8 +505,8 @@ describe("Applicant editable profile DOM behavior", () => {
         expect(nodes["view-cv-link"].hidden).toBe(true);
     });
 
-    test("the view profile action closes the avatar menu and redirects to the global profile page", async () => {
-        const { app, nodes, windowMock } = loadProfileScript({ withDocument: true });
+    test("the view profile action closes the avatar menu and opens the profile picture viewer", async () => {
+        const { app, nodes } = loadProfileScript({ withDocument: true });
         const pageData = await createMinimalPageData(app);
         app.profileGateway.fetchPageData = jest.fn().mockResolvedValue(pageData);
 
@@ -484,7 +517,8 @@ describe("Applicant editable profile DOM behavior", () => {
 
         expect(nodes["avatar-menu"].hidden).toBe(true);
         expect(nodes["avatar-menu-button"].setAttribute).toHaveBeenCalledWith("aria-expanded", "false");
-        expect(windowMock.location.href).toBe("/Applicant_profile_page/global_profile.html");
+        expect(nodes["profile-picture-modal"].hidden).toBe(false);
+        expect(nodes["profile-picture-fallback"].hidden).toBe(false);
     });
 
     test("the CV change handler rejects non-PDF uploads and shows feedback", async () => {
