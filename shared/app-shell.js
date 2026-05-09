@@ -5,6 +5,7 @@
     const role = body.dataset.shellRole;
     const active = body.dataset.shellActive;
     const base = body.dataset.shellBase || "..";
+    const profileHrefOverride = body.dataset.shellProfileHref;
 
     if (!role) return;
 
@@ -20,17 +21,27 @@
         window.location.href = loginHref;
     }
 
+    async function deleteAccount() {
+        try {
+            const module = await import(`${base}/shared/account-actions.js`);
+            await module.startDeleteAccountFlow({ loginHref });
+        } catch (error) {
+            console.error("Unable to load account deletion flow.", error);
+            alert("Account deletion could not be started.");
+        }
+    }
+
     const shellConfig = {
         applicant: {
             caption: "Applicant",
-            profileHref: `${base}/Applicant_profile_page/global_profile.html`,
+            profileHref: profileHrefOverride || `${base}/Applicant_profile_page/global_profile.html`,
             notificationHref: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html`,
             links: [
                 { key: "home", label: "Home", href: `${base}/Applicant_homepage/index.html` },
                 { key: "internships", label: "Internships", href: `${base}/INTERNSHIPS_PAGE/Internships_page.html` },
                 { key: "learnerships", label: "Learnerships", href: `${base}/LEARNERSHIPS_PAGE/Learnerships_page.html` },
                 { key: "apprenticeships", label: "Apprenticeships", href: `${base}/APPRENTICESHIPS_PAGE/Apprenticeships_page.html` },
-                { key: "profile", label: "Profile", href: `${base}/Applicant_profile_page/global_profile.html` },
+                { key: "profile", label: "Profile", href: profileHrefOverride || `${base}/Applicant_profile_page/global_profile.html` },
                 { key: "notifications", label: "Notifications", href: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html` }
             ]
         },
@@ -96,6 +107,7 @@
             `).join("")}
         </nav>
         <div class="app-shell-sidebar-footer">
+            <button class="app-shell-sidebar-link app-shell-delete-account-btn" id="appShellDeleteAccountBtn" type="button">Delete Account</button>
             <button class="app-shell-sidebar-link app-shell-logout-btn" id="appShellLogoutBtn" type="button">Log Out</button>
         </div>
     `;
@@ -115,6 +127,7 @@
 
     const menuBtn = document.getElementById("appShellMenuBtn");
     const closeBtn = document.getElementById("appShellCloseBtn");
+    const deleteAccountBtn = document.getElementById("appShellDeleteAccountBtn");
     const logoutBtn = document.getElementById("appShellLogoutBtn");
 
     function setSidebarState(isOpen) {
@@ -134,6 +147,10 @@
 
     if (logoutBtn) {
         logoutBtn.addEventListener("click", logOutUser);
+    }
+
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener("click", deleteAccount);
     }
 
     backdrop.addEventListener("click", () => setSidebarState(false));

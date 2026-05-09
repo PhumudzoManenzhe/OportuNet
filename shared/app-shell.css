@@ -198,6 +198,21 @@
     font: 600 15px/1.3 "Manrope", "Segoe UI", Arial, sans-serif;
 }
 
+.app-shell-delete-account-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid rgba(248, 113, 113, 0.42);
+    text-align: left;
+    cursor: pointer;
+    color: #fecaca;
+    font: 700 15px/1.3 "Manrope", "Segoe UI", Arial, sans-serif;
+}
+
+.app-shell-delete-account-btn:hover {
+    background: rgba(185, 28, 28, 0.2);
+    color: #ffffff;
+}
+
 .app-shell-logout-btn:hover {
     background: rgba(239, 68, 68, 0.16);
     color: #ffffff;
