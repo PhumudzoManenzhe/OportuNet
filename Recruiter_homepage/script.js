@@ -24,6 +24,7 @@ let isDeletingJob = false;
 let currentRecruiter = {
     uid: "",
     email: "",
+    displayName: "Recruiter",
     companyName: "Recruiter"
 };
 
@@ -53,13 +54,37 @@ function formatIsoDate(value) {
 }
 
 function getRecruiterCompanyName(userData, user) {
-    return userData?.recruiterProfile?.companyName
-        || userData?.recruiterProfile?.organisationName
-        || userData?.recruiterProfile?.organizationName
-        || userData?.displayName
-        || userData?.companyName
-        || user?.email
-        || "Recruiter";
+    return getDisplayName(
+        userData?.recruiterProfile?.companyName,
+        userData?.recruiterProfile?.organisationName,
+        userData?.recruiterProfile?.organizationName,
+        userData?.companyName,
+        userData?.displayName,
+        user?.displayName
+    );
+}
+
+function getRecruiterDisplayName(userData, user) {
+    return getDisplayName(
+        userData?.recruiterProfile?.contactName,
+        userData?.recruiterProfile?.fullName,
+        userData?.displayName,
+        userData?.recruiterProfile?.companyName,
+        userData?.companyName,
+        user?.displayName
+    );
+}
+
+function getDisplayName(...values) {
+    const name = values
+        .map((value) => String(value || "").trim())
+        .find((value) => value && !isEmailLike(value));
+
+    return name || "Recruiter";
+}
+
+function isEmailLike(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
 function mapOpportunitySnapshot(snapshot) {
@@ -165,7 +190,7 @@ async function loadFromLocalStorage() {
     const user = await resolveCurrentUser();
 
     if (!user) {
-        currentRecruiter = { uid: "", email: "", companyName: "Recruiter" };
+        currentRecruiter = { uid: "", email: "", displayName: "Recruiter", companyName: "Recruiter" };
         jobs = [];
         applications = [];
         notifications = [];
@@ -186,6 +211,7 @@ async function loadFromLocalStorage() {
     currentRecruiter = {
         uid: user.uid,
         email: user.email || "",
+        displayName: getRecruiterDisplayName(userData, user),
         companyName: getRecruiterCompanyName(userData, user)
     };
 
@@ -225,11 +251,16 @@ async function saveOpportunity(jobData) {
     }
 
     const opportunityRef = doc(db, OPPORTUNITIES_COLLECTION, jobData.id);
+    const recruiterName = getDisplayName(currentRecruiter.displayName, currentRecruiter.companyName);
+    const companyName = getDisplayName(currentRecruiter.companyName, currentRecruiter.displayName);
+
     await setDoc(opportunityRef, {
         ownerUid: user.uid,
+        recruiterName,
+        postedByName: recruiterName,
         title: jobData.title,
         opportunityType: inferOpportunityType(jobData),
-        companyName: currentRecruiter.companyName || user.email || "Recruiter",
+        companyName,
         location: jobData.location,
         duration: jobData.duration,
         stipend: jobData.stipend,
@@ -910,6 +941,7 @@ if (typeof module !== 'undefined' && module.exports) {
         filterJobsBySearch,
         getApplicantCount,
         getPendingApplicantCount,
+        getRecruiterDisplayName,
         sortJobs,
         validateJobForm,
         saveToLocalStorage,
@@ -942,6 +974,7 @@ async function initializeRecruiterHomepage() {
     const sidebar = document.getElementById("appSidebar");
     const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
     const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+    const deleteAccountBtn = document.getElementById("sidebarDeleteAccountBtn");
     const logoutBtn = document.getElementById("sidebarLogoutBtn");
 
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
@@ -979,6 +1012,10 @@ async function initializeRecruiterHomepage() {
             sessionStorage.clear();
             window.location.href = "../SignUp_LogIn_pages/logIn.html";
         });
+    }
+
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener("click", startDeleteAccountFlow);
     }
 
     document.querySelectorAll(".sidebar-link[href^='#']").forEach((link) => {
@@ -1075,8 +1112,18 @@ async function initializeRecruiterHomepage() {
     }
 }
 
+async function startDeleteAccountFlow() {
+    try {
+        const module = await import("../shared/account-actions.js");
+        await module.startDeleteAccountFlow({ loginHref: "../SignUp_LogIn_pages/logIn.html" });
+    } catch (error) {
+        console.error("Unable to start account deletion.", error);
+        alert("Account deletion could not be started.");
+    }
+}
+
 function applyRecruiterBranding() {
-    const recruiterName = currentRecruiter.companyName || currentRecruiter.email || "Recruiter";
+    const recruiterName = getDisplayName(currentRecruiter.displayName, currentRecruiter.companyName);
     const welcomeHeading = document.querySelector(".welcome h1");
     const sidebarName = document.querySelector(".sidebar-brand .user-name");
 
