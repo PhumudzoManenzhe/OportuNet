@@ -258,6 +258,11 @@ abbr {
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
+.profile-avatar-shell {
+    padding: 0;
+    cursor: pointer;
+}
+
 .profile-photo,
 .avatar-fallback {
     width: 100%;
@@ -651,6 +656,11 @@ abbr {
     line-height: 1.35;
 }
 
+.resume-meta[hidden],
+.resume-description[hidden] {
+    display: none;
+}
+
 .skill-group-card .resume-copy {
     display: grid;
     gap: 0.5rem;
@@ -842,6 +852,70 @@ abbr {
     box-shadow: var(--shadow);
 }
 
+.picture-modal {
+    width: min(92vw, 34rem);
+    padding: 0;
+    border: none;
+    border-radius: 1.2rem;
+    background: transparent;
+}
+
+.picture-modal::backdrop {
+    background: rgba(15, 23, 42, 0.58);
+}
+
+.picture-modal-content {
+    overflow: hidden;
+    border: 1px solid var(--brand-line);
+    border-radius: 1.2rem;
+    background: var(--surface);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+.picture-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.picture-modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.picture-preview {
+    display: grid;
+    place-items: center;
+    min-height: 22rem;
+    margin: 0;
+    padding: 1.25rem;
+    background: #f8fafc;
+}
+
+.picture-preview-image {
+    width: min(100%, 26rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+}
+
+.picture-preview-fallback {
+    width: min(70vw, 16rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 208, 150, 0.88), rgba(10, 102, 194, 0.95));
+    color: #ffffff;
+    font-size: clamp(3rem, 16vw, 5.5rem);
+    font-weight: 700;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+}
+
 .task-nav {
     position: fixed;
     left: 50%;
@@ -947,6 +1021,7 @@ abbr {
 .section-icon-button:focus-visible,
 .camera-button:focus-visible,
 .avatar-button:focus-visible,
+.profile-avatar-shell:focus-visible,
 .pill:focus-visible,
 .text-link:focus-visible,
 .show-all-button:focus-visible,

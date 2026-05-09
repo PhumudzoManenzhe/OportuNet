@@ -11,7 +11,7 @@
     <script src="../shared/app-shell.js" defer></script>
     <script type="module" src="global_profile.js"></script>
 </head>
-<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
+<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-profile-href="../Applicant_Editable_Profile/profile_index.html" data-shell-replace-header="true">
     <header class="app-header">
         <nav class="toolbar toolbar-profile" aria-label="Profile navigation">
             <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">
@@ -27,10 +27,10 @@
         <article class="profile-card" aria-labelledby="profile-name">
             <header class="profile-summary">
                 <figure class="profile-figure">
-                    <span class="profile-avatar-shell">
+                    <button type="button" id="profile-picture-button" class="profile-avatar-shell" aria-label="View profile picture">
                         <img id="profile-photo" class="profile-photo" alt="Profile picture" hidden>
                         <span id="avatar-fallback" class="avatar-fallback" aria-hidden="true"></span>
-                    </span>
+                    </button>
                 </figure>
 
                 <h1 id="profile-name"></h1>
@@ -122,6 +122,22 @@
 
     </main>
 
+    <dialog id="profile-picture-modal" class="picture-modal" aria-labelledby="profile-picture-title">
+        <div class="picture-modal-content">
+            <header class="picture-modal-header">
+                <h2 id="profile-picture-title">Profile picture</h2>
+                <button type="button" id="close-profile-picture-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close profile picture view</span>
+                </button>
+            </header>
+            <figure class="picture-preview">
+                <img id="profile-picture-preview" class="picture-preview-image" alt="Full profile picture" hidden>
+                <span id="profile-picture-fallback" class="picture-preview-fallback" aria-hidden="true"></span>
+            </figure>
+        </div>
+    </dialog>
+
     <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
 
     <template id="resume-item-template">
@@ -151,6 +167,8 @@
                     <h3 class="resume-title"></h3>
                     <p class="resume-meta education-field-line"></p>
                     <p class="resume-meta education-date-line"></p>
+                    <p class="resume-meta education-performance-line"></p>
+                    <p class="resume-description education-description-line"></p>
                 </section>
             </article>
         </li>
