@@ -436,6 +436,11 @@ img {
     line-height: 1.35;
 }
 
+.resume-meta[hidden],
+.resume-description[hidden] {
+    display: none;
+}
+
 .skill-group-card .resume-copy {
     display: grid;
     gap: 0.5rem;
@@ -528,19 +533,22 @@ img {
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgba(15, 23, 42, 0.38);
-    padding-top: 2rem;
+    display: grid;
+    place-items: center;
+    background: rgba(15, 23, 42, 0.48);
+    padding: 1rem;
 }
 
 .editor-form {
     width: min(calc(100% - 1rem), var(--editor-width));
     max-height: calc(100vh - 2rem);
-    margin: auto auto 0;
-    padding: 1.15rem 1rem 1rem;
+    margin: 0;
+    padding: 0;
     overflow: auto;
-    border-radius: 1.5rem 1.5rem 0 0;
+    border: 1px solid var(--brand-line);
+    border-radius: 1.2rem;
     background: var(--surface);
-    box-shadow: 0 -18px 36px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
 }
 
 .editor-header {
@@ -548,18 +556,21 @@ img {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--line);
 }
 
 .editor-header h2 {
     margin: 0;
-    font-size: 1.2rem;
+    color: var(--text);
+    font-size: 1.25rem;
 }
 
 .editor-group {
     display: grid;
     gap: 0.85rem;
-    padding: 1rem 0;
+    padding: 1rem 1.25rem;
     margin: 0;
     border: none;
     border-top: 1px solid var(--line);
@@ -567,7 +578,6 @@ img {
 
 .editor-group:first-of-type {
     border-top: none;
-    padding-top: 0;
 }
 
 .editor-group legend {
@@ -583,16 +593,54 @@ img {
     font-weight: 600;
 }
 
+.field-grid {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.field-note {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: #413b34;
+    font-weight: 600;
+}
+
+.checkbox-field input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--brand);
+}
+
 .form-field input,
 .form-field select,
 .form-field textarea {
     width: 100%;
+    min-height: 3rem;
     padding: 0.8rem 0.9rem;
     border: 1px solid #cbc7c0;
     border-radius: 0.85rem;
     background: #ffffff;
     color: var(--text);
     font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.form-field input:disabled {
+    background: #f2f5f8;
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+.form-field input[type="date"] {
+    color-scheme: light;
+    cursor: pointer;
 }
 
 .form-field input:focus,
@@ -609,9 +657,13 @@ img {
 }
 
 .editor-actions {
-    display: grid;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--line);
 }
 
 .editor-actions li {
@@ -632,6 +684,70 @@ img {
     color: #ffffff;
     text-align: center;
     box-shadow: var(--shadow);
+}
+
+.picture-modal {
+    width: min(92vw, 34rem);
+    padding: 0;
+    border: none;
+    border-radius: 1.2rem;
+    background: transparent;
+}
+
+.picture-modal::backdrop {
+    background: rgba(15, 23, 42, 0.58);
+}
+
+.picture-modal-content {
+    overflow: hidden;
+    border: 1px solid var(--brand-line);
+    border-radius: 1.2rem;
+    background: var(--surface);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+.picture-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.picture-modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.picture-preview {
+    display: grid;
+    place-items: center;
+    min-height: 22rem;
+    margin: 0;
+    padding: 1.25rem;
+    background: #f8fafc;
+}
+
+.picture-preview-image {
+    width: min(100%, 26rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+}
+
+.picture-preview-fallback {
+    width: min(70vw, 16rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 208, 150, 0.88), rgba(10, 102, 194, 0.95));
+    color: #ffffff;
+    font-size: clamp(3rem, 16vw, 5.5rem);
+    font-weight: 700;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
 }
 
 .section-icon-button:focus-visible,
@@ -655,12 +771,16 @@ img {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .field-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .detail-item-wide {
         grid-column: 1 / -1;
     }
 
     .editor-form {
-        border-radius: 1.6rem 1.6rem 0 0;
+        border-radius: 1.2rem;
     }
 }
 

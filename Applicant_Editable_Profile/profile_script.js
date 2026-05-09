@@ -45,10 +45,15 @@ const EDUCATION_EMPTY_STATE = Object.freeze({
 
 const QUALIFICATION_FIELD_COPY = Object.freeze({
     legend: "Qualification details",
-    title: "Qualification title",
-    subtitle: "Issuer or institution",
-    dates: "Date or period",
-    description: "Qualification details"
+    title: "Qualification name",
+    type: "Qualification type",
+    subtitle: "Issuing organization / institution",
+    issueDate: "Issue date",
+    expiryDate: "Expiry date",
+    noExpiry: "This qualification does not expire",
+    credentialId: "Credential ID",
+    credentialUrl: "Credential URL",
+    description: "Description / Skills learned"
 });
 
 const HAS_DOM = typeof document !== "undefined";
@@ -93,6 +98,7 @@ const $$ = (selector) => (HAS_DOM ? Array.from(document.querySelectorAll(selecto
 const ids = (pairs) => Object.fromEntries(pairs.map(([key, id]) => [key, $(id)]));
 const readValue = (field) => field?.value.trim() || "";
 const setText = (node, value = "") => node && (node.textContent = value);
+const setHidden = (node, value) => node && (node.hidden = value);
 
 const elements = {
     ...ids([
@@ -110,9 +116,11 @@ const elements = {
         ["changePhotoOption", "change-photo-option"],
         ["closeAddSectionButton", "close-add-section-button"],
         ["closeEditorButton", "close-editor-button"],
+        ["closeProfilePictureButton", "close-profile-picture-button"],
         ["cvFileName", "cv-file-name"],
         ["cvFileNote", "cv-file-note"],
         ["cvInput", "cv-input"],
+        ["deletePhotoOption", "delete-photo-option"],
         ["editorForm", "editor-form"],
         ["editorHeading", "editor-heading"],
         ["editorPanel", "editor-panel"],
@@ -130,6 +138,9 @@ const elements = {
         ["personalPhone", "personal-phone"],
         ["photoInput", "photo-input"],
         ["profileName", "profile-name"],
+        ["profilePictureFallback", "profile-picture-fallback"],
+        ["profilePictureModal", "profile-picture-modal"],
+        ["profilePicturePreview", "profile-picture-preview"],
         ["profilePhoto", "profile-photo"],
         ["qualificationsActiveHeader", "qualifications-active-header"],
         ["qualificationsAddButton", "qualifications-add-button"],
@@ -138,10 +149,15 @@ const elements = {
         ["qualificationsPlaceholder", "qualifications-placeholder"],
         ["qualificationsSection", "qualifications-section"],
         ["resumeTemplate", "resume-item-template"],
-        ["sharedDatesLabel", "shared-dates-label"],
         ["sharedDescriptionLabel", "shared-description-label"],
+        ["sharedCredentialIdLabel", "shared-credential-id-label"],
+        ["sharedCredentialUrlLabel", "shared-credential-url-label"],
+        ["sharedExpiryDateLabel", "shared-expiry-date-label"],
+        ["sharedIssueDateLabel", "shared-issue-date-label"],
+        ["sharedNoExpiryLabel", "shared-no-expiry-label"],
         ["sharedSubtitleLabel", "shared-subtitle-label"],
         ["sharedTitleLabel", "shared-title-label"],
+        ["sharedTypeLabel", "shared-type-label"],
         ["skillGroupTemplate", "skill-group-template"],
         ["skillsActiveHeader", "skills-active-header"],
         ["skillsAddButton", "skills-add-button"],
@@ -158,12 +174,22 @@ const elements = {
     ]),
     editorGroups: $$("[data-editor-section]"),
     addSectionFields: ids([
+        ["educationCurrent", "add-education-current-input"],
+        ["educationDescription", "add-education-description-input"],
+        ["educationEndDate", "add-education-end-date-input"],
         ["educationSchool", "add-education-school-input"],
         ["educationField", "add-education-field-input"],
-        ["educationDates", "add-education-dates-input"],
+        ["educationLevel", "add-education-level-input"],
+        ["educationPerformance", "add-education-performance-input"],
+        ["educationStartDate", "add-education-start-date-input"],
         ["sharedTitle", "add-shared-title-input"],
+        ["sharedType", "add-shared-type-input"],
         ["sharedSubtitle", "add-shared-subtitle-input"],
-        ["sharedDates", "add-shared-dates-input"],
+        ["sharedIssueDate", "add-shared-issue-date-input"],
+        ["sharedExpiryDate", "add-shared-expiry-date-input"],
+        ["sharedNoExpiry", "add-shared-no-expiry-input"],
+        ["sharedCredentialId", "add-shared-credential-id-input"],
+        ["sharedCredentialUrl", "add-shared-credential-url-input"],
         ["sharedDescription", "add-shared-description-input"],
         ["softSkills", "add-soft-skills-input"],
         ["technicalSkills", "add-technical-skills-input"]
@@ -171,9 +197,14 @@ const elements = {
     formFields: ids([
         ["aboutIntro", "about-intro-input"],
         ["address", "address-input"],
-        ["educationDates", "education-dates-input"],
+        ["educationCurrent", "education-current-input"],
+        ["educationDescription", "education-description-input"],
+        ["educationEndDate", "education-end-date-input"],
         ["educationField", "education-field-input"],
+        ["educationLevel", "education-level-input"],
+        ["educationPerformance", "education-performance-input"],
         ["educationSchool", "education-school-input"],
+        ["educationStartDate", "education-start-date-input"],
         ["email", "email-input"],
         ["phone", "phone-input"],
         ["profileName", "profile-name-input"],
@@ -188,8 +219,12 @@ const editorTargetMap = Object.freeze({
     "profile-name-input": "profile",
     "about-intro-input": "about",
     "education-school-input": "education",
+    "education-level-input": "education",
     "education-field-input": "education",
-    "education-dates-input": "education",
+    "education-start-date-input": "education",
+    "education-end-date-input": "education",
+    "education-performance-input": "education",
+    "education-description-input": "education",
     "qualifications-intro-input": "qualifications",
     "qualifications-button-input": "qualifications",
     "soft-skills-input": "skills",
@@ -259,12 +294,10 @@ const saveHandlers = {
     },
     education(pageData) {
         const item = pageData.education[0] || createEmptyEducationItem();
-        Object.assign(item, {
-            school: readValue(elements.formFields.educationSchool),
-            field: readValue(elements.formFields.educationField),
-            dates: readValue(elements.formFields.educationDates),
-            logo: createLogoFromText(readValue(elements.formFields.educationSchool))
-        });
+        const nextItem = readEducationFields(elements.formFields, { requireAll: true });
+        if (!nextItem) return false;
+
+        Object.assign(item, nextItem);
         pageData.education[0] = item;
     },
     qualifications(pageData) {
@@ -379,9 +412,13 @@ function bindEvents() {
     on(elements.addSectionButton, "click", () => openAddSectionPanel());
     on(elements.addSectionForm, "submit", handleAddSection);
     on(elements.addSectionSelect, "change", ({ target }) => updateAddSectionFields(target.value));
+    on(elements.addSectionFields.educationCurrent, "change", () => syncEducationCurrentState(elements.addSectionFields));
+    on(elements.addSectionFields.sharedNoExpiry, "change", () => syncQualificationExpiryState(elements.addSectionFields));
+    on(elements.formFields.educationCurrent, "change", () => syncEducationCurrentState(elements.formFields));
     on(elements.avatarMenuButton, "click", toggleAvatarMenu);
     on(elements.viewProfileOption, "click", handleViewProfile);
     on(elements.changePhotoOption, "click", triggerPhotoPicker);
+    on(elements.deletePhotoOption, "click", handleDeleteProfilePhoto);
     on(elements.uploadCvButton, "click", triggerCvPicker);
     on(elements.photoInput, "change", handlePhotoSelection);
     on(elements.cvInput, "change", handleCvSelection);
@@ -390,10 +427,12 @@ function bindEvents() {
     on(elements.cancelAddSectionButton, "click", closeAddSectionPanel);
     on(elements.closeEditorButton, "click", closeEditor);
     on(elements.cancelEditorButton, "click", closeEditor);
+    on(elements.closeProfilePictureButton, "click", closeProfilePictureViewer);
     on(document, "click", handleDocumentClick);
     on(document, "keydown", handleEscapeKey);
     on(elements.addSectionPanel, "click", ({ target }) => target === elements.addSectionPanel && closeAddSectionPanel());
     on(elements.editorPanel, "click", ({ target }) => target === elements.editorPanel && closeEditor());
+    on(elements.profilePictureModal, "click", ({ target }) => target === elements.profilePictureModal && closeProfilePictureViewer());
 }
 
 function handleDocumentClick({ target }) {
@@ -427,6 +466,7 @@ function handleDocumentClick({ target }) {
 
 function handleEscapeKey({ key }) {
     if (key !== "Escape") return;
+    if (isPictureViewerOpen()) return closeProfilePictureViewer();
     if (!elements.avatarMenu.hidden) return closeAvatarMenu();
     if (closeSectionActionMenus()) return;
     if (state.isEditorOpen) return closeEditor();
@@ -445,6 +485,9 @@ function renderPage() {
 function renderProfile(profile) {
     setText(elements.profileName, profile.name);
     setText(elements.addSectionButton, profile.addSectionButton);
+    if (elements.deletePhotoOption) {
+        elements.deletePhotoOption.hidden = !profile.photoUrl;
+    }
     renderAvatar(profile);
 }
 
@@ -512,8 +555,20 @@ function renderEducationItems(items, list) {
     renderTemplateItems(list, items, elements.educationTemplate, (fragment, item) => {
         setText(fragment.querySelector(".resume-logo-text"), item.logo || createLogoFromText(item.school));
         setText(fragment.querySelector(".resume-title"), item.school);
-        setText(fragment.querySelector(".education-field-line"), item.field);
-        setText(fragment.querySelector(".education-date-line"), item.dates);
+        const fieldLine = fragment.querySelector(".education-field-line");
+        const dateLine = fragment.querySelector(".education-date-line");
+        const performanceLine = fragment.querySelector(".education-performance-line");
+        const descriptionLine = fragment.querySelector(".education-description-line");
+        const fieldText = [item.level, item.field].filter(Boolean).join(" - ");
+
+        setText(fieldLine, fieldText);
+        setText(dateLine, formatEducationDateRange(item));
+        setText(performanceLine, item.performance);
+        setText(descriptionLine, item.description);
+        setHidden(fieldLine, !fieldText);
+        setHidden(dateLine, !formatEducationDateRange(item));
+        setHidden(performanceLine, !item.performance);
+        setHidden(descriptionLine, !item.description);
     });
 }
 
@@ -523,14 +578,15 @@ function renderResumeItems(items, list) {
         const dates = fragment.querySelector(".resume-date-line");
         const location = fragment.querySelector(".resume-location-line");
         const description = fragment.querySelector(".resume-description");
+        const details = getQualificationDisplay(item);
 
         setText(fragment.querySelector(".resume-logo-text"), item.logo || createLogoFromText(item.title));
         setText(fragment.querySelector(".resume-title"), item.title);
-        setText(subtitle, item.subtitle);
-        setText(dates, item.dates);
+        setText(subtitle, details.subtitle);
+        setText(dates, details.dates);
         setText(description, item.description);
-        subtitle.hidden = !item.subtitle;
-        dates.hidden = !item.dates;
+        subtitle.hidden = !details.subtitle;
+        dates.hidden = !details.dates;
         description.hidden = !item.description;
         location.hidden = true;
     });
@@ -577,13 +633,21 @@ function syncEditorForm() {
         address: state.pageData.personalDetails.address,
         aboutIntro: [state.pageData.about.intro, state.pageData.about.passion].filter(Boolean).join("\n\n"),
         educationSchool: education.school || "",
+        educationLevel: education.level || "",
         educationField: education.field || "",
-        educationDates: education.dates || "",
+        educationStartDate: getDateInputValue(education.startDate || education.dates || ""),
+        educationEndDate: getDateInputValue(education.endDate || ""),
+        educationPerformance: education.performance || "",
+        educationDescription: education.description || "",
         qualificationsIntro: state.pageData.qualifications.intro,
         qualificationsButton: state.pageData.qualifications.buttonLabel,
         softSkills: state.pageData.skills.softSkills.join(", "),
         technicalSkills: state.pageData.skills.technicalSkills.join(", ")
     });
+    if (elements.formFields.educationCurrent) {
+        elements.formFields.educationCurrent.checked = Boolean(education.current);
+        syncEducationCurrentState(elements.formFields);
+    }
 }
 
 function setFieldValues(fields, values) {
@@ -598,6 +662,7 @@ function openEditor(targetId) {
     state.isEditorOpen = true;
     syncEditorForm();
     updateEditorSections();
+    syncEducationCurrentState(elements.formFields);
     setText(elements.editorHeading, state.activeEditorSection ? `Edit ${SECTION_LABELS[state.activeEditorSection]}` : "Edit profile content");
     elements.editorPanel.hidden = false;
     updatePanelLockState();
@@ -631,6 +696,8 @@ function openAddSectionPanel(sectionType = "") {
     elements.addSectionForm.reset();
     elements.addSectionSelect.value = sectionType;
     updateAddSectionFields(sectionType);
+    syncEducationCurrentState(elements.addSectionFields);
+    syncQualificationExpiryState(elements.addSectionFields);
     state.isAddSectionOpen = true;
     elements.addSectionPanel.hidden = false;
     updatePanelLockState();
@@ -643,6 +710,8 @@ function closeAddSectionPanel() {
     elements.addSectionPanel.hidden = true;
     elements.addSectionForm.reset();
     updateAddSectionFields("");
+    syncEducationCurrentState(elements.addSectionFields);
+    syncQualificationExpiryState(elements.addSectionFields);
     updatePanelLockState();
 }
 
@@ -655,8 +724,13 @@ function updateAddSectionFields(sectionType) {
 
     setText(elements.supplementalLegend, QUALIFICATION_FIELD_COPY.legend);
     setText(elements.sharedTitleLabel, QUALIFICATION_FIELD_COPY.title);
+    setText(elements.sharedTypeLabel, QUALIFICATION_FIELD_COPY.type);
     setText(elements.sharedSubtitleLabel, QUALIFICATION_FIELD_COPY.subtitle);
-    setText(elements.sharedDatesLabel, QUALIFICATION_FIELD_COPY.dates);
+    setText(elements.sharedIssueDateLabel, QUALIFICATION_FIELD_COPY.issueDate);
+    setText(elements.sharedExpiryDateLabel, QUALIFICATION_FIELD_COPY.expiryDate);
+    setText(elements.sharedNoExpiryLabel, QUALIFICATION_FIELD_COPY.noExpiry);
+    setText(elements.sharedCredentialIdLabel, QUALIFICATION_FIELD_COPY.credentialId);
+    setText(elements.sharedCredentialUrlLabel, QUALIFICATION_FIELD_COPY.credentialUrl);
     setText(elements.sharedDescriptionLabel, QUALIFICATION_FIELD_COPY.description);
 }
 
@@ -747,30 +821,95 @@ async function persistPageUpdate(update, { success, failure, afterSave, log }) {
 }
 
 function buildEducationItem() {
-    const { educationSchool, educationField, educationDates } = elements.addSectionFields;
-    const school = readValue(educationSchool);
-    const field = readValue(educationField);
-    const dates = readValue(educationDates);
-    if (!school || !field || !dates) {
-        setFeedback("Fill in all education details before saving.");
-        return focusFirstEmptyField([educationSchool, educationField, educationDates]);
+    const item = readEducationFields(elements.addSectionFields, { requireAll: true });
+    return item ? { id: createItemId("education"), ...item } : null;
+}
+
+function readEducationFields(fields, { requireAll = false } = {}) {
+    const school = readValue(fields.educationSchool);
+    const level = readValue(fields.educationLevel);
+    const field = readValue(fields.educationField);
+    const startDate = readValue(fields.educationStartDate);
+    const current = Boolean(fields.educationCurrent?.checked);
+    const endDate = current ? "" : readValue(fields.educationEndDate);
+    const performance = readValue(fields.educationPerformance);
+    const description = readValue(fields.educationDescription);
+
+    if (requireAll) {
+        const requiredFields = [fields.educationSchool, fields.educationLevel, fields.educationField, fields.educationStartDate];
+
+        if (!school || !level || !field || !startDate) {
+            setFeedback("Fill in institution, education level, study field, and start date before saving.");
+            return focusFirstEmptyField(requiredFields);
+        }
+
+        if (!current && endDate && endDate < startDate) {
+            setFeedback("End date cannot be before the start date.");
+            fields.educationEndDate.focus();
+            return null;
+        }
     }
 
-    return { id: createItemId("education"), logo: createLogoFromText(school), school, field, dates };
+    return {
+        logo: createLogoFromText(school),
+        school,
+        level,
+        field,
+        startDate,
+        endDate,
+        current,
+        dates: current ? `${startDate} - Present` : [startDate, endDate].filter(Boolean).join(" - "),
+        performance,
+        description
+    };
 }
 
 function buildQualificationItem() {
-    const { sharedTitle, sharedSubtitle, sharedDates, sharedDescription } = elements.addSectionFields;
+    const {
+        sharedTitle,
+        sharedType,
+        sharedSubtitle,
+        sharedIssueDate,
+        sharedExpiryDate,
+        sharedNoExpiry,
+        sharedCredentialId,
+        sharedCredentialUrl,
+        sharedDescription
+    } = elements.addSectionFields;
     const title = readValue(sharedTitle);
+    const type = readValue(sharedType);
     const subtitle = readValue(sharedSubtitle);
-    const dates = readValue(sharedDates);
+    const issueDate = readValue(sharedIssueDate);
+    const noExpiry = Boolean(sharedNoExpiry?.checked);
+    const expiryDate = noExpiry ? "" : readValue(sharedExpiryDate);
+    const credentialId = readValue(sharedCredentialId);
+    const credentialUrl = readValue(sharedCredentialUrl);
     const description = readValue(sharedDescription);
-    if (!title || !subtitle || !dates || !description) {
-        setFeedback("Fill in all qualifications details before saving.");
-        return focusFirstEmptyField([sharedTitle, sharedSubtitle, sharedDates, sharedDescription]);
+    if (!title || !type || !subtitle || !issueDate) {
+        setFeedback("Fill in qualification name, type, issuer, and issue date before saving.");
+        return focusFirstEmptyField([sharedTitle, sharedType, sharedSubtitle, sharedIssueDate]);
     }
 
-    return { id: createItemId("qualifications"), logo: createLogoFromText(title), title, subtitle, dates, description };
+    if (!noExpiry && expiryDate && expiryDate < issueDate) {
+        setFeedback("Expiry date cannot be before the issue date.");
+        sharedExpiryDate.focus();
+        return null;
+    }
+
+    return {
+        id: createItemId("qualifications"),
+        logo: createLogoFromText(title),
+        title,
+        type,
+        subtitle,
+        issueDate,
+        expiryDate,
+        noExpiry,
+        dates: getQualificationDates(issueDate, expiryDate, noExpiry),
+        credentialId,
+        credentialUrl,
+        description
+    };
 }
 
 function focusFirstEmptyField(fields) {
@@ -794,6 +933,73 @@ function countWords(value) {
     return value.trim() ? value.trim().split(/\s+/).length : 0;
 }
 
+function syncEducationCurrentState(fields) {
+    if (!fields.educationCurrent || !fields.educationEndDate) return;
+
+    fields.educationEndDate.disabled = fields.educationCurrent.checked;
+    if (fields.educationCurrent.checked) {
+        fields.educationEndDate.value = "";
+    }
+}
+
+function syncQualificationExpiryState(fields) {
+    if (!fields.sharedNoExpiry || !fields.sharedExpiryDate) return;
+
+    fields.sharedExpiryDate.disabled = fields.sharedNoExpiry.checked;
+    if (fields.sharedNoExpiry.checked) {
+        fields.sharedExpiryDate.value = "";
+    }
+}
+
+function getDateInputValue(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+}
+
+function formatDateForDisplay(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value || "";
+
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat("en-ZA", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    }).format(date);
+}
+
+function formatEducationDateRange(item) {
+    if (!item) return "";
+    if (item.startDate) {
+        const start = formatDateForDisplay(item.startDate);
+        const end = item.current ? "Present" : formatDateForDisplay(item.endDate);
+        return [start, end].filter(Boolean).join(" - ");
+    }
+
+    return formatLegacyDateRange(item.dates);
+}
+
+function formatLegacyDateRange(value) {
+    if (!value) return "";
+    return value
+        .split(" - ")
+        .map((part) => part === "Present" ? part : formatDateForDisplay(part))
+        .join(" - ");
+}
+
+function getQualificationDates(issueDate, expiryDate, noExpiry) {
+    if (noExpiry) return `${issueDate} - No Expiry`;
+    return [issueDate, expiryDate].filter(Boolean).join(" - ");
+}
+
+function getQualificationDisplay(item) {
+    return {
+        subtitle: [item.type, item.subtitle].filter(Boolean).join(" - "),
+        dates: formatLegacyDateRange(item.dates || getQualificationDates(item.issueDate, item.expiryDate, item.noExpiry))
+    };
+}
+
 function mergeUniqueItems(existingItems, newItems) {
     const seen = new Set();
     return [...existingItems, ...newItems].filter((item) => {
@@ -805,7 +1011,19 @@ function mergeUniqueItems(existingItems, newItems) {
 }
 
 function createEmptyEducationItem() {
-    return { id: createItemId("education"), logo: "", school: "", field: "", dates: "" };
+    return {
+        id: createItemId("education"),
+        logo: "",
+        school: "",
+        level: "",
+        field: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        dates: "",
+        performance: "",
+        description: ""
+    };
 }
 
 function createItemId(prefix) {
@@ -836,12 +1054,73 @@ function closeAvatarMenu() {
 
 function handleViewProfile() {
     closeAvatarMenu();
-    window.location.href = "../Applicant_profile_page/global_profile.html";
+    openProfilePictureViewer();
+}
+
+function openProfilePictureViewer() {
+    const profile = state.pageData?.profile || {};
+    const hasPhoto = Boolean(profile.photoUrl);
+
+    if (hasPhoto) {
+        elements.profilePicturePreview.src = profile.photoUrl;
+        elements.profilePicturePreview.hidden = false;
+        elements.profilePictureFallback.hidden = true;
+    } else {
+        elements.profilePicturePreview.hidden = true;
+        elements.profilePicturePreview.removeAttribute("src");
+        elements.profilePictureFallback.hidden = false;
+        setText(elements.profilePictureFallback, getInitials(profile.name));
+    }
+
+    if (typeof elements.profilePictureModal.showModal === "function") {
+        elements.profilePictureModal.showModal();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = false;
+}
+
+function closeProfilePictureViewer() {
+    if (!elements.profilePictureModal) return;
+
+    if (typeof elements.profilePictureModal.close === "function" && elements.profilePictureModal.open) {
+        elements.profilePictureModal.close();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = true;
+}
+
+function isPictureViewerOpen() {
+    if (!elements.profilePictureModal) return false;
+    if (elements.profilePictureModal.open) return true;
+    return typeof elements.profilePictureModal.showModal !== "function" && elements.profilePictureModal.hidden === false;
 }
 
 function triggerPhotoPicker() {
     closeAvatarMenu();
     elements.photoInput.click();
+}
+
+async function handleDeleteProfilePhoto() {
+    closeAvatarMenu();
+    closeProfilePictureViewer();
+
+    if (!state.pageData?.profile?.photoUrl) {
+        setFeedback("There is no profile picture to delete.");
+        return;
+    }
+
+    try {
+        releaseTemporaryPhotoUrl();
+        state.pageData.profile.photoUrl = "";
+        state.pageData = await profileGateway.savePageData(state.pageData);
+        renderProfile(state.pageData.profile);
+        setFeedback("Profile picture deleted.");
+    } catch (error) {
+        console.error("Unable to delete the profile picture.", error);
+        setFeedback(error?.message || "The profile picture could not be deleted.");
+    }
 }
 
 function triggerCvPicker() {

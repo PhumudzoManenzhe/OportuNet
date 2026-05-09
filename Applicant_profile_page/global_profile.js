@@ -87,6 +87,7 @@ const elements = {
     cvFileName: document.getElementById("cv-file-name"),
     cvFileNote: document.getElementById("cv-file-note"),
     cvSection: document.getElementById("cv-section"),
+    closeProfilePictureButton: document.getElementById("close-profile-picture-button"),
     educationList: document.getElementById("education-list"),
     educationSection: document.getElementById("education-section"),
     educationTemplate: document.getElementById("education-item-template"),
@@ -99,6 +100,10 @@ const elements = {
     personalPhone: document.getElementById("personal-phone"),
     profileBackButton: document.getElementById("profile-back-button"),
     profileName: document.getElementById("profile-name"),
+    profilePictureButton: document.getElementById("profile-picture-button"),
+    profilePictureFallback: document.getElementById("profile-picture-fallback"),
+    profilePictureModal: document.getElementById("profile-picture-modal"),
+    profilePicturePreview: document.getElementById("profile-picture-preview"),
     profilePhoto: document.getElementById("profile-photo"),
     profileSearchForm: document.getElementById("profile-search-form"),
     projectsList: document.getElementById("projects-list"),
@@ -134,6 +139,24 @@ function bindEvents() {
     if (elements.profileSearchForm) {
         elements.profileSearchForm.addEventListener("submit", handleSearchSubmit);
     }
+
+    if (elements.profilePictureButton) {
+        elements.profilePictureButton.addEventListener("click", openProfilePictureViewer);
+    }
+
+    if (elements.closeProfilePictureButton) {
+        elements.closeProfilePictureButton.addEventListener("click", closeProfilePictureViewer);
+    }
+
+    if (elements.profilePictureModal) {
+        elements.profilePictureModal.addEventListener("click", ({ target }) => {
+            if (target === elements.profilePictureModal) closeProfilePictureViewer();
+        });
+    }
+
+    document.addEventListener("keydown", ({ key }) => {
+        if (key === "Escape" && isPictureViewerOpen()) closeProfilePictureViewer();
+    });
 }
 
 function handleBackNavigation() {
@@ -296,12 +319,17 @@ function renderEducationItems(items, targetList) {
         const title = fragment.querySelector(".resume-title");
         const field = fragment.querySelector(".education-field-line");
         const dates = fragment.querySelector(".education-date-line");
+        const performance = fragment.querySelector(".education-performance-line");
+        const description = fragment.querySelector(".education-description-line");
+        const fieldText = [item.level, item.field].filter(Boolean).join(" - ");
 
         listItem.dataset.entryId = item.id;
         logo.textContent = item.logo || createLogoFromText(item.school);
         title.textContent = item.school;
-        setOptionalText(field, item.field);
-        setOptionalText(dates, item.dates);
+        setOptionalText(field, fieldText);
+        setOptionalText(dates, formatEducationDateRange(item));
+        setOptionalText(performance, item.performance);
+        setOptionalText(description, item.description);
 
         targetList.append(fragment);
     });
@@ -348,8 +376,10 @@ function renderSharedItems(items, targetList) {
         listItem.dataset.entryId = item.id;
         logo.textContent = item.logo || createLogoFromText(item.title);
         title.textContent = item.title;
-        setOptionalText(companyLine, item.subtitle);
-        setOptionalText(dateLine, item.dates);
+        const details = getQualificationDisplay(item);
+
+        setOptionalText(companyLine, details.subtitle);
+        setOptionalText(dateLine, details.dates);
         setOptionalText(locationLine, "");
         setOptionalText(description, item.description);
 
@@ -372,6 +402,91 @@ function setDetailText(element, value) {
 function createLogoFromText(value) {
     const match = value.trim().match(/[A-Za-z0-9]/);
     return match ? match[0].toUpperCase() : "?";
+}
+
+function openProfilePictureViewer() {
+    const profile = state.pageData?.profile || {};
+    const hasPhoto = Boolean(profile.photoUrl);
+
+    if (hasPhoto) {
+        elements.profilePicturePreview.src = profile.photoUrl;
+        elements.profilePicturePreview.hidden = false;
+        elements.profilePictureFallback.hidden = true;
+    } else {
+        elements.profilePicturePreview.hidden = true;
+        elements.profilePicturePreview.removeAttribute("src");
+        elements.profilePictureFallback.hidden = false;
+        elements.profilePictureFallback.textContent = getInitials(profile.name);
+    }
+
+    if (typeof elements.profilePictureModal.showModal === "function") {
+        elements.profilePictureModal.showModal();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = false;
+}
+
+function closeProfilePictureViewer() {
+    if (!elements.profilePictureModal) return;
+
+    if (typeof elements.profilePictureModal.close === "function" && elements.profilePictureModal.open) {
+        elements.profilePictureModal.close();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = true;
+}
+
+function isPictureViewerOpen() {
+    if (!elements.profilePictureModal) return false;
+    if (elements.profilePictureModal.open) return true;
+    return typeof elements.profilePictureModal.showModal !== "function" && elements.profilePictureModal.hidden === false;
+}
+
+function formatDateForDisplay(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value || "";
+
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat("en-ZA", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    }).format(date);
+}
+
+function formatEducationDateRange(item) {
+    if (!item) return "";
+    if (item.startDate) {
+        const start = formatDateForDisplay(item.startDate);
+        const end = item.current ? "Present" : formatDateForDisplay(item.endDate);
+        return [start, end].filter(Boolean).join(" - ");
+    }
+
+    return formatLegacyDateRange(item.dates);
+}
+
+function formatLegacyDateRange(value) {
+    if (!value) return "";
+    return value
+        .split(" - ")
+        .map((part) => part === "Present" || part === "No Expiry" ? part : formatDateForDisplay(part))
+        .join(" - ");
+}
+
+function getQualificationDates(issueDate, expiryDate, noExpiry) {
+    if (noExpiry) return `${issueDate} - No Expiry`;
+    return [issueDate, expiryDate].filter(Boolean).join(" - ");
+}
+
+function getQualificationDisplay(item) {
+    return {
+        subtitle: [item.type, item.subtitle].filter(Boolean).join(" - "),
+        dates: formatLegacyDateRange(item.dates || getQualificationDates(item.issueDate, item.expiryDate, item.noExpiry))
+    };
 }
 
 function getInitials(name) {

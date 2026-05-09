@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A mobile-first LinkedIn-style profile page with editable profile sections and future-ready backend placeholders.">
-    <title>LinkedIn-Style Profile</title>
+    <title>Editable profile</title>
     <link rel="stylesheet" href="../shared/app-shell.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="profile_style.css">
@@ -49,6 +49,7 @@
                     <ul>
                         <li><button type="button" id="view-profile-option">View profile</button></li>
                         <li><button type="button" id="change-photo-option">Change profile picture</button></li>
+                        <li><button type="button" id="delete-photo-option" class="section-action-delete" hidden>Delete profile picture</button></li>
                     </ul>
                 </aside>
 
@@ -270,30 +271,85 @@
 
             <fieldset id="education-add-group" class="editor-group" hidden>
                 <legend>Education details</legend>
-                <label class="form-field" for="add-education-school-input">School name
-                    <input id="add-education-school-input" name="addEducationSchool" type="text" maxlength="120">
+                <label class="form-field" for="add-education-school-input">Institution/School name
+                    <input id="add-education-school-input" name="addEducationSchool" type="text" maxlength="120" placeholder="e.g., University of the Witwatersrand">
+                </label>
+                <label class="form-field" for="add-education-level-input">Education level
+                    <select id="add-education-level-input" name="addEducationLevel">
+                        <option value="">Select education level</option>
+                        <option>High School</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Honours</option>
+                        <option>Master's Degree</option>
+                        <option>PhD</option>
+                        <option>Other</option>
+                    </select>
                 </label>
                 <label class="form-field" for="add-education-field-input">Study field
-                    <input id="add-education-field-input" name="addEducationField" type="text" maxlength="120">
+                    <input id="add-education-field-input" name="addEducationField" type="text" maxlength="120" placeholder="e.g., Computer Science">
                 </label>
-                <label class="form-field" for="add-education-dates-input">Education dates
-                    <input id="add-education-dates-input" name="addEducationDates" type="text" maxlength="120">
+                <div class="field-grid">
+                    <label class="form-field" for="add-education-start-date-input">Start date
+                        <input id="add-education-start-date-input" name="addEducationStartDate" type="date">
+                    </label>
+                    <label class="form-field" for="add-education-end-date-input">End date
+                        <input id="add-education-end-date-input" name="addEducationEndDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="add-education-current-input">
+                    <input id="add-education-current-input" name="addEducationCurrent" type="checkbox">
+                    <span>Currently studying here</span>
+                </label>
+                <label class="form-field" for="add-education-performance-input">Academic performance <span class="field-note">Optional</span>
+                    <input id="add-education-performance-input" name="addEducationPerformance" type="text" maxlength="120" placeholder="e.g., 75% Average, GPA 3.8, Cum Laude">
+                </label>
+                <label class="form-field" for="add-education-description-input">Description <span class="field-note">Optional</span>
+                    <textarea id="add-education-description-input" name="addEducationDescription" rows="4" maxlength="280" placeholder="Achievements, projects, leadership roles..."></textarea>
                 </label>
             </fieldset>
 
             <fieldset id="supplemental-add-group" class="editor-group" hidden>
                 <legend id="supplemental-legend">Section details</legend>
                 <label class="form-field" for="add-shared-title-input"><span id="shared-title-label">Title</span>
-                    <input id="add-shared-title-input" name="addSharedTitle" type="text" maxlength="120">
+                    <input id="add-shared-title-input" name="addSharedTitle" type="text" maxlength="120" placeholder="e.g., AWS Cloud Practitioner">
+                </label>
+                <label class="form-field" for="add-shared-type-input"><span id="shared-type-label">Type</span>
+                    <select id="add-shared-type-input" name="addSharedType">
+                        <option value="">Select qualification type</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Degree</option>
+                        <option>License</option>
+                        <option>Online Certification</option>
+                        <option>Short Course</option>
+                        <option>Other</option>
+                    </select>
                 </label>
                 <label class="form-field" for="add-shared-subtitle-input"><span id="shared-subtitle-label">Subtitle</span>
-                    <input id="add-shared-subtitle-input" name="addSharedSubtitle" type="text" maxlength="160">
+                    <input id="add-shared-subtitle-input" name="addSharedSubtitle" type="text" maxlength="160" placeholder="e.g., Cisco, Google, Coursera">
                 </label>
-                <label class="form-field" for="add-shared-dates-input"><span id="shared-dates-label">Dates</span>
-                    <input id="add-shared-dates-input" name="addSharedDates" type="text" maxlength="120">
+                <div class="field-grid">
+                    <label class="form-field" for="add-shared-issue-date-input"><span id="shared-issue-date-label">Issue date</span>
+                        <input id="add-shared-issue-date-input" name="addSharedIssueDate" type="date">
+                    </label>
+                    <label class="form-field" for="add-shared-expiry-date-input"><span id="shared-expiry-date-label">Expiry date</span>
+                        <input id="add-shared-expiry-date-input" name="addSharedExpiryDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="add-shared-no-expiry-input">
+                    <input id="add-shared-no-expiry-input" name="addSharedNoExpiry" type="checkbox">
+                    <span id="shared-no-expiry-label">This qualification does not expire</span>
+                </label>
+                <label class="form-field" for="add-shared-credential-id-input"><span id="shared-credential-id-label">Credential ID</span> <span class="field-note">Optional</span>
+                    <input id="add-shared-credential-id-input" name="addSharedCredentialId" type="text" maxlength="120" placeholder="e.g., ABCD-12345">
+                </label>
+                <label class="form-field" for="add-shared-credential-url-input"><span id="shared-credential-url-label">Credential URL</span> <span class="field-note">Optional</span>
+                    <input id="add-shared-credential-url-input" name="addSharedCredentialUrl" type="url" maxlength="240" placeholder="https://...">
                 </label>
                 <label class="form-field" for="add-shared-description-input"><span id="shared-description-label">Description</span>
-                    <textarea id="add-shared-description-input" name="addSharedDescription" rows="4" maxlength="260"></textarea>
+                    <textarea id="add-shared-description-input" name="addSharedDescription" rows="4" maxlength="280" placeholder="Skills, technologies, achievements..."></textarea>
                 </label>
             </fieldset>
 
@@ -340,14 +396,42 @@
 
             <fieldset class="editor-group" data-editor-section="education">
                 <legend>Education</legend>
-                <label class="form-field" for="education-school-input">School name
-                    <input id="education-school-input" name="educationSchool" type="text" maxlength="120" required>
+                <label class="form-field" for="education-school-input">Institution name
+                    <input id="education-school-input" name="educationSchool" type="text" maxlength="120" placeholder="e.g., University of the Witwatersrand" required>
+                </label>
+                <label class="form-field" for="education-level-input">Education level
+                    <select id="education-level-input" name="educationLevel" required>
+                        <option value="">Select education level</option>
+                        <option>High School</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Honours</option>
+                        <option>Master's Degree</option>
+                        <option>PhD</option>
+                        <option>Other</option>
+                    </select>
                 </label>
                 <label class="form-field" for="education-field-input">Study field
-                    <input id="education-field-input" name="educationField" type="text" maxlength="120" required>
+                    <input id="education-field-input" name="educationField" type="text" maxlength="120" placeholder="e.g., Computer Science" required>
                 </label>
-                <label class="form-field" for="education-dates-input">Education dates
-                    <input id="education-dates-input" name="educationDates" type="text" maxlength="120" required>
+                <div class="field-grid">
+                    <label class="form-field" for="education-start-date-input">Start date
+                        <input id="education-start-date-input" name="educationStartDate" type="date" required>
+                    </label>
+                    <label class="form-field" for="education-end-date-input">End date
+                        <input id="education-end-date-input" name="educationEndDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="education-current-input">
+                    <input id="education-current-input" name="educationCurrent" type="checkbox">
+                    <span>Currently studying here</span>
+                </label>
+                <label class="form-field" for="education-performance-input">Academic performance <span class="field-note">Optional</span>
+                    <input id="education-performance-input" name="educationPerformance" type="text" maxlength="120" placeholder="e.g., 75% Average, GPA 3.8, Cum Laude">
+                </label>
+                <label class="form-field" for="education-description-input">Description <span class="field-note">Optional</span>
+                    <textarea id="education-description-input" name="educationDescription" rows="4" maxlength="280" placeholder="Achievements, projects, leadership roles..."></textarea>
                 </label>
             </fieldset>
 
@@ -391,6 +475,22 @@
         </form>
     </aside>
 
+    <dialog id="profile-picture-modal" class="picture-modal" aria-labelledby="profile-picture-title">
+        <div class="picture-modal-content">
+            <header class="picture-modal-header">
+                <h2 id="profile-picture-title">Profile picture</h2>
+                <button type="button" id="close-profile-picture-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close profile picture view</span>
+                </button>
+            </header>
+            <figure class="picture-preview">
+                <img id="profile-picture-preview" class="picture-preview-image" alt="Full profile picture" hidden>
+                <span id="profile-picture-fallback" class="picture-preview-fallback" aria-hidden="true"></span>
+            </figure>
+        </div>
+    </dialog>
+
     <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
 
     <template id="resume-item-template">
@@ -420,6 +520,8 @@
                     <h3 class="resume-title"></h3>
                     <p class="resume-meta education-field-line"></p>
                     <p class="resume-meta education-date-line"></p>
+                    <p class="resume-meta education-performance-line"></p>
+                    <p class="resume-description education-description-line"></p>
                 </section>
             </article>
         </li>
