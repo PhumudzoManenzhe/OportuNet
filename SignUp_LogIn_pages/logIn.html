@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Form in HTML and CSS | CodingNepal</title>
+  <link rel="stylesheet" href="/SignUp_LogIn_pages/logIn_style.css" />
+</head>
+<body>
+
+  <main class="login_form">
+    <!-- Login form container -->
+    <form action="#">
+      <h3>Log in with</h3>
+
+      <section class="login_option">
+        <!-- Google button -->
+        <article class="option">
+          <a href="#">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
+            <span>Google</span>
+          </a>
+        </article>
+      </section>
+
+      <!-- Login option separator -->
+      <p class="separator">
+        <span>or</span>
+      </p>
+
+      <!-- Email input box -->
+      <section class="input_box">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter email address" required />
+      </section>
+
+      <!-- Password input box -->
+      <section class="input_box password_box">
+        <header class="password_title">
+          <label for="password">Password</label>
+          <a id="forgotPassword" href="#">Forgot Password?</a>
+        </header>
+
+        <section class="password_wrapper">
+          <input type="password" id="password" placeholder="Enter your password" required />
+          <span id="togglePassword" class="toggle-password">Show</span>
+        </section>
+      </section>
+
+      <!-- Login button -->
+      <button type="submit">Log In</button>
+
+      <p class="sign_up">
+        Don't have an account? <a href="/SignUp_LogIn_pages/index.html">Sign up</a>
+      </p>
+    </form>
+  </main>
+
+  <script type = "module" src="signup_logIn.js"></script>
+
+</body>
+</html>
