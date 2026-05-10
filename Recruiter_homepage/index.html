@@ -7,68 +7,75 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="recruiter_homepage.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body data-theme="light">
+    <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="avatar-sm" aria-hidden="true">
+                    <span class="brand-orbit brand-orbit-one"></span>
+                    <span class="brand-orbit brand-orbit-two"></span>
+                    <span class="brand-node"></span>
+                </div>
+                <div class="profile-info">
+                    <span class="user-name">Recruiter</span>
+                    <span class="profile-caption">Recruiter</span>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close sidebar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Recruiter navigation">
+            <a href="index.html" class="sidebar-link active">Home</a>
+            <a href="#opportunitiesSection" class="sidebar-link">My Posts</a>
+            <a href="#applicationsSection" class="sidebar-link">Applications</a>
+            <a href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" class="sidebar-link">Notifications</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
+        </div>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 
     <!-- ========== HEADER / TOP NAVIGATION ========== -->
     <header class="navbar">
         <div class="nav-left">
-            <div class="profile-static">
-                <div class="avatar-sm">PC</div>
-                <div class="profile-info">
-                    <span class="user-name">Provider Co.</span>
-                    <span class="profile-caption">Recruiter</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="nav-center">
-            <div class="brand-mark">SA</div>
-            <div class="brand-text">
-                <span class="brand-label">SA Skills Portal</span>
-                <p class="brand-subtitle">Connecting talent with opportunities</p>
-            </div>
+            <button class="icon-btn menu-btn" id="hamburgerBtn" type="button" aria-label="Open sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
 
         <div class="nav-right">
-            <button class="icon-btn" id="topNotificationBtn" type="button" aria-label="Notifications">
+            <a class="icon-btn nav-link-icon" id="topNotificationBtn" href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" aria-label="Go to notifications page">
                 <i class="fa-regular fa-bell"></i>
-            </button>
-            <div class="hamburger-menu">
-                <button class="hamburger-btn" id="hamburgerBtn" type="button">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <nav class="hamburger-dropdown" id="hamburgerMenu">
-                    <a href="#" class="hamburger-item" id="settingsOnlyBtn"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
-                </nav>
-            </div>
+            </a>
         </div>
+        
     </header>
 
     <!-- ========== MAIN CONTENT ========== -->
     <main class="container">
+        <!-- Welcome Section -->
         <section class="welcome">
-            <span class="eyebrow">Recruiter Workspace</span>
-            <h1>Welcome back, <span id="recruiterName">Provider Co.</span></h1>
+            <h1>Welcome back, Recruiter</h1>
             <p>Track your opportunities, review applications, and find the next great candidate.</p>
         </section>
 
+        <!-- Opportunities Section -->
         <section id="opportunitiesSection" aria-labelledby="opportunitiesHeading">
             <header class="section-header">
                 <h2 id="opportunitiesHeading">My Posts</h2>
                 <div class="header-buttons">
-                    <div class="sort-buttons">
-                        <span>Sort by:</span>
-                        <button class="sort-btn active" id="sortByDateBtn" type="button">📅 Date</button>
-                        <button class="sort-btn" id="sortByApplicantsBtn" type="button">👥 Applicants</button>
-                    </div>
-                    <button class="btn-secondary" id="exportJobsBtn" type="button">📎 Export CSV</button>
+                    <button class="btn-secondary" id="applicationsBtn" type="button">Applications</button>
                     <button class="btn-primary" id="postJobBtn" type="button">+ Post New Opportunity</button>
                 </div>
             </header>
 
+            <!-- Bulk Delete Sidebar -->
             <aside id="bulkDeleteBar" class="bulk-delete-bar" style="display: none;">
                 <span><strong id="selectedCount">0</strong> jobs selected</span>
                 <div class="bulk-actions">
@@ -77,8 +84,10 @@
                 </div>
             </aside>
 
+            <!-- Job Listings -->
             <section id="opportunitiesList" class="opportunities-grid"></section>
 
+            <!-- Pagination Navigation -->
             <nav id="paginationControls" class="pagination-controls">
                 <button id="prevPageBtn" class="pagination-btn" disabled>◀ Previous</button>
                 <span id="pageInfo">Page 1 of 1</span>
@@ -86,6 +95,7 @@
             </nav>
         </section>
 
+        <!-- Applications Section (hidden by default) -->
         <section id="applicationsSection" style="display: none;">
             <header class="section-header">
                 <h2 id="applicationsHeading">All Applications</h2>
@@ -98,6 +108,7 @@
             <div id="applicationsList" class="applications-table"></div>
         </section>
 
+        <!-- Notifications Section (hidden by default) -->
         <section id="notificationsSection" style="display: none;">
             <header class="section-header">
                 <h2 id="notificationsHeading">Notifications</h2>
@@ -107,7 +118,8 @@
         </section>
     </main>
 
-    <!-- ========== MODALS ========== -->
+    <!-- ========== MODAL DIALOGS ========== -->
+    <!-- Post Job Modal (with SAQA NQF dropdown) -->
     <dialog id="postJobModal" class="modal">
         <div class="modal-content">
             <header class="modal-header">
@@ -143,6 +155,23 @@
                     <label for="jobClosingDate">Closing Date *</label>
                     <input type="date" id="jobClosingDate" required>
                 </div>
+                <!-- SAQA NQF Level Dropdown (Sprint 3 Requirement) -->
+                <div class="form-group">
+                    <label>Minimum NQF Level Required (SAQA) *</label>
+                    <select id="nqfLevel" required>
+                        <option value="">Select NQF Level</option>
+                        <option value="1">NQF Level 1 (Grade 9)</option>
+                        <option value="2">NQF Level 2 (Grade 10)</option>
+                        <option value="3">NQF Level 3 (Grade 11)</option>
+                        <option value="4">NQF Level 4 (National Senior Certificate / Matric)</option>
+                        <option value="5">NQF Level 5 (Higher Certificate)</option>
+                        <option value="6">NQF Level 6 (Diploma / Advanced Certificate)</option>
+                        <option value="7">NQF Level 7 (Bachelor's Degree / Advanced Diploma)</option>
+                        <option value="8">NQF Level 8 (Honours Degree / Postgraduate Diploma)</option>
+                        <option value="9">NQF Level 9 (Master's Degree)</option>
+                        <option value="10">NQF Level 10 (Doctoral Degree)</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="jobRequirements">Requirements (one per line) *</label>
                     <textarea id="jobRequirements" rows="5" required></textarea>
@@ -156,11 +185,10 @@
                     <label for="jobStatus">Status</label>
                     <select id="jobStatus">
                         <option value="active">Active</option>
-                        <option value="draft">Draft (Save for later)</option>
+                        <option value="closed">Closed</option>
                     </select>
                 </div>
                 <footer class="form-buttons">
-                    <button type="button" class="btn-secondary" id="saveDraftBtn">💾 Save as Draft</button>
                     <button type="button" class="btn-secondary" id="cancelModalBtn">Cancel</button>
                     <button type="submit" class="btn-primary" id="submitJobBtn">Post Opportunity</button>
                 </footer>
@@ -168,6 +196,7 @@
         </div>
     </dialog>
 
+    <!-- Confirm Delete Modal -->
     <dialog id="confirmModal" class="modal confirm-modal">
         <div class="modal-content confirm-content">
             <header class="modal-header">
@@ -183,30 +212,6 @@
         </div>
     </dialog>
 
-    <footer class="page-footer">
-        <p>&copy; 2026 SA Skills Portal | Connecting South African talent with opportunities</p>
-    </footer>
-
-    <nav class="bottom-nav">
-        <button class="nav-item active" id="opportunitiesBtn" type="button">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </button>
-        <button class="nav-item" id="applicationsBtn" type="button">
-            <i class="fa-solid fa-file-lines"></i>
-            <span>Applications</span>
-        </button>
-    </nav>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    
-    <!-- Team's shared Firebase config -->
-    <script src="Firestore_db/firebase-config.js"></script>
-    
-    <!-- Recruiter code -->
-    <script src="recruiter_homepage.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
