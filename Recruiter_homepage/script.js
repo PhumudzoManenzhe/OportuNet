@@ -99,6 +99,7 @@ function mapOpportunitySnapshot(snapshot) {
         stipend: job.stipend || "",
         duration: job.duration || "",
         closingDate: job.closingDate || "",
+        nqfLevel: job.nqfLevel || "",
         requirements: Array.isArray(job.requirements) ? job.requirements : [],
         description: job.description || "",
         postedAt: job.postedAt || "",
@@ -271,6 +272,7 @@ async function saveOpportunity(jobData) {
         duration: jobData.duration,
         stipend: jobData.stipend,
         closingDate: jobData.closingDate,
+        nqfLevel: jobData.nqfLevel,
         description: jobData.description,
         requirements: Array.isArray(jobData.requirements) ? jobData.requirements : [],
         status: jobData.status === "closed" ? "closed" : "active",
@@ -397,6 +399,10 @@ function renderOpportunities() {
                     <div>
                         <dt>Closing Date</dt>
                         <dd>${job.closingDate}</dd>
+                    </div>
+                    <div>
+                        <dt>NQF Level (SAQA)</dt>
+                        <dd>${job.nqfLevel ? `NQF Level ${job.nqfLevel}` : 'Not specified'}</dd>
                     </div>
                 </dl>
                 ${job.description ? `<p class="opportunity-summary">${escapeHtml(job.description)}</p>` : ""}
@@ -763,7 +769,7 @@ function renderApplications() {
     let html = '<table><thead><tr><th>Name</th><th>Opportunity</th><th>Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
     filteredApps.forEach(app => {
         const job = jobs.find(j => j.id === app.jobId);
-        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(job?.title || app.opportunityTitle || 'Unknown')}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${app.status}</td><td class="action-buttons"><button class="application-action-btn view-application-btn" onclick="viewApplicant('${app.id}')">View</button><button class="application-action-btn shortlist-application-btn" onclick="shortlistApplicant('${app.id}')">Shortlist</button><button class="application-action-btn reject-application-btn" onclick="rejectApplicant('${app.id}')">Reject</button></td></tr>`;
+        html += `<tr><td data-label="Name">${escapeHtml(app.applicantName)}</td><td data-label="Opportunity">${escapeHtml(job?.title || app.opportunityTitle || 'Unknown')}</td><td data-label="Date">${app.appliedDate}</td><td data-label="Qualifications">${escapeHtml(app.qualifications)}</td><td data-label="Status">${app.status}</td><td data-label="Actions" class="action-buttons"><button class="application-action-btn view-application-btn" onclick="viewApplicant('${app.id}')">View</button><button class="application-action-btn shortlist-application-btn" onclick="shortlistApplicant('${app.id}')">Shortlist</button><button class="application-action-btn reject-application-btn" onclick="rejectApplicant('${app.id}')">Reject</button></td></tr>`;
     });
     html += "</tbody></table>";
     container.innerHTML = html;
@@ -843,6 +849,7 @@ function validateJobForm() {
     const stipend = document.getElementById("jobStipend");
     const duration = document.getElementById("jobDuration");
     const closingDate = document.getElementById("jobClosingDate");
+    const nqfLevel = document.getElementById("nqfLevel");
     const requirements = document.getElementById("jobRequirements");
     
     if (!titleField.value.trim()) { alert("Please enter a job title field"); return false; }
@@ -851,6 +858,7 @@ function validateJobForm() {
     if (!stipend.value.trim()) { alert("Please enter stipend/salary"); return false; }
     if (!duration.value.trim()) { alert("Please enter duration"); return false; }
     if (!closingDate.value) { alert("Please select closing date"); return false; }
+    if (!nqfLevel.value) { alert("Please select the minimum NQF Level (SAQA requirement)"); return false; }
     if (!requirements.value.trim()) { alert("Please enter requirements"); return false; }
     
     return true;
@@ -892,6 +900,7 @@ async function postJob(event) {
         stipend: document.getElementById("jobStipend").value.trim(),
         duration: document.getElementById("jobDuration").value.trim(),
         closingDate: document.getElementById("jobClosingDate").value,
+        nqfLevel: document.getElementById("nqfLevel").value,
         requirements: document.getElementById("jobRequirements").value.trim().split("\n").filter(l => l.trim()),
         description: document.getElementById("jobDescription").value,
         postedAt: existingJob?.postedAt || now,
@@ -944,6 +953,7 @@ function editJob(jobId) {
     document.getElementById("jobStipend").value = job.stipend;
     document.getElementById("jobDuration").value = job.duration;
     document.getElementById("jobClosingDate").value = job.closingDate;
+    document.getElementById("nqfLevel").value = job.nqfLevel || "";
     document.getElementById("jobRequirements").value = job.requirements.join("\n");
     document.getElementById("jobDescription").value = job.description || "";
     document.getElementById("jobStatus").value = job.status;
@@ -1044,7 +1054,7 @@ function viewJobDetails(jobId) {
     if (!job) return;
     
     let reqText = job.requirements.map(r => `- ${r}`).join("\n");
-    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nApplicants: ${getApplicantCount(jobId)}\nStatus: ${job.status}\n\nRequirements:\n${reqText}\n\n${job.description || "No description"}`);
+    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nNQF Level: ${job.nqfLevel || 'Not specified'}\nApplicants: ${getApplicantCount(jobId)}\nStatus: ${job.status}\n\nRequirements:\n${reqText}\n\n${job.description || "No description"}`);
 }
 
 async function viewApplicant(id) {
@@ -1130,9 +1140,9 @@ function exportJobsToCSV() {
         return;
     }
     
-    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,Applicants\n";
+    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,NQF Level,Applicants\n";
     jobs.forEach(job => {
-        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}",${getApplicantCount(job.id)}\n`;
+        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}","${job.nqfLevel || 'Not specified'}",${getApplicantCount(job.id)}\n`;
     });
     
     const blob = new Blob([csv], { type: "text/csv" });
