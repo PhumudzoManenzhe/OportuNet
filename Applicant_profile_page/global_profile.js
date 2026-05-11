@@ -3,10 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const PROFILE_FIELD = "applicantProfile";
-const routeContext = {
-    applicantId: new URLSearchParams(window.location.search).get("applicantId") || "",
-    viewer: new URLSearchParams(window.location.search).get("viewer") || ""
-};
+const routeContext = getRouteContext();
 
 const initialPageData = Object.freeze({
     profile: {
@@ -49,6 +46,48 @@ function cloneData(value) {
     }
 
     return JSON.parse(JSON.stringify(value));
+}
+
+function getRouteContext() {
+    const search = typeof window !== "undefined" && window?.location?.search
+        ? String(window.location.search)
+        : "";
+
+    if (typeof URLSearchParams === "function") {
+        const params = new URLSearchParams(search);
+        return {
+            applicantId: params.get("applicantId") || "",
+            viewer: params.get("viewer") || ""
+        };
+    }
+
+    return {
+        applicantId: readQueryParam(search, "applicantId"),
+        viewer: readQueryParam(search, "viewer")
+    };
+}
+
+function readQueryParam(search, key) {
+    const normalizedSearch = String(search || "").replace(/^\?/, "");
+    if (!normalizedSearch || !key) return "";
+
+    const parts = normalizedSearch.split("&");
+    for (const part of parts) {
+        const [rawKey, rawValue = ""] = part.split("=");
+        if (decodeQueryValue(rawKey) === key) {
+            return decodeQueryValue(rawValue);
+        }
+    }
+
+    return "";
+}
+
+function decodeQueryValue(value) {
+    try {
+        return decodeURIComponent(String(value || "").replace(/\+/g, " "));
+    } catch (_error) {
+        return String(value || "");
+    }
 }
 
 const profileGateway = {
