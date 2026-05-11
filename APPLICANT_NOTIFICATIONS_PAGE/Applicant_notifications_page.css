@@ -31,14 +31,19 @@ body {
 
 .page-header {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 24px;
 }
 
 .page-header h1 {
   font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.page-meta {
+  color: var(--muted);
 }
 
 .notification-list {
@@ -58,12 +63,36 @@ body {
   border-left: 5px solid var(--brand);
 }
 
+.notification-card-positive {
+  background:
+    radial-gradient(circle at top right, rgba(219, 234, 254, 0.7), transparent 30%),
+    var(--surface);
+}
+
+.notification-card-empty {
+  text-align: center;
+}
+
+.notification-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
 .notification-card h2 {
   font-size: 1.05rem;
-  margin-bottom: 8px;
 }
 
 .notification-card p {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.notification-time {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }

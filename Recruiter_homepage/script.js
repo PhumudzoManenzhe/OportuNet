@@ -99,6 +99,7 @@ function mapOpportunitySnapshot(snapshot) {
         stipend: job.stipend || "",
         duration: job.duration || "",
         closingDate: job.closingDate || "",
+        nqfLevel: job.nqfLevel || "",
         requirements: Array.isArray(job.requirements) ? job.requirements : [],
         description: job.description || "",
         postedAt: job.postedAt || "",
@@ -113,13 +114,19 @@ function mapApplicationSnapshot(snapshot) {
     return {
         id: snapshot.id,
         applicantId: application.applicantId || "",
+        applicantEmail: application.applicantEmail || "",
+        companyName: application.companyName || "",
         jobId: application.jobId || "",
         recruiterId: application.recruiterId || "",
         applicantName: application.applicantName || "Unknown applicant",
+        cvFileName: application.cvFileName || "",
+        cvFileUrl: application.cvFileUrl || "",
         qualifications: application.qualifications || "Not provided",
         opportunityTitle: application.opportunityTitle || "",
+        opportunityType: application.opportunityType || "",
         status: application.status || "pending",
         appliedAt: application.appliedAt || "",
+        statusUpdatedAt: application.statusUpdatedAt || application.appliedAt || "",
         appliedDate: formatIsoDate(application.appliedAt)
     };
 }
@@ -265,6 +272,7 @@ async function saveOpportunity(jobData) {
         duration: jobData.duration,
         stipend: jobData.stipend,
         closingDate: jobData.closingDate,
+        nqfLevel: jobData.nqfLevel,
         description: jobData.description,
         requirements: Array.isArray(jobData.requirements) ? jobData.requirements : [],
         status: jobData.status === "closed" ? "closed" : "active",
@@ -392,6 +400,10 @@ function renderOpportunities() {
                         <dt>Closing Date</dt>
                         <dd>${job.closingDate}</dd>
                     </div>
+                    <div>
+                        <dt>NQF Level (SAQA)</dt>
+                        <dd>${job.nqfLevel ? `NQF Level ${job.nqfLevel}` : 'Not specified'}</dd>
+                    </div>
                 </dl>
                 ${job.description ? `<p class="opportunity-summary">${escapeHtml(job.description)}</p>` : ""}
                 <div class="action-buttons-group">
@@ -416,6 +428,209 @@ function renderOpportunities() {
                 updateBulkDeleteBar();
             });
         });
+    }
+}
+
+function getApplicationStatusLabel(status) {
+    const normalizedStatus = String(status || "").trim().toLowerCase();
+    if (!normalizedStatus) return "Pending";
+    return normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1);
+}
+
+function buildApplicationProfileHref(applicantId) {
+    if (!applicantId) return "#";
+    return `../Applicant_profile_page/global_profile.html?applicantId=${encodeURIComponent(applicantId)}&viewer=recruiter`;
+}
+
+function buildApplicationDetailCard(title, metaLines = [], description = "") {
+    const meta = metaLines
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+        .join(" • ");
+    const descriptionMarkup = description
+        ? `<p class="application-detail-description">${escapeHtml(description)}</p>`
+        : "";
+
+    return `
+        <article class="application-detail-card">
+            <h4>${escapeHtml(title || "Untitled")}</h4>
+            ${meta ? `<p class="application-detail-meta">${escapeHtml(meta)}</p>` : ""}
+            ${descriptionMarkup}
+        </article>
+    `;
+}
+
+function renderApplicationSkills(profile = {}) {
+    const softSkills = Array.isArray(profile?.skills?.softSkills) ? profile.skills.softSkills : [];
+    const technicalSkills = Array.isArray(profile?.skills?.technicalSkills) ? profile.skills.technicalSkills : [];
+    const skills = [...technicalSkills, ...softSkills]
+        .map((skill) => String(skill || "").trim())
+        .filter(Boolean);
+
+    if (skills.length === 0) {
+        return '<p class="application-empty-copy">No skills listed yet.</p>';
+    }
+
+    return skills.slice(0, 10).map((skill) => `<span class="application-skill-pill">${escapeHtml(skill)}</span>`).join("");
+}
+
+function renderApplicationQualifications(profile = {}) {
+    const items = Array.isArray(profile?.qualifications?.items) ? profile.qualifications.items : [];
+    if (items.length === 0) {
+        return '<p class="application-empty-copy">No qualifications added yet.</p>';
+    }
+
+    return items.slice(0, 4).map((item) => {
+        const dates = [item?.issueDate, item?.expiryDate].filter(Boolean).join(" - ");
+        const metaLines = [item?.type, item?.subtitle, item?.dates || dates];
+        return buildApplicationDetailCard(item?.title || "Qualification", metaLines, item?.description || "");
+    }).join("");
+}
+
+function renderApplicationHighlights(profile = {}) {
+    const educationItems = Array.isArray(profile?.education) ? profile.education : [];
+    const experienceItems = Array.isArray(profile?.experience) ? profile.experience : [];
+    const items = [];
+
+    if (educationItems[0]) {
+        const education = educationItems[0];
+        items.push(buildApplicationDetailCard(
+            education.school || "Education",
+            [education.level, education.field, education.performance],
+            education.description || ""
+        ));
+    }
+
+    if (experienceItems[0]) {
+        const experience = experienceItems[0];
+        items.push(buildApplicationDetailCard(
+            experience.title || "Experience",
+            [experience.company, experience.employmentType, experience.dates || experience.duration],
+            experience.description || ""
+        ));
+    }
+
+    if (!items.length && profile?.about) {
+        const aboutText = [profile.about.intro, profile.about.passion]
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+            .join(" ");
+        if (aboutText) {
+            items.push(buildApplicationDetailCard("About the applicant", [], aboutText));
+        }
+    }
+
+    return items.join("") || '<p class="application-empty-copy">No additional profile details available yet.</p>';
+}
+
+function setApplicationViewLinks(app, profile = {}) {
+    const profileLink = document.getElementById("applicationViewProfileLink");
+    const cvLink = document.getElementById("applicationViewCvLink");
+
+    if (profileLink) {
+        const href = buildApplicationProfileHref(app.applicantId);
+        profileLink.href = href;
+        profileLink.setAttribute("aria-disabled", String(!app.applicantId));
+        profileLink.classList.toggle("is-disabled", !app.applicantId);
+    }
+
+    if (cvLink) {
+        const fileUrl = profile?.cv?.fileUrl || app.cvFileUrl || "";
+        const fileName = profile?.cv?.fileName || app.cvFileName || "";
+        cvLink.hidden = !fileUrl;
+
+        if (fileUrl) {
+            cvLink.href = fileUrl;
+            if (fileName) {
+                cvLink.download = fileName;
+            } else {
+                cvLink.removeAttribute("download");
+            }
+        } else {
+            cvLink.removeAttribute("href");
+            cvLink.removeAttribute("download");
+        }
+    }
+}
+
+function renderApplicationView(app, profile = {}) {
+    const job = jobs.find((item) => item.id === app.jobId);
+    const applicantName = profile?.profile?.name || app.applicantName || "Unknown applicant";
+    const applicantEmail = profile?.personalDetails?.email || app.applicantEmail || "Not provided";
+    const aboutText = [profile?.about?.intro, profile?.about?.passion]
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+        .join(" ");
+    const subtitleParts = [
+        job?.title || app.opportunityTitle || "Opportunity",
+        aboutText || "Profile details ready for recruiter review."
+    ].filter(Boolean);
+
+    const title = document.getElementById("applicationViewTitle");
+    const subtitle = document.getElementById("applicationViewSubtitle");
+    const status = document.getElementById("applicationViewStatus");
+    const appliedDate = document.getElementById("applicationViewAppliedDate");
+    const opportunity = document.getElementById("applicationViewOpportunity");
+    const email = document.getElementById("applicationViewEmail");
+    const qualifications = document.getElementById("applicationViewQualifications");
+    const skills = document.getElementById("applicationViewSkills");
+    const qualificationItems = document.getElementById("applicationViewQualificationItems");
+    const highlights = document.getElementById("applicationViewHighlights");
+
+    if (title) title.textContent = applicantName;
+    if (subtitle) subtitle.textContent = subtitleParts.join(" • ");
+    if (status) status.textContent = getApplicationStatusLabel(app.status);
+    if (appliedDate) appliedDate.textContent = app.appliedDate || "Not available";
+    if (opportunity) opportunity.textContent = job?.title || app.opportunityTitle || "Unknown opportunity";
+    if (email) email.textContent = applicantEmail;
+    if (qualifications) qualifications.textContent = app.qualifications || "No summary provided yet.";
+    if (skills) skills.innerHTML = renderApplicationSkills(profile);
+    if (qualificationItems) qualificationItems.innerHTML = renderApplicationQualifications(profile);
+    if (highlights) highlights.innerHTML = renderApplicationHighlights(profile);
+
+    setApplicationViewLinks(app, profile);
+}
+
+function openApplicationViewModal() {
+    const modal = document.getElementById("applicationViewModal");
+    if (!modal) return;
+
+    if (typeof modal.showModal === "function") {
+        modal.showModal();
+        return;
+    }
+
+    modal.setAttribute("open", "open");
+    modal.style.display = "flex";
+}
+
+function closeApplicationViewModal() {
+    const modal = document.getElementById("applicationViewModal");
+    if (!modal) return;
+
+    if (typeof modal.close === "function") {
+        modal.close();
+    }
+
+    modal.style.display = "none";
+    modal.removeAttribute("open");
+}
+
+async function loadApplicantProfileForReview(applicantId) {
+    if (!applicantId) {
+        return null;
+    }
+
+    try {
+        const userSnapshot = await getDoc(doc(db, "users", applicantId));
+        if (!userSnapshot.exists()) {
+            return null;
+        }
+
+        return userSnapshot.data()?.applicantProfile || null;
+    } catch (error) {
+        console.error("Unable to load applicant profile for recruiter review.", error);
+        return null;
     }
 }
 
@@ -554,7 +769,7 @@ function renderApplications() {
     let html = '<table><thead><tr><th>Name</th><th>Opportunity</th><th>Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
     filteredApps.forEach(app => {
         const job = jobs.find(j => j.id === app.jobId);
-        html += `<tr><td>${escapeHtml(app.applicantName)}</td><td>${escapeHtml(job?.title || app.opportunityTitle || 'Unknown')}</td><td>${app.appliedDate}</td><td>${escapeHtml(app.qualifications)}</td><td>${app.status}</td><td class="action-buttons"><button onclick="viewApplicant('${app.id}')">View</button><button onclick="shortlistApplicant('${app.id}')">Shortlist</button><button onclick="rejectApplicant('${app.id}')">Reject</button></td></tr>`;
+        html += `<tr><td data-label="Name">${escapeHtml(app.applicantName)}</td><td data-label="Opportunity">${escapeHtml(job?.title || app.opportunityTitle || 'Unknown')}</td><td data-label="Date">${app.appliedDate}</td><td data-label="Qualifications">${escapeHtml(app.qualifications)}</td><td data-label="Status">${app.status}</td><td data-label="Actions" class="action-buttons"><button class="application-action-btn view-application-btn" onclick="viewApplicant('${app.id}')">View</button><button class="application-action-btn shortlist-application-btn" onclick="shortlistApplicant('${app.id}')">Shortlist</button><button class="application-action-btn reject-application-btn" onclick="rejectApplicant('${app.id}')">Reject</button></td></tr>`;
     });
     html += "</tbody></table>";
     container.innerHTML = html;
@@ -634,6 +849,7 @@ function validateJobForm() {
     const stipend = document.getElementById("jobStipend");
     const duration = document.getElementById("jobDuration");
     const closingDate = document.getElementById("jobClosingDate");
+    const nqfLevel = document.getElementById("nqfLevel");
     const requirements = document.getElementById("jobRequirements");
     
     if (!titleField.value.trim()) { alert("Please enter a job title field"); return false; }
@@ -642,6 +858,7 @@ function validateJobForm() {
     if (!stipend.value.trim()) { alert("Please enter stipend/salary"); return false; }
     if (!duration.value.trim()) { alert("Please enter duration"); return false; }
     if (!closingDate.value) { alert("Please select closing date"); return false; }
+    if (!nqfLevel.value) { alert("Please select the minimum NQF Level (SAQA requirement)"); return false; }
     if (!requirements.value.trim()) { alert("Please enter requirements"); return false; }
     
     return true;
@@ -683,6 +900,7 @@ async function postJob(event) {
         stipend: document.getElementById("jobStipend").value.trim(),
         duration: document.getElementById("jobDuration").value.trim(),
         closingDate: document.getElementById("jobClosingDate").value,
+        nqfLevel: document.getElementById("nqfLevel").value,
         requirements: document.getElementById("jobRequirements").value.trim().split("\n").filter(l => l.trim()),
         description: document.getElementById("jobDescription").value,
         postedAt: existingJob?.postedAt || now,
@@ -735,6 +953,7 @@ function editJob(jobId) {
     document.getElementById("jobStipend").value = job.stipend;
     document.getElementById("jobDuration").value = job.duration;
     document.getElementById("jobClosingDate").value = job.closingDate;
+    document.getElementById("nqfLevel").value = job.nqfLevel || "";
     document.getElementById("jobRequirements").value = job.requirements.join("\n");
     document.getElementById("jobDescription").value = job.description || "";
     document.getElementById("jobStatus").value = job.status;
@@ -835,13 +1054,15 @@ function viewJobDetails(jobId) {
     if (!job) return;
     
     let reqText = job.requirements.map(r => `- ${r}`).join("\n");
-    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nApplicants: ${getApplicantCount(jobId)}\nStatus: ${job.status}\n\nRequirements:\n${reqText}\n\n${job.description || "No description"}`);
+    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nNQF Level: ${job.nqfLevel || 'Not specified'}\nApplicants: ${getApplicantCount(jobId)}\nStatus: ${job.status}\n\nRequirements:\n${reqText}\n\n${job.description || "No description"}`);
 }
 
-function viewApplicant(id) {
+async function viewApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
-        alert(`${app.applicantName}\n${app.opportunityTitle || "Opportunity"}\n${app.appliedDate}\n${app.qualifications}\nStatus: ${app.status}`);
+        const profile = await loadApplicantProfileForReview(app.applicantId);
+        renderApplicationView(app, profile || {});
+        openApplicationViewModal();
     }
 }
 
@@ -849,9 +1070,15 @@ async function shortlistApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
         const previousStatus = app.status;
+        const previousStatusUpdatedAt = app.statusUpdatedAt;
+        const statusUpdatedAt = new Date().toISOString();
         try {
-            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), { status: "shortlisted" });
+            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), {
+                status: "shortlisted",
+                statusUpdatedAt
+            });
             app.status = "shortlisted";
+            app.statusUpdatedAt = statusUpdatedAt;
             notifications.unshift({ id: Date.now(), title: "Shortlisted", message: `You shortlisted ${app.applicantName}`, time: "Just now", read: false });
             await saveToLocalStorage();
             renderApplications();
@@ -859,6 +1086,7 @@ async function shortlistApplicant(id) {
             alert(`${app.applicantName} shortlisted`);
         } catch (error) {
             app.status = previousStatus;
+            app.statusUpdatedAt = previousStatusUpdatedAt;
             alert(error?.message || "This application could not be updated.");
         }
     }
@@ -868,9 +1096,15 @@ async function rejectApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
         const previousStatus = app.status;
+        const previousStatusUpdatedAt = app.statusUpdatedAt;
+        const statusUpdatedAt = new Date().toISOString();
         try {
-            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), { status: "rejected" });
+            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), {
+                status: "rejected",
+                statusUpdatedAt
+            });
             app.status = "rejected";
+            app.statusUpdatedAt = statusUpdatedAt;
             notifications.unshift({ id: Date.now(), title: "Rejected", message: `You rejected ${app.applicantName}`, time: "Just now", read: false });
             await saveToLocalStorage();
             renderApplications();
@@ -878,6 +1112,7 @@ async function rejectApplicant(id) {
             alert(`${app.applicantName} rejected`);
         } catch (error) {
             app.status = previousStatus;
+            app.statusUpdatedAt = previousStatusUpdatedAt;
             alert(error?.message || "This application could not be updated.");
         }
     }
@@ -905,9 +1140,9 @@ function exportJobsToCSV() {
         return;
     }
     
-    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,Applicants\n";
+    let csv = "Job Title,Location,Stipend,Duration,Closing Date,Posted Date,Status,NQF Level,Applicants\n";
     jobs.forEach(job => {
-        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}",${getApplicantCount(job.id)}\n`;
+        csv += `"${job.title}","${job.location}","${job.stipend}","${job.duration}","${job.closingDate}","${job.postedDate}","${job.status}","${job.nqfLevel || 'Not specified'}",${getApplicantCount(job.id)}\n`;
     });
     
     const blob = new Blob([csv], { type: "text/csv" });
@@ -1059,6 +1294,9 @@ async function initializeRecruiterHomepage() {
     const confirmCancelBtn = document.getElementById("confirmCancelBtn");
     const confirmOkBtn = document.getElementById("confirmOkBtn");
     const confirmModal = document.getElementById("confirmModal");
+    const applicationViewModal = document.getElementById("applicationViewModal");
+    const closeApplicationViewModalBtn = document.getElementById("closeApplicationViewModalBtn");
+    const closeApplicationViewFooterBtn = document.getElementById("closeApplicationViewFooterBtn");
     const filterAll = document.getElementById("filterAll");
     const filterPending = document.getElementById("filterPending");
     const filterReviewed = document.getElementById("filterReviewed");
@@ -1074,6 +1312,8 @@ async function initializeRecruiterHomepage() {
     if (cancelBulkBtn) cancelBulkBtn.addEventListener("click", () => toggleBulkMode());
     if (confirmCancelBtn) confirmCancelBtn.addEventListener("click", closeDeleteModal);
     if (confirmOkBtn) confirmOkBtn.addEventListener("click", performDeleteJob);
+    if (closeApplicationViewModalBtn) closeApplicationViewModalBtn.addEventListener("click", closeApplicationViewModal);
+    if (closeApplicationViewFooterBtn) closeApplicationViewFooterBtn.addEventListener("click", closeApplicationViewModal);
     if (confirmModal) {
         confirmModal.addEventListener("cancel", (event) => {
             event.preventDefault();
@@ -1082,6 +1322,17 @@ async function initializeRecruiterHomepage() {
         confirmModal.addEventListener("click", (event) => {
             if (event.target === confirmModal) {
                 closeDeleteModal();
+            }
+        });
+    }
+    if (applicationViewModal) {
+        applicationViewModal.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            closeApplicationViewModal();
+        });
+        applicationViewModal.addEventListener("click", (event) => {
+            if (event.target === applicationViewModal) {
+                closeApplicationViewModal();
             }
         });
     }

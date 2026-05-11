@@ -41,6 +41,7 @@
                 { key: "internships", label: "Internships", href: `${base}/INTERNSHIPS_PAGE/Internships_page.html` },
                 { key: "learnerships", label: "Learnerships", href: `${base}/LEARNERSHIPS_PAGE/Learnerships_page.html` },
                 { key: "apprenticeships", label: "Apprenticeships", href: `${base}/APPRENTICESHIPS_PAGE/Apprenticeships_page.html` },
+                { key: "applications", label: "My Applications", href: `${base}/APPLICANT_APPLICATIONS_PAGE/applications.html` },
                 { key: "profile", label: "Profile", href: profileHrefOverride || `${base}/Applicant_profile_page/global_profile.html` },
                 { key: "notifications", label: "Notifications", href: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html` }
             ]
