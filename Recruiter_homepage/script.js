@@ -857,7 +857,7 @@ function validateJobForm() {
     if (!location.value.trim()) { alert("Please enter a location"); return false; }
     if (!stipend.value.trim()) { alert("Please enter stipend/salary"); return false; }
     if (!duration.value.trim()) { alert("Please enter duration"); return false; }
-    if (!closingDate.value) { alert("Please select closing date"); return false; }
+    //if (!closingDate.value) { alert("Please select closing date"); return false; }
     if (!nqfLevel.value) { alert("Please select the minimum NQF Level (SAQA requirement)"); return false; }
     if (!requirements.value.trim()) { alert("Please enter requirements"); return false; }
     
@@ -952,7 +952,7 @@ function editJob(jobId) {
     document.getElementById("jobLocation").value = job.location;
     document.getElementById("jobStipend").value = job.stipend;
     document.getElementById("jobDuration").value = job.duration;
-    document.getElementById("jobClosingDate").value = job.closingDate;
+    //document.getElementById("jobClosingDate").value = job.closingDate;
     document.getElementById("nqfLevel").value = job.nqfLevel || "";
     document.getElementById("jobRequirements").value = job.requirements.join("\n");
     document.getElementById("jobDescription").value = job.description || "";
