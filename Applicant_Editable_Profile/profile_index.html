@@ -11,6 +11,7 @@
     <script src="../shared/app-shell.js" defer></script>
     <script src="profile_script.js" defer></script>
     <script type="module" src="profile_firebase.js"></script>
+    <script type="module" src="choosing_qualification.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
     <header class="app-header">
@@ -283,9 +284,19 @@
 
             <fieldset id="supplemental-add-group" class="editor-group" hidden>
                 <legend id="supplemental-legend">Section details</legend>
-                <label class="form-field" for="add-shared-title-input"><span id="shared-title-label">Title</span>
-                    <input id="add-shared-title-input" name="addSharedTitle" type="text" maxlength="120">
+                <label class="form-field" for="qualificationSelect">
+                    <span id="shared-title-label">Qualification title</span>
+                    <select
+                        id="qualificationSelect"
+                        name="qualification"
+    >
+                        <option value="">
+                            Loading qualifications...
+                        </option>
+                    </select>
                 </label>
+
+                <div id="selectedInfo"></div>
                 <label class="form-field" for="add-shared-subtitle-input"><span id="shared-subtitle-label">Subtitle</span>
                     <input id="add-shared-subtitle-input" name="addSharedSubtitle" type="text" maxlength="160">
                 </label>
