@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Role</title>
+  <link rel="stylesheet" href="chooseRoles_style.css">
+</head>
+<body>
+
+<main class="role-page" aria-labelledby="roleTitle">
+  <section class="role-shell">
+    <section class="role-intro" aria-label="OportuNet onboarding">
+      <p class="eyebrow">OportuNet</p>
+      <h1 id="roleTitle">Select your role</h1>
+      <ul class="role-highlights" aria-label="Role sign in notes">
+        <li>Sign in as an applicant to find jobs and apply.</li>
+        <li>Sign in as a recruiter to post jobs and hire.</li>
+      </ul>
+    </section>
+
+    <section class="role-panel" aria-label="Choose your account role">
+      <header class="panel-header">
+        <!-- <span class="step-pill">Step 1 of 2</span>
+        <h2>How will you use OportuNet?</h2> -->
+      </header>
+
+      <section class="role-options" aria-label="Available roles">
+        <button class="role-btn" id="applicantBtn" type="button" aria-expanded="false" aria-controls="applicantDetailsForm">
+          <span class="role-mark" aria-hidden="true">AP</span>
+          <span class="role-copy">
+            <strong>Applicant</strong>
+          </span>
+        </button>
+
+        <button class="role-btn" id="recruiterBtn" type="button" aria-expanded="false" aria-controls="recruiterDetailsForm">
+          <span class="role-mark recruiter-mark" aria-hidden="true">RE</span>
+          <span class="role-copy">
+            <strong>Recruiter</strong>
+          </span>
+        </button>
+      </section>
+
+      <form id="applicantDetailsForm" class="details-form" hidden>
+        <fieldset>
+          <legend>Applicant details</legend>
+
+          <label class="form-field" for="applicantFullName">
+            <span>Full name</span>
+            <input id="applicantFullName" name="fullName" type="text" maxlength="80" autocomplete="name" required>
+          </label>
+
+          <label class="form-field" for="applicantEmail">
+            <span>Email address</span>
+            <input id="applicantEmail" name="email" type="email" maxlength="120" autocomplete="email" required>
+          </label>
+
+          <label class="form-field" for="applicantPhone">
+            <span>Phone number</span>
+            <input id="applicantPhone" name="phone" type="tel" maxlength="40" autocomplete="tel" required>
+          </label>
+
+          <label class="form-field" for="applicantAddress">
+            <span>Home address <small>Optional</small></span>
+            <textarea id="applicantAddress" name="address" rows="3" maxlength="240" autocomplete="street-address"></textarea>
+          </label>
+        </fieldset>
+
+        <section class="form-actions">
+          <button type="submit" class="continue-btn" id="saveApplicantDetailsBtn">Continue as applicant</button>
+          <button type="button" class="secondary-btn" id="cancelApplicantDetailsBtn">Back</button>
+        </section>
+      </form>
+
+      <form id="recruiterDetailsForm" class="details-form" hidden>
+        <fieldset>
+          <legend>Recruiter details</legend>
+
+          <label class="form-field" for="recruiterFullName">
+            <span>Your name</span>
+            <input id="recruiterFullName" name="fullName" type="text" maxlength="80" autocomplete="name" required>
+          </label>
+
+          <label class="form-field" for="recruiterOrganisationName">
+            <span>Organisation name <small>Optional</small></span>
+            <input id="recruiterOrganisationName" name="organisationName" type="text" maxlength="100" autocomplete="organization">
+          </label>
+        </fieldset>
+
+        <section class="form-actions">
+          <button type="submit" class="continue-btn" id="saveRecruiterDetailsBtn">Continue as recruiter</button>
+          <button type="button" class="secondary-btn" id="cancelRecruiterDetailsBtn">Back</button>
+        </section>
+      </form>
+
+      <!-- <p id="roleFeedback" class="role-feedback" role="status" aria-live="polite" hidden></p> -->
+    </section>
+  </section>
+</main>
+
+<script type="module" src="chooseRoles.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A mobile-first LinkedIn-style profile page with editable profile sections and future-ready backend placeholders.">
+    <title>Editable profile</title>
+    <link rel="stylesheet" href="../shared/app-shell.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="profile_style.css">
+    <script src="../shared/app-shell.js" defer></script>
+    <script src="profile_script.js" defer></script>
+    <script type="module" src="profile_firebase.js"></script>
+</head>
+<body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-replace-header="true">
+    <header class="app-header">
+        <nav class="toolbar" aria-label="Profile navigation">
+            <button type="button" class="toolbar-button" data-feedback="Back navigation will be connected when this page is attached to the wider app.">
+                <span aria-hidden="true">&larr;</span>
+                <span class="sr-only">Go back</span>
+            </button>
+
+            <form class="toolbar-search" role="search" aria-label="Search">
+                <label class="sr-only" for="profile-search">Search</label>
+                <input id="profile-search" name="profile-search" type="search" placeholder="Search">
+            </form>
+
+            <button type="button" class="toolbar-button" data-feedback="Settings will be connected to the wider application shell.">
+                <span aria-hidden="true">&#9881;</span>
+                <span class="sr-only">Open settings</span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="profile-app">
+        <section class="cover-panel" aria-label="Profile cover"></section>
+
+        <article class="profile-card" aria-labelledby="profile-name">
+            <header class="profile-summary">
+                <figure class="profile-figure">
+                    <button type="button" id="avatar-menu-button" class="avatar-button" aria-haspopup="menu" aria-expanded="false" aria-controls="avatar-menu">
+                        <img id="profile-photo" class="profile-photo" alt="Profile picture" hidden>
+                        <span id="avatar-fallback" class="avatar-fallback" aria-hidden="true"></span>
+                        <span class="sr-only">Open profile picture actions</span>
+                    </button>
+                </figure>
+
+                <aside id="avatar-menu" class="avatar-menu" aria-label="Profile picture actions" hidden>
+                    <ul>
+                        <li><button type="button" id="view-profile-option">View profile</button></li>
+                        <li><button type="button" id="change-photo-option">Change profile picture</button></li>
+                        <li><button type="button" id="delete-photo-option" class="section-action-delete" hidden>Delete profile picture</button></li>
+                    </ul>
+                </aside>
+
+                <nav class="profile-summary-tools" aria-label="Profile summary actions">
+                    <details class="section-action-menu">
+                        <summary class="section-icon-button">
+                            <span aria-hidden="true">&#9998;</span>
+                            <span class="sr-only">Open profile summary actions</span>
+                        </summary>
+                        <ul class="section-action-list">
+                            <li><button type="button" data-open-editor="profile-name-input">Edit details</button></li>
+                        </ul>
+                    </details>
+                </nav>
+
+                <h1 id="profile-name"></h1>
+
+                <ul class="action-pills" aria-label="Primary profile actions">
+                    <li><button type="button" id="add-section-button" class="pill pill-outline"></button></li>
+                </ul>
+            </header>
+        </article>
+
+        <section class="screen-section" aria-labelledby="about-heading">
+            <header class="section-heading">
+                <h2 id="about-heading">About</h2>
+                <details class="section-action-menu">
+                    <summary class="section-icon-button">
+                        <span aria-hidden="true">&#9998;</span>
+                        <span class="sr-only">Open about section actions</span>
+                    </summary>
+                    <ul class="section-action-list">
+                        <li><button type="button" data-open-editor="about-intro-input">Edit details</button></li>
+                    </ul>
+                </details>
+            </header>
+            <p id="about-intro" class="body-copy about-copy"></p>
+            <p id="about-passion" class="body-copy detail-empty" hidden>Tell people about yourself, your background, and the kind of opportunities you are looking for.</p>
+        </section>
+
+        <section id="education-section" class="screen-section screen-section-muted" aria-label="Education">
+            <article id="education-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Education</h2>
+                </header>
+                <p id="education-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="education-add-button" class="pill pill-outline pill-wide" data-open-add-section="education"></button>
+                </p>
+            </article>
+            <header id="education-active-header" class="section-heading" hidden>
+                <h2 id="education-heading">Education</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="education">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add education</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open education section actions</span>
+                            </summary>
+                            <ul class="section-action-list">
+                                <li><button type="button" data-open-editor="education-school-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="education">Delete section</button></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="education-list" class="resume-list" hidden></ol>
+        </section>
+
+        <section id="qualifications-section" class="screen-section screen-section-muted" aria-label="Qualifications">
+            <article id="qualifications-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Qualifications</h2>
+                </header>
+                <p id="qualifications-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="qualifications-add-button" class="pill pill-outline pill-wide" data-open-add-section="qualifications"></button>
+                </p>
+            </article>
+            <header id="qualifications-active-header" class="section-heading" hidden>
+                <h2>Qualifications</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="qualifications">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add qualification entry</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open qualifications section actions</span>
+                            </summary>
+                            <ul class="section-action-list">
+                                <li><button type="button" data-open-editor="qualifications-intro-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="qualifications">Delete section</button></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="qualifications-list" class="resume-list" hidden></ol>
+        </section>
+
+        <section id="skills-section" class="screen-section screen-section-muted" aria-label="Skills">
+            <article id="skills-placeholder" class="skills-card section-placeholder-card">
+                <header class="section-heading">
+                    <h2>Skills</h2>
+                </header>
+                <p id="skills-placeholder-intro" class="body-copy"></p>
+                <p class="add-skills-wrap">
+                    <button type="button" id="skills-add-button" class="pill pill-outline pill-wide" data-open-add-section="skills">Add skills</button>
+                </p>
+            </article>
+            <header id="skills-active-header" class="section-heading" hidden>
+                <h2>Skills</h2>
+                <ul class="inline-actions">
+                    <li>
+                        <button type="button" class="section-icon-button" data-open-add-section="skills">
+                            <span aria-hidden="true">+</span>
+                            <span class="sr-only">Add skills</span>
+                        </button>
+                    </li>
+                    <li>
+                        <details class="section-action-menu">
+                            <summary class="section-icon-button">
+                                <span aria-hidden="true">&#9998;</span>
+                                <span class="sr-only">Open skills section actions</span>
+                            </summary>
+                            <ul class="section-action-list">
+                                <li><button type="button" data-open-editor="soft-skills-input">Edit details</button></li>
+                                <li><button type="button" class="section-action-delete" data-delete-section="skills">Delete section</button></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </header>
+            <ol id="skills-list" class="resume-list" hidden></ol>
+        </section>
+
+        <section class="screen-section" aria-labelledby="personal-details-heading">
+            <header class="section-heading">
+                <h2 id="personal-details-heading">Personal details</h2>
+                <details class="section-action-menu">
+                    <summary class="section-icon-button">
+                        <span aria-hidden="true">&#9998;</span>
+                        <span class="sr-only">Open personal details actions</span>
+                    </summary>
+                    <ul class="section-action-list">
+                        <li><button type="button" data-open-editor="phone-input">Edit details</button></li>
+                    </ul>
+                </details>
+            </header>
+
+            <dl class="detail-list">
+                <div class="detail-item">
+                    <dt>Phone number</dt>
+                    <dd id="personal-phone"></dd>
+                </div>
+                <div class="detail-item">
+                    <dt>Email address</dt>
+                    <dd id="personal-email"></dd>
+                </div>
+                <div class="detail-item detail-item-wide">
+                    <dt>Home address</dt>
+                    <dd id="personal-address" class="detail-address"></dd>
+                </div>
+            </dl>
+        </section>
+
+               <section class="screen-section" aria-labelledby="cv-heading">
+            <header class="section-heading section-heading-stack">
+                <div>
+                    <h2 id="cv-heading">CV</h2>
+                </div>
+            </header>
+
+            <article class="document-card">
+                <p id="cv-file-name" class="document-title">No CV uploaded yet</p>
+                <p id="cv-file-note" class="body-copy document-note">Upload a PDF version of your CV. Only PDF files are accepted.</p>
+                <div class="document-actions">
+                    <button type="button" id="upload-cv-button" class="pill pill-outline">Upload PDF CV</button>
+                    <a id="view-cv-link" class="pill pill-primary" href="#" target="_blank" rel="noopener noreferrer" hidden>View CV</a>
+                </div>
+            </article>
+        </section>
+        
+    </main>
+
+    <aside id="add-section-panel" class="editor-panel" hidden aria-labelledby="add-section-heading">
+        <form id="add-section-form" class="editor-form">
+            <header class="editor-header">
+                <h2 id="add-section-heading">Add section details</h2>
+                <button type="button" id="close-add-section-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close add section panel</span>
+                </button>
+            </header>
+
+            <fieldset class="editor-group">
+                <legend>Choose a section</legend>
+                <label class="form-field" for="add-section-select">Section
+                    <select id="add-section-select" name="sectionType" required>
+                        <option value="">Select a section</option>
+                        <option value="education">Education</option>
+                        <option value="qualifications">Qualifications</option>
+                        <option value="skills">Skills</option>
+                    </select>
+                </label>
+            </fieldset>
+
+            <fieldset id="education-add-group" class="editor-group" hidden>
+                <legend>Education details</legend>
+                <label class="form-field" for="add-education-school-input">Institution/School name
+                    <input id="add-education-school-input" name="addEducationSchool" type="text" maxlength="120" placeholder="e.g., University of the Witwatersrand">
+                </label>
+                <label class="form-field" for="add-education-level-input">Education level
+                    <select id="add-education-level-input" name="addEducationLevel">
+                        <option value="">Select education level</option>
+                        <option>High School</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Honours</option>
+                        <option>Master's Degree</option>
+                        <option>PhD</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="form-field" for="add-education-field-input">Study field
+                    <input id="add-education-field-input" name="addEducationField" type="text" maxlength="120" placeholder="e.g., Computer Science">
+                </label>
+                <div class="field-grid">
+                    <label class="form-field" for="add-education-start-date-input">Start date
+                        <input id="add-education-start-date-input" name="addEducationStartDate" type="date">
+                    </label>
+                    <label class="form-field" for="add-education-end-date-input">End date
+                        <input id="add-education-end-date-input" name="addEducationEndDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="add-education-current-input">
+                    <input id="add-education-current-input" name="addEducationCurrent" type="checkbox">
+                    <span>Currently studying here</span>
+                </label>
+                <label class="form-field" for="add-education-performance-input">Academic performance <span class="field-note">Optional</span>
+                    <input id="add-education-performance-input" name="addEducationPerformance" type="text" maxlength="120" placeholder="e.g., 75% Average, GPA 3.8, Cum Laude">
+                </label>
+                <label class="form-field" for="add-education-description-input">Description <span class="field-note">Optional</span>
+                    <textarea id="add-education-description-input" name="addEducationDescription" rows="4" maxlength="280" placeholder="Achievements, projects, leadership roles..."></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset id="supplemental-add-group" class="editor-group" hidden>
+                <legend id="supplemental-legend">Section details</legend>
+                <label class="form-field" for="add-shared-title-input"><span id="shared-title-label">Title</span>
+                    <input id="add-shared-title-input" name="addSharedTitle" type="text" maxlength="120" placeholder="e.g., AWS Cloud Practitioner">
+                </label>
+                <label class="form-field" for="add-shared-type-input"><span id="shared-type-label">Type</span>
+                    <select id="add-shared-type-input" name="addSharedType">
+                        <option value="">Select qualification type</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Degree</option>
+                        <option>License</option>
+                        <option>Online Certification</option>
+                        <option>Short Course</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="form-field" for="add-shared-subtitle-input"><span id="shared-subtitle-label">Subtitle</span>
+                    <input id="add-shared-subtitle-input" name="addSharedSubtitle" type="text" maxlength="160" placeholder="e.g., Cisco, Google, Coursera">
+                </label>
+                <div class="field-grid">
+                    <label class="form-field" for="add-shared-issue-date-input"><span id="shared-issue-date-label">Issue date</span>
+                        <input id="add-shared-issue-date-input" name="addSharedIssueDate" type="date">
+                    </label>
+                    <label class="form-field" for="add-shared-expiry-date-input"><span id="shared-expiry-date-label">Expiry date</span>
+                        <input id="add-shared-expiry-date-input" name="addSharedExpiryDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="add-shared-no-expiry-input">
+                    <input id="add-shared-no-expiry-input" name="addSharedNoExpiry" type="checkbox">
+                    <span id="shared-no-expiry-label">This qualification does not expire</span>
+                </label>
+                <label class="form-field" for="add-shared-credential-id-input"><span id="shared-credential-id-label">Credential ID</span> <span class="field-note">Optional</span>
+                    <input id="add-shared-credential-id-input" name="addSharedCredentialId" type="text" maxlength="120" placeholder="e.g., ABCD-12345">
+                </label>
+                <label class="form-field" for="add-shared-credential-url-input"><span id="shared-credential-url-label">Credential URL</span> <span class="field-note">Optional</span>
+                    <input id="add-shared-credential-url-input" name="addSharedCredentialUrl" type="url" maxlength="240" placeholder="https://...">
+                </label>
+                <label class="form-field" for="add-shared-description-input"><span id="shared-description-label">Description</span>
+                    <textarea id="add-shared-description-input" name="addSharedDescription" rows="4" maxlength="280" placeholder="Skills, technologies, achievements..."></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset id="skills-add-group" class="editor-group" hidden>
+                <legend>Skills</legend>
+                <label class="form-field" for="add-soft-skills-input">Soft skills
+                    <textarea id="add-soft-skills-input" name="addSoftSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+                <label class="form-field" for="add-technical-skills-input">Technical skills
+                    <textarea id="add-technical-skills-input" name="addTechnicalSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+            </fieldset>
+
+            <ul class="editor-actions">
+                <li><button type="submit" class="pill pill-primary pill-wide">Add to profile</button></li>
+                <li><button type="button" id="cancel-add-section-button" class="pill pill-outline pill-wide">Cancel</button></li>
+            </ul>
+        </form>
+    </aside>
+
+    <aside id="editor-panel" class="editor-panel" hidden aria-labelledby="editor-heading">
+        <form id="editor-form" class="editor-form">
+            <header class="editor-header">
+                <h2 id="editor-heading">Edit profile content</h2>
+                <button type="button" id="close-editor-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close editor</span>
+                </button>
+            </header>
+
+            <fieldset class="editor-group" data-editor-section="profile">
+                <legend>Profile</legend>
+                <label class="form-field" for="profile-name-input">Full name
+                    <input id="profile-name-input" name="profileName" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="about">
+                <legend>About</legend>
+                <label class="form-field" for="about-intro-input">About
+                    <textarea id="about-intro-input" name="aboutIntro" rows="8" placeholder="Write about yourself in up to 500 words." required></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="education">
+                <legend>Education</legend>
+                <label class="form-field" for="education-school-input">Institution name
+                    <input id="education-school-input" name="educationSchool" type="text" maxlength="120" placeholder="e.g., University of the Witwatersrand" required>
+                </label>
+                <label class="form-field" for="education-level-input">Education level
+                    <select id="education-level-input" name="educationLevel" required>
+                        <option value="">Select education level</option>
+                        <option>High School</option>
+                        <option>Certificate</option>
+                        <option>Diploma</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Honours</option>
+                        <option>Master's Degree</option>
+                        <option>PhD</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="form-field" for="education-field-input">Study field
+                    <input id="education-field-input" name="educationField" type="text" maxlength="120" placeholder="e.g., Computer Science" required>
+                </label>
+                <div class="field-grid">
+                    <label class="form-field" for="education-start-date-input">Start date
+                        <input id="education-start-date-input" name="educationStartDate" type="date" required>
+                    </label>
+                    <label class="form-field" for="education-end-date-input">End date
+                        <input id="education-end-date-input" name="educationEndDate" type="date">
+                    </label>
+                </div>
+                <label class="checkbox-field" for="education-current-input">
+                    <input id="education-current-input" name="educationCurrent" type="checkbox">
+                    <span>Currently studying here</span>
+                </label>
+                <label class="form-field" for="education-performance-input">Academic performance <span class="field-note">Optional</span>
+                    <input id="education-performance-input" name="educationPerformance" type="text" maxlength="120" placeholder="e.g., 75% Average, GPA 3.8, Cum Laude">
+                </label>
+                <label class="form-field" for="education-description-input">Description <span class="field-note">Optional</span>
+                    <textarea id="education-description-input" name="educationDescription" rows="4" maxlength="280" placeholder="Achievements, projects, leadership roles..."></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="qualifications">
+                <legend>Qualifications</legend>
+                <label class="form-field" for="qualifications-intro-input">Qualifications prompt
+                    <textarea id="qualifications-intro-input" name="qualificationsIntro" rows="3" maxlength="220" required></textarea>
+                </label>
+                <label class="form-field" for="qualifications-button-input">Qualifications button label
+                    <input id="qualifications-button-input" name="qualificationsButton" type="text" maxlength="80" required>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="skills">
+                <legend>Skills</legend>
+                <label class="form-field" for="soft-skills-input">Soft skills
+                    <textarea id="soft-skills-input" name="softSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+                <label class="form-field" for="technical-skills-input">Technical skills
+                    <textarea id="technical-skills-input" name="technicalSkills" rows="3" placeholder="Enter skills separated by commas or new lines"></textarea>
+                </label>
+            </fieldset>
+
+            <fieldset class="editor-group" data-editor-section="personalDetails">
+                <legend>Personal details</legend>
+                <label class="form-field" for="phone-input">Phone number
+                    <input id="phone-input" name="phone" type="tel" maxlength="40" required>
+                </label>
+                <label class="form-field" for="email-input">Email address
+                    <input id="email-input" name="email" type="email" maxlength="120" required>
+                </label>
+                <label class="form-field" for="address-input">Home address
+                    <textarea id="address-input" name="address" rows="4" maxlength="240" required></textarea>
+                </label>
+            </fieldset>
+
+            <ul class="editor-actions">
+                <li><button type="submit" class="pill pill-primary pill-wide">Save changes</button></li>
+                <li><button type="button" id="cancel-editor-button" class="pill pill-outline pill-wide">Cancel</button></li>
+            </ul>
+        </form>
+    </aside>
+
+    <dialog id="profile-picture-modal" class="picture-modal" aria-labelledby="profile-picture-title">
+        <div class="picture-modal-content">
+            <header class="picture-modal-header">
+                <h2 id="profile-picture-title">Profile picture</h2>
+                <button type="button" id="close-profile-picture-button" class="section-icon-button">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close profile picture view</span>
+                </button>
+            </header>
+            <figure class="picture-preview">
+                <img id="profile-picture-preview" class="picture-preview-image" alt="Full profile picture" hidden>
+                <span id="profile-picture-fallback" class="picture-preview-fallback" aria-hidden="true"></span>
+            </figure>
+        </div>
+    </dialog>
+
+    <p id="page-feedback" class="feedback-toast" role="status" aria-live="polite" hidden></p>
+
+    <template id="resume-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo" aria-hidden="true">
+                    <span class="resume-logo-text"></span>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta resume-company-line"></p>
+                    <p class="resume-meta resume-date-line"></p>
+                    <p class="resume-meta resume-location-line"></p>
+                    <p class="resume-description"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <template id="education-item-template">
+        <li>
+            <article class="resume-item">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <span class="resume-logo-text"></span>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <p class="resume-meta education-field-line"></p>
+                    <p class="resume-meta education-date-line"></p>
+                    <p class="resume-meta education-performance-line"></p>
+                    <p class="resume-description education-description-line"></p>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <template id="skill-group-template">
+        <li>
+            <article class="resume-item skill-group-card">
+                <figure class="resume-logo education-logo" aria-hidden="true">
+                    <span class="resume-logo-text"></span>
+                </figure>
+                <section class="resume-copy">
+                    <h3 class="resume-title"></h3>
+                    <ul class="grouped-skill-list"></ul>
+                </section>
+            </article>
+        </li>
+    </template>
+
+    <input id="photo-input" type="file" accept="image/*" hidden>
+    <input id="cv-input" type="file" accept=".pdf,application/pdf" hidden>
+</body>
+</html>

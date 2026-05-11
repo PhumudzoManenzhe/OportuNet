@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicant Homepage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
+    <div class="sidebar-header">
+      <div class="sidebar-brand" aria-label="OpportuNet applicant portal">
+        <div class="avatar-sm" aria-hidden="true">
+          <span class="brand-orbit brand-orbit-one"></span>
+          <span class="brand-orbit brand-orbit-two"></span>
+          <span class="brand-node"></span>
+        </div>
+        <div class="profile-info">
+          <span class="user-name">OpportuNet</span>
+          <span class="profile-caption">Applicant portal</span>
+        </div>
+      </div>
+      <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close sidebar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Applicant navigation">
+      <a href="index.html" class="sidebar-link active">Home</a>
+      <a href="../INTERNSHIPS_PAGE/Internships_page.html" class="sidebar-link">Internships</a>
+      <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="sidebar-link">Learnerships</a>
+      <a href="../APPRENTICESHIPS_PAGE/Apprenticeships_page.html" class="sidebar-link">Apprenticeships</a>
+      <a href="../APPLICANT_APPLICATIONS_PAGE/applications.html" class="sidebar-link">My Applications</a>
+      <a href="../Applicant_Editable_Profile/profile_index.html" class="sidebar-link">Profile</a>
+      <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link">Notifications</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-link delete-account-btn" id="sidebarDeleteAccountBtn" type="button">Delete Account</button>
+      <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="icon-btn menu-btn" id="hamburgerBtn" type="button" aria-label="Open sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <div class="nav-right">
+      <a class="icon-btn nav-link-icon" href="../Applicant_Editable_Profile/profile_index.html" aria-label="Go to profile page">
+        <i class="fa-regular fa-user"></i>
+      </a>
+      <a class="icon-btn nav-link-icon" href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" aria-label="Go to notifications page">
+        <i class="fa-regular fa-bell"></i>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <h1>Welcome back.</h1>
+      <p>Explore opportunities, stay on top of updates, and keep your profile ready for the next application.</p>
+    </section>
+
+    <section class="overview" aria-label="Opportunity categories">
+      <button type="button" class="card-btn" onclick="window.location.href='../INTERNSHIPS_PAGE/Internships_page.html'">
+        <span class="card-btn-kicker">Opportunity Category</span>
+        <span class="card-btn-title">Internships</span>
+        <span class="card-btn-copy">Browse currently available internship positions from participating employers.</span>
+        <span class="card-btn-link">View listings</span>
+      </button>
+
+      <button type="button" class="card-btn" onclick="window.location.href='../LEARNERSHIPS_PAGE/Learnerships_page.html'">
+        <span class="card-btn-kicker">Opportunity Category</span>
+        <span class="card-btn-title">Learnerships</span>
+        <span class="card-btn-copy">Review structured learnership opportunities and entry requirements.</span>
+        <span class="card-btn-link">View listings</span>
+      </button>
+
+      <button type="button" class="card-btn" onclick="window.location.href='../APPRENTICESHIPS_PAGE/Apprenticeships_page.html'">
+        <span class="card-btn-kicker">Opportunity Category</span>
+        <span class="card-btn-title">Apprenticeships</span>
+        <span class="card-btn-copy">Explore apprenticeship openings focused on practical workplace training.</span>
+        <span class="card-btn-link">View listings</span>
+      </button>
+
+      <button type="button" class="card-btn" onclick="window.location.href='../APPLICANT_APPLICATIONS_PAGE/applications.html'">
+        <span class="card-btn-kicker">Application Tracker</span>
+        <span class="card-btn-title">My Applications</span>
+        <span class="card-btn-copy">Review every application you have submitted and follow its latest status update.</span>
+        <span class="card-btn-link">Track progress</span>
+      </button>
+    </section>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

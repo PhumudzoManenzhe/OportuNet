@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="recruiter_notifications_page.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+</head>
+<body data-shell-role="recruiter" data-shell-active="notifications" data-shell-base="..">
+  <main class="container">
+    <header class="page-header">
+      <h1>Notifications</h1>
+    </header>
+
+    <section class="notification-list" aria-label="Recruiter notifications">
+      <article class="notification-card unread">
+        <h2>Applications ready to review</h2>
+        <p>New applications have been submitted for your active opportunities and are waiting for your review.</p>
+      </article>
+
+      <article class="notification-card">
+        <h2>Post closing soon</h2>
+        <p>Your Front-End Internship listing closes in 2 days. Extend the deadline if you still need more applicants.</p>
+      </article>
+
+      <article class="notification-card">
+        <h2>Shortlist reminder</h2>
+        <p>Remember to update shortlisted candidates so they can track their application progress in time.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

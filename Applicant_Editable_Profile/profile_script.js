@@ -1,0 +1,1211 @@
+const initialPageData = Object.freeze({
+    profile: {
+        name: "",
+        addSectionButton: "Add section",
+        photoUrl: ""
+    },
+    about: {
+        intro: "",
+        passion: ""
+    },
+    education: [],
+    qualifications: {
+        intro: "",
+        buttonLabel: "Add qualifications",
+        items: []
+    },
+    skills: {
+        intro: "",
+        softSkills: [],
+        technicalSkills: []
+    },
+    personalDetails: {
+        phone: "",
+        email: "",
+        address: ""
+    },
+    cv: {
+        fileName: "",
+        fileUrl: ""
+    }
+});
+
+const SECTION_LABELS = Object.freeze({
+    profile: "Profile",
+    about: "About",
+    education: "Education",
+    qualifications: "Qualifications",
+    skills: "Skills",
+    personalDetails: "Personal details"
+});
+
+const EDUCATION_EMPTY_STATE = Object.freeze({
+    buttonLabel: "Add education"
+});
+
+const QUALIFICATION_FIELD_COPY = Object.freeze({
+    legend: "Qualification details",
+    title: "Qualification name",
+    type: "Qualification type",
+    subtitle: "Issuing organization / institution",
+    issueDate: "Issue date",
+    expiryDate: "Expiry date",
+    noExpiry: "This qualification does not expire",
+    credentialId: "Credential ID",
+    credentialUrl: "Credential URL",
+    description: "Description / Skills learned"
+});
+
+const HAS_DOM = typeof document !== "undefined";
+const HAS_WINDOW = typeof window !== "undefined";
+
+function cloneData(value) {
+    return typeof structuredClone === "function" ? structuredClone(value) : JSON.parse(JSON.stringify(value));
+}
+
+function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => resolve(typeof reader.result === "string" ? reader.result : ""));
+        reader.addEventListener("error", () => reject(reader.error || new Error("Unable to read the selected file.")));
+        reader.readAsDataURL(file);
+    });
+}
+
+function isPdfFile(file) {
+    return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+}
+
+const profileGateway = {
+    async fetchPageData() { return cloneData(initialPageData); },
+    async savePageData(pageData) { return cloneData(pageData); },
+    async uploadProfilePhoto(file) { return readFileAsDataUrl(file); },
+    async uploadCv(file) { return readFileAsDataUrl(file); }
+};
+
+const state = {
+    activeEditorSection: "",
+    feedbackTimer: null,
+    isAddSectionOpen: false,
+    isEditorOpen: false,
+    isInitialized: false,
+    pageData: null,
+    temporaryPhotoUrl: ""
+};
+
+const $ = (id) => (HAS_DOM ? document.getElementById(id) : null);
+const $$ = (selector) => (HAS_DOM ? Array.from(document.querySelectorAll(selector)) : []);
+const ids = (pairs) => Object.fromEntries(pairs.map(([key, id]) => [key, $(id)]));
+const readValue = (field) => field?.value.trim() || "";
+const setText = (node, value = "") => node && (node.textContent = value);
+const setHidden = (node, value) => node && (node.hidden = value);
+
+const elements = {
+    ...ids([
+        ["aboutIntro", "about-intro"],
+        ["aboutPassion", "about-passion"],
+        ["addSectionButton", "add-section-button"],
+        ["addSectionForm", "add-section-form"],
+        ["addSectionPanel", "add-section-panel"],
+        ["addSectionSelect", "add-section-select"],
+        ["avatarFallback", "avatar-fallback"],
+        ["avatarMenu", "avatar-menu"],
+        ["avatarMenuButton", "avatar-menu-button"],
+        ["cancelAddSectionButton", "cancel-add-section-button"],
+        ["cancelEditorButton", "cancel-editor-button"],
+        ["changePhotoOption", "change-photo-option"],
+        ["closeAddSectionButton", "close-add-section-button"],
+        ["closeEditorButton", "close-editor-button"],
+        ["closeProfilePictureButton", "close-profile-picture-button"],
+        ["cvFileName", "cv-file-name"],
+        ["cvFileNote", "cv-file-note"],
+        ["cvInput", "cv-input"],
+        ["deletePhotoOption", "delete-photo-option"],
+        ["editorForm", "editor-form"],
+        ["editorHeading", "editor-heading"],
+        ["editorPanel", "editor-panel"],
+        ["educationActiveHeader", "education-active-header"],
+        ["educationAddButton", "education-add-button"],
+        ["educationAddGroup", "education-add-group"],
+        ["educationIntro", "education-intro"],
+        ["educationList", "education-list"],
+        ["educationPlaceholder", "education-placeholder"],
+        ["educationSection", "education-section"],
+        ["educationTemplate", "education-item-template"],
+        ["feedback", "page-feedback"],
+        ["personalAddress", "personal-address"],
+        ["personalEmail", "personal-email"],
+        ["personalPhone", "personal-phone"],
+        ["photoInput", "photo-input"],
+        ["profileName", "profile-name"],
+        ["profilePictureFallback", "profile-picture-fallback"],
+        ["profilePictureModal", "profile-picture-modal"],
+        ["profilePicturePreview", "profile-picture-preview"],
+        ["profilePhoto", "profile-photo"],
+        ["qualificationsActiveHeader", "qualifications-active-header"],
+        ["qualificationsAddButton", "qualifications-add-button"],
+        ["qualificationsIntro", "qualifications-intro"],
+        ["qualificationsList", "qualifications-list"],
+        ["qualificationsPlaceholder", "qualifications-placeholder"],
+        ["qualificationsSection", "qualifications-section"],
+        ["resumeTemplate", "resume-item-template"],
+        ["sharedDescriptionLabel", "shared-description-label"],
+        ["sharedCredentialIdLabel", "shared-credential-id-label"],
+        ["sharedCredentialUrlLabel", "shared-credential-url-label"],
+        ["sharedExpiryDateLabel", "shared-expiry-date-label"],
+        ["sharedIssueDateLabel", "shared-issue-date-label"],
+        ["sharedNoExpiryLabel", "shared-no-expiry-label"],
+        ["sharedSubtitleLabel", "shared-subtitle-label"],
+        ["sharedTitleLabel", "shared-title-label"],
+        ["sharedTypeLabel", "shared-type-label"],
+        ["skillGroupTemplate", "skill-group-template"],
+        ["skillsActiveHeader", "skills-active-header"],
+        ["skillsAddButton", "skills-add-button"],
+        ["skillsAddGroup", "skills-add-group"],
+        ["skillsList", "skills-list"],
+        ["skillsPlaceholder", "skills-placeholder"],
+        ["skillsPlaceholderIntro", "skills-placeholder-intro"],
+        ["skillsSection", "skills-section"],
+        ["supplementalAddGroup", "supplemental-add-group"],
+        ["supplementalLegend", "supplemental-legend"],
+        ["uploadCvButton", "upload-cv-button"],
+        ["viewCvLink", "view-cv-link"],
+        ["viewProfileOption", "view-profile-option"]
+    ]),
+    editorGroups: $$("[data-editor-section]"),
+    addSectionFields: ids([
+        ["educationCurrent", "add-education-current-input"],
+        ["educationDescription", "add-education-description-input"],
+        ["educationEndDate", "add-education-end-date-input"],
+        ["educationSchool", "add-education-school-input"],
+        ["educationField", "add-education-field-input"],
+        ["educationLevel", "add-education-level-input"],
+        ["educationPerformance", "add-education-performance-input"],
+        ["educationStartDate", "add-education-start-date-input"],
+        ["sharedTitle", "add-shared-title-input"],
+        ["sharedType", "add-shared-type-input"],
+        ["sharedSubtitle", "add-shared-subtitle-input"],
+        ["sharedIssueDate", "add-shared-issue-date-input"],
+        ["sharedExpiryDate", "add-shared-expiry-date-input"],
+        ["sharedNoExpiry", "add-shared-no-expiry-input"],
+        ["sharedCredentialId", "add-shared-credential-id-input"],
+        ["sharedCredentialUrl", "add-shared-credential-url-input"],
+        ["sharedDescription", "add-shared-description-input"],
+        ["softSkills", "add-soft-skills-input"],
+        ["technicalSkills", "add-technical-skills-input"]
+    ]),
+    formFields: ids([
+        ["aboutIntro", "about-intro-input"],
+        ["address", "address-input"],
+        ["educationCurrent", "education-current-input"],
+        ["educationDescription", "education-description-input"],
+        ["educationEndDate", "education-end-date-input"],
+        ["educationField", "education-field-input"],
+        ["educationLevel", "education-level-input"],
+        ["educationPerformance", "education-performance-input"],
+        ["educationSchool", "education-school-input"],
+        ["educationStartDate", "education-start-date-input"],
+        ["email", "email-input"],
+        ["phone", "phone-input"],
+        ["profileName", "profile-name-input"],
+        ["qualificationsButton", "qualifications-button-input"],
+        ["qualificationsIntro", "qualifications-intro-input"],
+        ["softSkills", "soft-skills-input"],
+        ["technicalSkills", "technical-skills-input"]
+    ])
+};
+
+const editorTargetMap = Object.freeze({
+    "profile-name-input": "profile",
+    "about-intro-input": "about",
+    "education-school-input": "education",
+    "education-level-input": "education",
+    "education-field-input": "education",
+    "education-start-date-input": "education",
+    "education-end-date-input": "education",
+    "education-performance-input": "education",
+    "education-description-input": "education",
+    "qualifications-intro-input": "qualifications",
+    "qualifications-button-input": "qualifications",
+    "soft-skills-input": "skills",
+    "technical-skills-input": "skills",
+    "phone-input": "personalDetails",
+    "email-input": "personalDetails",
+    "address-input": "personalDetails"
+});
+
+const sectionViews = {
+    education: {
+        section: elements.educationSection,
+        placeholder: elements.educationPlaceholder,
+        header: elements.educationActiveHeader,
+        list: elements.educationList,
+        intro: elements.educationIntro,
+        button: elements.educationAddButton,
+        getItems: (pageData) => pageData.education,
+        getIntro: () => EDUCATION_EMPTY_STATE.intro,
+        getButton: () => EDUCATION_EMPTY_STATE.buttonLabel,
+        render: renderEducationItems
+    },
+    qualifications: {
+        section: elements.qualificationsSection,
+        placeholder: elements.qualificationsPlaceholder,
+        header: elements.qualificationsActiveHeader,
+        list: elements.qualificationsList,
+        intro: elements.qualificationsIntro,
+        button: elements.qualificationsAddButton,
+        getItems: (pageData) => pageData.qualifications.items,
+        getIntro: (pageData) => pageData.qualifications.intro,
+        getButton: (pageData) => pageData.qualifications.buttonLabel,
+        render: renderResumeItems
+    },
+    skills: {
+        section: elements.skillsSection,
+        placeholder: elements.skillsPlaceholder,
+        header: elements.skillsActiveHeader,
+        list: elements.skillsList,
+        intro: elements.skillsPlaceholderIntro,
+        button: elements.skillsAddButton,
+        getItems: (pageData) => getSkillGroups(pageData.skills),
+        getIntro: (pageData) => pageData.skills.intro,
+        getButton: () => "Add skills",
+        render: renderSkillGroups
+    }
+};
+
+const saveHandlers = {
+    profile(pageData) {
+        Object.assign(pageData.profile, {
+            name: readValue(elements.formFields.profileName)
+        });
+    },
+    about(pageData) {
+        const aboutText = readValue(elements.formFields.aboutIntro);
+        if (countWords(aboutText) > 500) {
+            setFeedback("Your About section can be up to 500 words.");
+            elements.formFields.aboutIntro.focus();
+            return false;
+        }
+
+        Object.assign(pageData.about, {
+            intro: aboutText,
+            passion: ""
+        });
+    },
+    education(pageData) {
+        const item = pageData.education[0] || createEmptyEducationItem();
+        const nextItem = readEducationFields(elements.formFields, { requireAll: true });
+        if (!nextItem) return false;
+
+        Object.assign(item, nextItem);
+        pageData.education[0] = item;
+    },
+    qualifications(pageData) {
+        Object.assign(pageData.qualifications, {
+            intro: readValue(elements.formFields.qualificationsIntro),
+            buttonLabel: readValue(elements.formFields.qualificationsButton)
+        });
+    },
+    skills(pageData) {
+        pageData.skills.softSkills = parseSkillText(elements.formFields.softSkills.value);
+        pageData.skills.technicalSkills = parseSkillText(elements.formFields.technicalSkills.value);
+    },
+    personalDetails(pageData) {
+        Object.assign(pageData.personalDetails, {
+            phone: readValue(elements.formFields.phone),
+            email: readValue(elements.formFields.email),
+            address: readValue(elements.formFields.address)
+        });
+    }
+};
+
+const addHandlers = {
+    education(pageData) {
+        const item = buildEducationItem();
+        if (!item) return null;
+        pageData.education.push(item);
+        return "education";
+    },
+    qualifications(pageData) {
+        const item = buildQualificationItem();
+        if (!item) return null;
+        pageData.qualifications.items.push(item);
+        return "qualifications";
+    },
+    skills(pageData) {
+        const softSkills = parseSkillText(elements.addSectionFields.softSkills.value);
+        const technicalSkills = parseSkillText(elements.addSectionFields.technicalSkills.value);
+        if (!softSkills.length && !technicalSkills.length) {
+            setFeedback("Add at least one skill before saving.");
+            elements.addSectionFields.softSkills.focus();
+            return null;
+        }
+
+        pageData.skills.softSkills = mergeUniqueItems(pageData.skills.softSkills, softSkills);
+        pageData.skills.technicalSkills = mergeUniqueItems(pageData.skills.technicalSkills, technicalSkills);
+        return "skills";
+    }
+};
+
+const deleteHandlers = {
+    education(pageData) {
+        pageData.education = [];
+        return "education";
+    },
+    qualifications(pageData) {
+        pageData.qualifications.items = [];
+        return "qualifications";
+    },
+    skills(pageData) {
+        pageData.skills.softSkills = [];
+        pageData.skills.technicalSkills = [];
+        return "skills";
+    }
+};
+
+if (HAS_WINDOW) {
+    window.addEventListener("beforeunload", releaseTemporaryPhotoUrl);
+    window.ApplicantEditableProfile = Object.freeze({
+        cloneData,
+        createItemId,
+        createLogoFromText,
+        getInitials,
+        initializePage,
+        isPdfFile,
+        mergeUniqueItems,
+        parseSkillText,
+        profileGateway,
+        state
+    });
+}
+
+if (HAS_DOM) {
+    // Wait until the full page load so the Firebase bridge has time to
+    // replace the default gateway before the first profile fetch happens.
+    window.addEventListener("load", initializePage, { once: true });
+}
+
+async function initializePage() {
+    if (state.isInitialized || !isPageReady()) return;
+    state.isInitialized = true;
+    bindEvents();
+
+    try {
+        state.pageData = await profileGateway.fetchPageData();
+        renderPage();
+        syncEditorForm();
+    } catch (error) {
+        console.error("Unable to load the profile page.", error);
+        setFeedback("The profile page could not be loaded.");
+    }
+}
+
+function isPageReady() {
+    return Boolean(elements.addSectionButton && elements.editorForm && elements.profileName);
+}
+
+function on(node, eventName, handler) {
+    node?.addEventListener(eventName, handler);
+}
+
+function bindEvents() {
+    on(elements.addSectionButton, "click", () => openAddSectionPanel());
+    on(elements.addSectionForm, "submit", handleAddSection);
+    on(elements.addSectionSelect, "change", ({ target }) => updateAddSectionFields(target.value));
+    on(elements.addSectionFields.educationCurrent, "change", () => syncEducationCurrentState(elements.addSectionFields));
+    on(elements.addSectionFields.sharedNoExpiry, "change", () => syncQualificationExpiryState(elements.addSectionFields));
+    on(elements.formFields.educationCurrent, "change", () => syncEducationCurrentState(elements.formFields));
+    on(elements.avatarMenuButton, "click", toggleAvatarMenu);
+    on(elements.viewProfileOption, "click", handleViewProfile);
+    on(elements.changePhotoOption, "click", triggerPhotoPicker);
+    on(elements.deletePhotoOption, "click", handleDeleteProfilePhoto);
+    on(elements.uploadCvButton, "click", triggerCvPicker);
+    on(elements.photoInput, "change", handlePhotoSelection);
+    on(elements.cvInput, "change", handleCvSelection);
+    on(elements.editorForm, "submit", handleSave);
+    on(elements.closeAddSectionButton, "click", closeAddSectionPanel);
+    on(elements.cancelAddSectionButton, "click", closeAddSectionPanel);
+    on(elements.closeEditorButton, "click", closeEditor);
+    on(elements.cancelEditorButton, "click", closeEditor);
+    on(elements.closeProfilePictureButton, "click", closeProfilePictureViewer);
+    on(document, "click", handleDocumentClick);
+    on(document, "keydown", handleEscapeKey);
+    on(elements.addSectionPanel, "click", ({ target }) => target === elements.addSectionPanel && closeAddSectionPanel());
+    on(elements.editorPanel, "click", ({ target }) => target === elements.editorPanel && closeEditor());
+    on(elements.profilePictureModal, "click", ({ target }) => target === elements.profilePictureModal && closeProfilePictureViewer());
+}
+
+function handleDocumentClick({ target }) {
+    const editorTrigger = target.closest("[data-open-editor]");
+    const addTrigger = target.closest("[data-open-add-section]");
+    const deleteTrigger = target.closest("[data-delete-section]");
+
+    if (editorTrigger) {
+        closeSectionActionMenus();
+        openEditor(editorTrigger.dataset.openEditor);
+        return;
+    }
+
+    if (addTrigger) {
+        closeSectionActionMenus();
+        openAddSectionPanel(addTrigger.dataset.openAddSection);
+        return;
+    }
+
+    if (deleteTrigger) {
+        handleDeleteSection(deleteTrigger.dataset.deleteSection);
+        return;
+    }
+
+    if (!elements.avatarMenu.hidden && !elements.avatarMenu.contains(target) && !elements.avatarMenuButton.contains(target)) {
+        closeAvatarMenu();
+    }
+
+    closeSectionActionMenus(target.closest(".section-action-menu"));
+}
+
+function handleEscapeKey({ key }) {
+    if (key !== "Escape") return;
+    if (isPictureViewerOpen()) return closeProfilePictureViewer();
+    if (!elements.avatarMenu.hidden) return closeAvatarMenu();
+    if (closeSectionActionMenus()) return;
+    if (state.isEditorOpen) return closeEditor();
+    if (state.isAddSectionOpen) closeAddSectionPanel();
+}
+
+function renderPage() {
+    if (!state.pageData) return;
+    renderProfile(state.pageData.profile);
+    renderAbout(state.pageData.about);
+    renderCv(state.pageData.cv);
+    renderPersonalDetails(state.pageData.personalDetails);
+    Object.values(sectionViews).forEach((view) => renderListSection(view, state.pageData));
+}
+
+function renderProfile(profile) {
+    setText(elements.profileName, profile.name);
+    setText(elements.addSectionButton, profile.addSectionButton);
+    if (elements.deletePhotoOption) {
+        elements.deletePhotoOption.hidden = !profile.photoUrl;
+    }
+    renderAvatar(profile);
+}
+
+function renderAvatar(profile) {
+    elements.profilePhoto.alt = `${profile.name} profile picture`;
+    if (profile.photoUrl) {
+        elements.profilePhoto.src = profile.photoUrl;
+        elements.profilePhoto.hidden = false;
+        elements.avatarFallback.hidden = true;
+        return;
+    }
+
+    elements.profilePhoto.removeAttribute("src");
+    elements.profilePhoto.hidden = true;
+    elements.avatarFallback.hidden = false;
+    setText(elements.avatarFallback, getInitials(profile.name));
+}
+
+function renderAbout(about) {
+    const aboutText = [about.intro, about.passion].filter(Boolean).join("\n\n");
+    setText(elements.aboutIntro, aboutText);
+    elements.aboutIntro.hidden = !aboutText;
+    elements.aboutPassion.hidden = Boolean(aboutText);
+}
+
+function renderPersonalDetails(personalDetails) {
+    setDetailText(elements.personalPhone, personalDetails.phone, "Add your phone number");
+    setDetailText(elements.personalEmail, personalDetails.email, "Add your email address");
+    setDetailText(elements.personalAddress, personalDetails.address, "Add your home address");
+}
+
+function renderCv(cv) {
+    const hasCv = Boolean(cv.fileUrl);
+    setText(elements.cvFileName, hasCv ? cv.fileName : "No CV uploaded yet");
+    setText(elements.cvFileNote, hasCv ? "PDF uploaded and ready to view." : "Upload a PDF version of your CV. Only PDF files are accepted.");
+    setText(elements.uploadCvButton, hasCv ? "Replace PDF CV" : "Upload PDF CV");
+
+    if (!hasCv) {
+        elements.viewCvLink.hidden = true;
+        elements.viewCvLink.removeAttribute("href");
+        elements.viewCvLink.removeAttribute("download");
+        return;
+    }
+
+    elements.viewCvLink.hidden = false;
+    elements.viewCvLink.href = cv.fileUrl;
+    elements.viewCvLink.download = cv.fileName;
+}
+
+function renderListSection(view, pageData) {
+    const items = view.getItems(pageData);
+    const hasItems = items.length > 0;
+
+    view.section.classList.toggle("screen-section-muted", !hasItems);
+    view.placeholder.hidden = hasItems;
+    view.header.hidden = !hasItems;
+    view.list.hidden = !hasItems;
+    setText(view.intro, view.getIntro(pageData));
+    setText(view.button, view.getButton(pageData));
+    view.list.replaceChildren();
+    if (hasItems) view.render(items, view.list);
+}
+
+function renderEducationItems(items, list) {
+    renderTemplateItems(list, items, elements.educationTemplate, (fragment, item) => {
+        setText(fragment.querySelector(".resume-logo-text"), item.logo || createLogoFromText(item.school));
+        setText(fragment.querySelector(".resume-title"), item.school);
+        const fieldLine = fragment.querySelector(".education-field-line");
+        const dateLine = fragment.querySelector(".education-date-line");
+        const performanceLine = fragment.querySelector(".education-performance-line");
+        const descriptionLine = fragment.querySelector(".education-description-line");
+        const fieldText = [item.level, item.field].filter(Boolean).join(" - ");
+
+        setText(fieldLine, fieldText);
+        setText(dateLine, formatEducationDateRange(item));
+        setText(performanceLine, item.performance);
+        setText(descriptionLine, item.description);
+        setHidden(fieldLine, !fieldText);
+        setHidden(dateLine, !formatEducationDateRange(item));
+        setHidden(performanceLine, !item.performance);
+        setHidden(descriptionLine, !item.description);
+    });
+}
+
+function renderResumeItems(items, list) {
+    renderTemplateItems(list, items, elements.resumeTemplate, (fragment, item) => {
+        const subtitle = fragment.querySelector(".resume-company-line");
+        const dates = fragment.querySelector(".resume-date-line");
+        const location = fragment.querySelector(".resume-location-line");
+        const description = fragment.querySelector(".resume-description");
+        const details = getQualificationDisplay(item);
+
+        setText(fragment.querySelector(".resume-logo-text"), item.logo || createLogoFromText(item.title));
+        setText(fragment.querySelector(".resume-title"), item.title);
+        setText(subtitle, details.subtitle);
+        setText(dates, details.dates);
+        setText(description, item.description);
+        subtitle.hidden = !details.subtitle;
+        dates.hidden = !details.dates;
+        description.hidden = !item.description;
+        location.hidden = true;
+    });
+}
+
+function renderSkillGroups(groups, list) {
+    renderTemplateItems(list, groups, elements.skillGroupTemplate, (fragment, group) => {
+        const groupedList = fragment.querySelector(".grouped-skill-list");
+        setText(fragment.querySelector(".resume-logo-text"), createLogoFromText(group.heading));
+        setText(fragment.querySelector(".resume-title"), group.heading);
+        group.items.forEach((item) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = item;
+            groupedList.append(listItem);
+        });
+    });
+}
+
+function renderTemplateItems(list, items, template, fill) {
+    const fragment = document.createDocumentFragment();
+    items.forEach((item) => {
+        const node = template.content.cloneNode(true);
+        fill(node, item);
+        fragment.append(node);
+    });
+    list.append(fragment);
+}
+
+function getSkillGroups(skills) {
+    return [
+        { heading: "Soft skills", items: skills.softSkills },
+        { heading: "Technical skills", items: skills.technicalSkills }
+    ].filter((group) => group.items.length > 0);
+}
+
+function syncEditorForm() {
+    if (!state.pageData) return;
+
+    const education = state.pageData.education[0] || {};
+    setFieldValues(elements.formFields, {
+        profileName: state.pageData.profile.name,
+        phone: state.pageData.personalDetails.phone,
+        email: state.pageData.personalDetails.email,
+        address: state.pageData.personalDetails.address,
+        aboutIntro: [state.pageData.about.intro, state.pageData.about.passion].filter(Boolean).join("\n\n"),
+        educationSchool: education.school || "",
+        educationLevel: education.level || "",
+        educationField: education.field || "",
+        educationStartDate: getDateInputValue(education.startDate || education.dates || ""),
+        educationEndDate: getDateInputValue(education.endDate || ""),
+        educationPerformance: education.performance || "",
+        educationDescription: education.description || "",
+        qualificationsIntro: state.pageData.qualifications.intro,
+        qualificationsButton: state.pageData.qualifications.buttonLabel,
+        softSkills: state.pageData.skills.softSkills.join(", "),
+        technicalSkills: state.pageData.skills.technicalSkills.join(", ")
+    });
+    if (elements.formFields.educationCurrent) {
+        elements.formFields.educationCurrent.checked = Boolean(education.current);
+        syncEducationCurrentState(elements.formFields);
+    }
+}
+
+function setFieldValues(fields, values) {
+    Object.entries(values).forEach(([key, value]) => fields[key] && (fields[key].value = value));
+}
+
+function openEditor(targetId) {
+    if (!state.pageData) return;
+    if (state.isAddSectionOpen) closeAddSectionPanel();
+
+    state.activeEditorSection = editorTargetMap[targetId] || "";
+    state.isEditorOpen = true;
+    syncEditorForm();
+    updateEditorSections();
+    syncEducationCurrentState(elements.formFields);
+    setText(elements.editorHeading, state.activeEditorSection ? `Edit ${SECTION_LABELS[state.activeEditorSection]}` : "Edit profile content");
+    elements.editorPanel.hidden = false;
+    updatePanelLockState();
+    closeAvatarMenu();
+    focusLater($(targetId) || elements.formFields.profileName);
+}
+
+function closeEditor() {
+    state.activeEditorSection = "";
+    state.isEditorOpen = false;
+    elements.editorPanel.hidden = true;
+    updateEditorSections();
+    setText(elements.editorHeading, "Edit profile content");
+    updatePanelLockState();
+}
+
+function updateEditorSections() {
+    elements.editorGroups.forEach((group) => {
+        const visible = !state.activeEditorSection || group.dataset.editorSection === state.activeEditorSection;
+        group.hidden = !visible;
+        group.querySelectorAll("input, textarea, select").forEach((field) => {
+            field.disabled = !visible;
+        });
+    });
+}
+
+function openAddSectionPanel(sectionType = "") {
+    if (!state.pageData) return;
+    if (state.isEditorOpen) closeEditor();
+
+    elements.addSectionForm.reset();
+    elements.addSectionSelect.value = sectionType;
+    updateAddSectionFields(sectionType);
+    syncEducationCurrentState(elements.addSectionFields);
+    syncQualificationExpiryState(elements.addSectionFields);
+    state.isAddSectionOpen = true;
+    elements.addSectionPanel.hidden = false;
+    updatePanelLockState();
+    closeAvatarMenu();
+    focusLater(getFirstAddSectionField(sectionType) || elements.addSectionSelect);
+}
+
+function closeAddSectionPanel() {
+    state.isAddSectionOpen = false;
+    elements.addSectionPanel.hidden = true;
+    elements.addSectionForm.reset();
+    updateAddSectionFields("");
+    syncEducationCurrentState(elements.addSectionFields);
+    syncQualificationExpiryState(elements.addSectionFields);
+    updatePanelLockState();
+}
+
+function updateAddSectionFields(sectionType) {
+    const isQualification = sectionType === "qualifications";
+    elements.educationAddGroup.hidden = sectionType !== "education";
+    elements.skillsAddGroup.hidden = sectionType !== "skills";
+    elements.supplementalAddGroup.hidden = !isQualification;
+    if (!isQualification) return;
+
+    setText(elements.supplementalLegend, QUALIFICATION_FIELD_COPY.legend);
+    setText(elements.sharedTitleLabel, QUALIFICATION_FIELD_COPY.title);
+    setText(elements.sharedTypeLabel, QUALIFICATION_FIELD_COPY.type);
+    setText(elements.sharedSubtitleLabel, QUALIFICATION_FIELD_COPY.subtitle);
+    setText(elements.sharedIssueDateLabel, QUALIFICATION_FIELD_COPY.issueDate);
+    setText(elements.sharedExpiryDateLabel, QUALIFICATION_FIELD_COPY.expiryDate);
+    setText(elements.sharedNoExpiryLabel, QUALIFICATION_FIELD_COPY.noExpiry);
+    setText(elements.sharedCredentialIdLabel, QUALIFICATION_FIELD_COPY.credentialId);
+    setText(elements.sharedCredentialUrlLabel, QUALIFICATION_FIELD_COPY.credentialUrl);
+    setText(elements.sharedDescriptionLabel, QUALIFICATION_FIELD_COPY.description);
+}
+
+function getFirstAddSectionField(sectionType) {
+    if (sectionType === "education") return elements.addSectionFields.educationSchool;
+    if (sectionType === "qualifications") return elements.addSectionFields.sharedTitle;
+    if (sectionType === "skills") return elements.addSectionFields.softSkills;
+    return null;
+}
+
+function updatePanelLockState() {
+    document.body.classList.toggle("editor-open", state.isEditorOpen || state.isAddSectionOpen);
+}
+
+async function handleSave(event) {
+    event.preventDefault();
+    const saveSection = saveHandlers[state.activeEditorSection];
+    if (!saveSection) {
+        setFeedback("Open a section before saving changes.");
+        return;
+    }
+
+    await persistPageUpdate((nextPageData) => saveSection(nextPageData), {
+        success: `${SECTION_LABELS[state.activeEditorSection]} updated.`,
+        failure: "The updated profile content could not be saved.",
+        afterSave: closeEditor,
+        log: "Unable to save the profile page."
+    });
+}
+
+async function handleAddSection(event) {
+    event.preventDefault();
+    if (!state.pageData) return;
+
+    const sectionType = elements.addSectionSelect.value;
+    if (!sectionType) {
+        setFeedback("Choose a section before adding details.");
+        elements.addSectionSelect.focus();
+        return;
+    }
+
+    const addSection = addHandlers[sectionType];
+    if (!addSection) {
+        setFeedback("That section is not available yet.");
+        return;
+    }
+
+    await persistPageUpdate((nextPageData) => addSection(nextPageData), {
+        success: (key) => `${SECTION_LABELS[key]} has been added to the profile.`,
+        failure: "The new section details could not be saved.",
+        afterSave: () => {
+            closeAddSectionPanel();
+            scrollToSection(sectionType);
+        },
+        log: "Unable to add the new section details."
+    });
+}
+
+async function handleDeleteSection(sectionKey) {
+    const removeSection = deleteHandlers[sectionKey];
+    if (!state.pageData || !removeSection) return;
+
+    await persistPageUpdate((nextPageData) => removeSection(nextPageData), {
+        success: (key) => `${SECTION_LABELS[key]} section deleted.`,
+        failure: "The section could not be deleted.",
+        afterSave: () => closeSectionActionMenus(),
+        log: "Unable to delete the section."
+    });
+}
+
+async function persistPageUpdate(update, { success, failure, afterSave, log }) {
+    try {
+        const nextPageData = cloneData(state.pageData);
+        const result = update(nextPageData);
+        if (result === null || result === false) return null;
+
+        state.pageData = await profileGateway.savePageData(nextPageData);
+        renderPage();
+        syncEditorForm();
+        afterSave?.(result);
+        setFeedback(typeof success === "function" ? success(result) : success);
+        return result;
+    } catch (error) {
+        console.error(log, error);
+        setFeedback(error?.message || failure);
+        return null;
+    }
+}
+
+function buildEducationItem() {
+    const item = readEducationFields(elements.addSectionFields, { requireAll: true });
+    return item ? { id: createItemId("education"), ...item } : null;
+}
+
+function readEducationFields(fields, { requireAll = false } = {}) {
+    const school = readValue(fields.educationSchool);
+    const level = readValue(fields.educationLevel);
+    const field = readValue(fields.educationField);
+    const startDate = readValue(fields.educationStartDate);
+    const current = Boolean(fields.educationCurrent?.checked);
+    const endDate = current ? "" : readValue(fields.educationEndDate);
+    const performance = readValue(fields.educationPerformance);
+    const description = readValue(fields.educationDescription);
+
+    if (requireAll) {
+        const requiredFields = [fields.educationSchool, fields.educationLevel, fields.educationField, fields.educationStartDate];
+
+        if (!school || !level || !field || !startDate) {
+            setFeedback("Fill in institution, education level, study field, and start date before saving.");
+            return focusFirstEmptyField(requiredFields);
+        }
+
+        if (!current && endDate && endDate < startDate) {
+            setFeedback("End date cannot be before the start date.");
+            fields.educationEndDate.focus();
+            return null;
+        }
+    }
+
+    return {
+        logo: createLogoFromText(school),
+        school,
+        level,
+        field,
+        startDate,
+        endDate,
+        current,
+        dates: current ? `${startDate} - Present` : [startDate, endDate].filter(Boolean).join(" - "),
+        performance,
+        description
+    };
+}
+
+function buildQualificationItem() {
+    const {
+        sharedTitle,
+        sharedType,
+        sharedSubtitle,
+        sharedIssueDate,
+        sharedExpiryDate,
+        sharedNoExpiry,
+        sharedCredentialId,
+        sharedCredentialUrl,
+        sharedDescription
+    } = elements.addSectionFields;
+    const title = readValue(sharedTitle);
+    const type = readValue(sharedType);
+    const subtitle = readValue(sharedSubtitle);
+    const issueDate = readValue(sharedIssueDate);
+    const noExpiry = Boolean(sharedNoExpiry?.checked);
+    const expiryDate = noExpiry ? "" : readValue(sharedExpiryDate);
+    const credentialId = readValue(sharedCredentialId);
+    const credentialUrl = readValue(sharedCredentialUrl);
+    const description = readValue(sharedDescription);
+    if (!title || !type || !subtitle || !issueDate) {
+        setFeedback("Fill in qualification name, type, issuer, and issue date before saving.");
+        return focusFirstEmptyField([sharedTitle, sharedType, sharedSubtitle, sharedIssueDate]);
+    }
+
+    if (!noExpiry && expiryDate && expiryDate < issueDate) {
+        setFeedback("Expiry date cannot be before the issue date.");
+        sharedExpiryDate.focus();
+        return null;
+    }
+
+    return {
+        id: createItemId("qualifications"),
+        logo: createLogoFromText(title),
+        title,
+        type,
+        subtitle,
+        issueDate,
+        expiryDate,
+        noExpiry,
+        dates: getQualificationDates(issueDate, expiryDate, noExpiry),
+        credentialId,
+        credentialUrl,
+        description
+    };
+}
+
+function focusFirstEmptyField(fields) {
+    fields.find((field) => !readValue(field))?.focus();
+    return null;
+}
+
+function focusLater(field) {
+    if (!field) return;
+    window.setTimeout(() => {
+        field.focus();
+        field.scrollIntoView({ block: "center" });
+    }, 0);
+}
+
+function parseSkillText(value) {
+    return value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+}
+
+function countWords(value) {
+    return value.trim() ? value.trim().split(/\s+/).length : 0;
+}
+
+function syncEducationCurrentState(fields) {
+    if (!fields.educationCurrent || !fields.educationEndDate) return;
+
+    fields.educationEndDate.disabled = fields.educationCurrent.checked;
+    if (fields.educationCurrent.checked) {
+        fields.educationEndDate.value = "";
+    }
+}
+
+function syncQualificationExpiryState(fields) {
+    if (!fields.sharedNoExpiry || !fields.sharedExpiryDate) return;
+
+    fields.sharedExpiryDate.disabled = fields.sharedNoExpiry.checked;
+    if (fields.sharedNoExpiry.checked) {
+        fields.sharedExpiryDate.value = "";
+    }
+}
+
+function getDateInputValue(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+}
+
+function formatDateForDisplay(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value || "";
+
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return new Intl.DateTimeFormat("en-ZA", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    }).format(date);
+}
+
+function formatEducationDateRange(item) {
+    if (!item) return "";
+    if (item.startDate) {
+        const start = formatDateForDisplay(item.startDate);
+        const end = item.current ? "Present" : formatDateForDisplay(item.endDate);
+        return [start, end].filter(Boolean).join(" - ");
+    }
+
+    return formatLegacyDateRange(item.dates);
+}
+
+function formatLegacyDateRange(value) {
+    if (!value) return "";
+    return value
+        .split(" - ")
+        .map((part) => part === "Present" ? part : formatDateForDisplay(part))
+        .join(" - ");
+}
+
+function getQualificationDates(issueDate, expiryDate, noExpiry) {
+    if (noExpiry) return `${issueDate} - No Expiry`;
+    return [issueDate, expiryDate].filter(Boolean).join(" - ");
+}
+
+function getQualificationDisplay(item) {
+    return {
+        subtitle: [item.type, item.subtitle].filter(Boolean).join(" - "),
+        dates: formatLegacyDateRange(item.dates || getQualificationDates(item.issueDate, item.expiryDate, item.noExpiry))
+    };
+}
+
+function mergeUniqueItems(existingItems, newItems) {
+    const seen = new Set();
+    return [...existingItems, ...newItems].filter((item) => {
+        const key = item.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function createEmptyEducationItem() {
+    return {
+        id: createItemId("education"),
+        logo: "",
+        school: "",
+        level: "",
+        field: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        dates: "",
+        performance: "",
+        description: ""
+    };
+}
+
+function createItemId(prefix) {
+    return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? `${prefix}-${crypto.randomUUID()}`
+        : `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
+function createLogoFromText(value) {
+    const match = value.trim().match(/[A-Za-z0-9]/);
+    return match ? match[0].toUpperCase() : "?";
+}
+
+function scrollToSection(sectionType) {
+    sectionViews[sectionType]?.section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function toggleAvatarMenu() {
+    const shouldOpen = elements.avatarMenu.hidden;
+    elements.avatarMenu.hidden = !shouldOpen;
+    elements.avatarMenuButton.setAttribute("aria-expanded", String(shouldOpen));
+}
+
+function closeAvatarMenu() {
+    elements.avatarMenu.hidden = true;
+    elements.avatarMenuButton.setAttribute("aria-expanded", "false");
+}
+
+function handleViewProfile() {
+    closeAvatarMenu();
+    openProfilePictureViewer();
+}
+
+function openProfilePictureViewer() {
+    const profile = state.pageData?.profile || {};
+    const hasPhoto = Boolean(profile.photoUrl);
+
+    if (hasPhoto) {
+        elements.profilePicturePreview.src = profile.photoUrl;
+        elements.profilePicturePreview.hidden = false;
+        elements.profilePictureFallback.hidden = true;
+    } else {
+        elements.profilePicturePreview.hidden = true;
+        elements.profilePicturePreview.removeAttribute("src");
+        elements.profilePictureFallback.hidden = false;
+        setText(elements.profilePictureFallback, getInitials(profile.name));
+    }
+
+    if (typeof elements.profilePictureModal.showModal === "function") {
+        elements.profilePictureModal.showModal();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = false;
+}
+
+function closeProfilePictureViewer() {
+    if (!elements.profilePictureModal) return;
+
+    if (typeof elements.profilePictureModal.close === "function" && elements.profilePictureModal.open) {
+        elements.profilePictureModal.close();
+        return;
+    }
+
+    elements.profilePictureModal.hidden = true;
+}
+
+function isPictureViewerOpen() {
+    if (!elements.profilePictureModal) return false;
+    if (elements.profilePictureModal.open) return true;
+    return typeof elements.profilePictureModal.showModal !== "function" && elements.profilePictureModal.hidden === false;
+}
+
+function triggerPhotoPicker() {
+    closeAvatarMenu();
+    elements.photoInput.click();
+}
+
+async function handleDeleteProfilePhoto() {
+    closeAvatarMenu();
+    closeProfilePictureViewer();
+
+    if (!state.pageData?.profile?.photoUrl) {
+        setFeedback("There is no profile picture to delete.");
+        return;
+    }
+
+    try {
+        releaseTemporaryPhotoUrl();
+        state.pageData.profile.photoUrl = "";
+        state.pageData = await profileGateway.savePageData(state.pageData);
+        renderProfile(state.pageData.profile);
+        setFeedback("Profile picture deleted.");
+    } catch (error) {
+        console.error("Unable to delete the profile picture.", error);
+        setFeedback(error?.message || "The profile picture could not be deleted.");
+    }
+}
+
+function triggerCvPicker() {
+    elements.cvInput.click();
+}
+
+async function handlePhotoSelection(event) {
+    const [file] = event.target.files || [];
+    if (!file) return;
+
+    try {
+        const photoUrl = await profileGateway.uploadProfilePhoto(file);
+        releaseTemporaryPhotoUrl();
+        state.temporaryPhotoUrl = photoUrl;
+        state.pageData.profile.photoUrl = photoUrl;
+        state.pageData = await profileGateway.savePageData(state.pageData);
+        renderProfile(state.pageData.profile);
+        setFeedback("Profile picture updated.");
+    } catch (error) {
+        console.error("Unable to update the profile picture.", error);
+        setFeedback(error?.message || "The profile picture could not be updated.");
+    } finally {
+        elements.photoInput.value = "";
+    }
+}
+
+async function handleCvSelection(event) {
+    const [file] = event.target.files || [];
+    if (!file) return;
+
+    if (!isPdfFile(file)) {
+        setFeedback("Please upload a PDF version of your CV.");
+        elements.cvInput.value = "";
+        return;
+    }
+
+    try {
+        const fileUrl = await profileGateway.uploadCv(file);
+        state.pageData.cv.fileName = file.name;
+        state.pageData.cv.fileUrl = fileUrl;
+        state.pageData = await profileGateway.savePageData(state.pageData);
+        renderCv(state.pageData.cv);
+        setFeedback("PDF CV uploaded.");
+    } catch (error) {
+        console.error("Unable to upload the CV.", error);
+        setFeedback(error?.message || "The CV could not be uploaded.");
+    } finally {
+        elements.cvInput.value = "";
+    }
+}
+
+function closeSectionActionMenus(exceptionMenu = null) {
+    let closedAny = false;
+    document.querySelectorAll(".section-action-menu[open]").forEach((menu) => {
+        if (menu === exceptionMenu) return;
+        menu.open = false;
+        closedAny = true;
+    });
+    return closedAny;
+}
+
+function setFeedback(message) {
+    window.clearTimeout(state.feedbackTimer);
+    setText(elements.feedback, message);
+    elements.feedback.hidden = !message;
+    if (!message) return;
+
+    state.feedbackTimer = window.setTimeout(() => {
+        elements.feedback.hidden = true;
+        elements.feedback.textContent = "";
+    }, 3200);
+}
+
+function getInitials(name) {
+    return name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
+}
+
+function setDetailText(node, value, emptyText) {
+    const hasValue = Boolean(value);
+    setText(node, hasValue ? value : emptyText);
+    node.classList.toggle("detail-empty", !hasValue);
+}
+
+function releaseTemporaryPhotoUrl() {
+    if (!state.temporaryPhotoUrl || !state.temporaryPhotoUrl.startsWith("blob:")) return;
+    URL.revokeObjectURL(state.temporaryPhotoUrl);
+    state.temporaryPhotoUrl = "";
+}

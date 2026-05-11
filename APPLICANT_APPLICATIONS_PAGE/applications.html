@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Applications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="applications.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="applications.js"></script>
+</head>
+<body data-shell-role="applicant" data-shell-active="applications" data-shell-base="..">
+  <main class="page-shell">
+    <section class="page-toolbar" aria-label="Application filters">
+      <div class="filter-group">
+        <button type="button" class="filter-btn active" data-filter="all">All</button>
+        <button type="button" class="filter-btn" data-filter="pending">Pending</button>
+        <button type="button" class="filter-btn" data-filter="wishlisted">Wish listed</button>
+        <button type="button" class="filter-btn" data-filter="accepted">Accepted</button>
+      </div>
+    </section>
+
+    <section class="applications-section" aria-labelledby="applicationsHeading">
+      <header class="section-heading">
+        <h2 id="applicationsHeading">Submitted applications</h2>
+        <p id="applicationsMeta" class="section-meta">Loading your applications...</p>
+      </header>
+      <section id="applicationsList" class="applications-grid" aria-label="Application list">
+        <p class="empty-state">Loading your applications...</p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
