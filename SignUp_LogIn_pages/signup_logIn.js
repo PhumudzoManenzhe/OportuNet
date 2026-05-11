@@ -4,7 +4,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -23,8 +24,51 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 // const auth = firebase.auth();
 const googleProvider = new GoogleAuthProvider();
 
+// TOAST NOTIFICATION HELPER
+function showToast(message, type = "error") {
+    let container = document.querySelector(".toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-container";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // Trigger slide-in animation
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300); // Wait for CSS transition
+    }, 3000);
+}
+
+// FRIENDLY ERROR MESSAGE HELPER
+function getFriendlyErrorMessage(error) {
+    switch (error.code) {
+        case "auth/email-already-in-use": return "This email is already registered. Please log in.";
+        case "auth/invalid-email": return "The email address is not valid.";
+        case "auth/weak-password": return "The password is too weak. Please use at least 6 characters.";
+        case "auth/user-not-found": return "No account found with this email address.";
+        case "auth/wrong-password":
+        case "auth/invalid-credential": return "Incorrect email or password. Please try again.";
+        case "auth/too-many-requests": return "Too many failed attempts. Please try again later.";
+        case "auth/popup-closed-by-user": return "Sign-in was canceled.";
+        case "auth/network-request-failed": return "Network error. Please check your internet connection.";
+        default: return "An unexpected error occurred. Please try again.";
+    }
+}
+
 // GOOGLE LOGIN FUNCTION
-function googleLogin() {
+function googleLogin(action) {
     signInWithPopup(auth, googleProvider)
     .then((result) => {
         const user = result.user;
@@ -34,26 +78,33 @@ function googleLogin() {
         getDoc(docRef)
         .then((docSnap) => {
 
-            // FIRST TIME GOOGLE SIGN-UP
-            if (!docSnap.exists()) {
-                window.location.href = "chooseRoles.html";
-            }
-
-            // EXISTING USER
-            else {
-                const role = docSnap.data().role;
-
-                if (role === "applicant") {
-                    window.location.href = "../Applicant_homepage/index.html";
+            if (action === "signup") {
+                if (docSnap.exists()) {
+                    showToast("An account with this Google email already exists. Please log in.", "error");
+                    signOut(auth); // Clear the active session since they shouldn't be logged in
+                    setTimeout(() => window.location.href = "./logIn.html", 2000);
                 } else {
-                    window.location.href = "../Recruiter_homepage/index.html";
+                    window.location.href = "./chooseRoles.html";
+                }
+            } else if (action === "login") {
+                if (!docSnap.exists()) {
+                    showToast("No account found for this Google email. Please sign up.", "error");
+                    signOut(auth);
+                    setTimeout(() => window.location.href = "./index.html", 2000);
+                } else {
+                    const role = docSnap.data().role;
+                    if (role === "applicant") {
+                        window.location.href = "../Applicant_homepage/index.html";
+                    } else {
+                        window.location.href = "../Recruiter_homepage/index.html";
+                    }
                 }
             }
         });
 
     })
     .catch((error) => {
-        alert("Google Error: " + error.message);
+        showToast(getFriendlyErrorMessage(error), "error");
     });
 }
 
@@ -61,10 +112,10 @@ function googleLogin() {
 function signUpUser(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-        alert("Account Created!");
-        window.location.href = "logIn.html";
+        showToast("Account Created!", "success");
+        setTimeout(() => window.location.href = "./logIn.html", 2000);
     }).catch((error) => {
-        alert(error.message);
+        showToast(getFriendlyErrorMessage(error), "error");
     });
 }
 
@@ -80,7 +131,7 @@ function logInUser(email, password) {
         getDoc(docRef)
         .then((docSnap) => {
             if (!docSnap.exists()) {
-                window.location.href = "chooseRoles.html";
+                window.location.href = "./chooseRoles.html";
             } else {
                 const role = docSnap.data().role;
 
@@ -93,12 +144,12 @@ function logInUser(email, password) {
         })
         .catch((error) => {
             console.error("Firestore error:", error);
-            alert("Failed to load user data");
+            showToast("Failed to load user data", "error");
         });
 
     })
     .catch((error) => {
-        alert(error.message);
+        showToast(getFriendlyErrorMessage(error), "error");
     });
 }
 
@@ -137,26 +188,18 @@ function logInUser(email, password) {
 
 function forgotPassword(email) {
     if (!email) {
-        alert("Please enter your email first.");
+        showToast("Please enter your email first.", "error");
+        document.getElementById("email").focus();
         return;
     }
 
     sendPasswordResetEmail(auth,email)
     .then(() => {
-        alert("If an account exists, a reset email has been sent.");
+        showToast("If an account exists, a reset email has been sent.", "success");
     })
     .catch((error) => {
         console.error(error);
-
-        if (error.code === "auth/user-not-found") {
-            alert("No account found with this email.");
-        } 
-        else if (error.code === "auth/invalid-email") {
-            alert("Invalid email address.");
-        } 
-        else {
-            alert(error.message);
-        }
+        showToast(getFriendlyErrorMessage(error), "error");
     });
 }
 // Attach Event Listeners (Once the DOM is ready)
@@ -183,14 +226,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle Google Buttons (Both pages)
-    const googleBtns = document.querySelectorAll(".google-btn, .option a");
-    googleBtns.forEach(btn => {
-        btn.onclick = (e) => {
+    // Handle Google Sign Up Button
+    const signupGoogleBtn = document.querySelector(".google-btn");
+    if (signupGoogleBtn) {
+        signupGoogleBtn.onclick = (e) => {
             e.preventDefault();
-            googleLogin();
+            googleLogin("signup");
         };
-    });
+    }
+
+    // Handle Google Log In Button
+    const loginGoogleBtn = document.querySelector(".option a");
+    if (loginGoogleBtn) {
+        loginGoogleBtn.onclick = (e) => {
+            e.preventDefault();
+            googleLogin("login");
+        };
+    }
+
     // Handle Forgot Password Link
     const forgotPasswordLink = document.getElementById("forgotPassword");
     if (forgotPasswordLink) {
