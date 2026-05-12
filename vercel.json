@@ -1,5 +1,11 @@
 {
   "routes": [
-    { "src": "/", "dest": "/SignUp_LogIn_pages/" }
+    {
+      "src": "/",
+      "status": 308,
+      "headers": {
+        "Location": "/SignUp_LogIn_pages/"
+      }
+    }
   ]
 }
