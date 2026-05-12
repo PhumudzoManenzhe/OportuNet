@@ -24,38 +24,119 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 // const auth = firebase.auth();
 const googleProvider = new GoogleAuthProvider();
 
-// TOAST NOTIFICATION HELPER
-function showToast(message, type = "error") {
-    let container = document.querySelector(".toast-container");
-    if (!container) {
-        container = document.createElement("div");
-        container.className = "toast-container";
-        document.body.appendChild(container);
+function canRenderInlineMessage() {
+    return Boolean(
+        typeof document !== "undefined" &&
+        typeof document.createElement === "function" &&
+        typeof document.getElementById === "function" &&
+        typeof document.querySelector === "function"
+    );
+}
+
+function notify(message, type = "error", targetName = "form") {
+    if (canRenderInlineMessage() && showInlineMessage(message, type, targetName)) {
+        return;
     }
 
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
+    if (typeof alert === "function") {
+        alert(message);
+    }
+}
 
-    container.appendChild(toast);
+function redirectTo(path, delay = 0) {
+    const redirect = () => {
+        window.location.href = path;
+    };
 
-    // Trigger slide-in animation
-    requestAnimationFrame(() => {
-        toast.classList.add("show");
+    if (delay > 0 && typeof setTimeout === "function") {
+        setTimeout(redirect, delay);
+        return;
+    }
+
+    redirect();
+}
+
+function getActiveForm() {
+    return document.getElementById("signupForm") || document.querySelector(".login_form form");
+}
+
+function getField(targetName) {
+    const signupForm = document.getElementById("signupForm");
+
+    if (targetName === "email") {
+        return signupForm?.querySelector('input[type="email"]') || document.getElementById("email");
+    }
+
+    if (targetName === "password") {
+        return document.getElementById("password");
+    }
+
+    if (targetName === "confirmPassword") {
+        return document.getElementById("confirmPassword");
+    }
+
+    return null;
+}
+
+function getGoogleButton() {
+    return document.querySelector(".google-btn") || document.querySelector(".option a");
+}
+
+function clearInlineMessages(form = getActiveForm()) {
+    if (!form) return;
+
+    const messages = form.querySelectorAll(".field-message, .form-message, .google-message");
+    messages.forEach((message) => message.remove());
+
+    const invalidFields = form.querySelectorAll(".has-error");
+    invalidFields.forEach((field) => {
+        field.classList.remove("has-error");
+        field.removeAttribute("aria-invalid");
     });
+}
 
-    // Remove after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300); // Wait for CSS transition
-    }, 3000);
+function getMessageTarget(field) {
+    if (!field) return null;
+
+    return field.closest(".input-group, .input_box, .password_box");
+}
+
+function showInlineMessage(message, type = "error", targetName = "form") {
+    const form = getActiveForm();
+    if (!form) return false;
+
+    const googleButton = targetName === "google" ? getGoogleButton() : null;
+    const field = getField(targetName);
+    const target = getMessageTarget(field) || form;
+    const messageElement = document.createElement("p");
+    const isFieldMessage = Boolean(field);
+
+    messageElement.className = googleButton
+        ? `google-message ${type}`
+        : isFieldMessage
+            ? `field-message ${type}`
+            : `form-message ${type}`;
+    messageElement.textContent = message;
+    messageElement.setAttribute("role", type === "error" ? "alert" : "status");
+
+    if (field && type === "error") {
+        field.classList.add("has-error");
+        field.setAttribute("aria-invalid", "true");
+    }
+
+    if (googleButton) {
+        googleButton.insertAdjacentElement("afterend", messageElement);
+    } else {
+        target.appendChild(messageElement);
+    }
+    return true;
 }
 
 // FRIENDLY ERROR MESSAGE HELPER
 function getFriendlyErrorMessage(error) {
     switch (error.code) {
         case "auth/email-already-in-use": return "This email is already registered. Please log in.";
-        case "auth/invalid-email": return "The email address is not valid.";
+        case "auth/invalid-email": return "Invalid email address.";
         case "auth/weak-password": return "The password is too weak. Please use at least 6 characters.";
         case "auth/user-not-found": return "No account found with this email address.";
         case "auth/wrong-password":
@@ -68,7 +149,8 @@ function getFriendlyErrorMessage(error) {
 }
 
 // GOOGLE LOGIN FUNCTION
-function googleLogin(action) {
+function googleLogin(action = "signup") {
+    clearInlineMessages();
     signInWithPopup(auth, googleProvider)
     .then((result) => {
         const user = result.user;
@@ -80,31 +162,35 @@ function googleLogin(action) {
 
             if (action === "signup") {
                 if (docSnap.exists()) {
-                    showToast("An account with this Google email already exists. Please log in.", "error");
+                    notify("An account with this Google email already exists.", "error", "google");
                     signOut(auth); // Clear the active session since they shouldn't be logged in
-                    setTimeout(() => window.location.href = "./logIn.html", 2000);
                 } else {
-                    window.location.href = "./chooseRoles.html";
+                    redirectTo("./chooseRoles.html");
                 }
             } else if (action === "login") {
                 if (!docSnap.exists()) {
-                    showToast("No account found for this Google email. Please sign up.", "error");
+                    notify("No account found for this Google email.", "error", "google");
                     signOut(auth);
-                    setTimeout(() => window.location.href = "./index.html", 2000);
                 } else {
                     const role = docSnap.data().role;
                     if (role === "applicant") {
-                        window.location.href = "../Applicant_homepage/index.html";
+                        redirectTo("../Applicant_homepage/index.html");
+                    } else if (role === "recruiter") {
+                        redirectTo("../Recruiter_homepage/index.html");
                     } else {
-                        window.location.href = "../Recruiter_homepage/index.html";
+                        redirectTo("./chooseRoles.html");
                     }
                 }
             }
+        })
+        .catch((error) => {
+            console.error("Firestore error:", error);
+            notify("Failed to load user data", "error", "form");
         });
 
     })
     .catch((error) => {
-        showToast(getFriendlyErrorMessage(error), "error");
+        notify(getFriendlyErrorMessage(error), "error", "form");
     });
 }
 
@@ -112,10 +198,10 @@ function googleLogin(action) {
 function signUpUser(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-        showToast("Account Created!", "success");
-        setTimeout(() => window.location.href = "./logIn.html", 2000);
+        notify("Account created! Choose your role to finish setup.", "success", "form");
+        redirectTo("./chooseRoles.html", 2000);
     }).catch((error) => {
-        showToast(getFriendlyErrorMessage(error), "error");
+        notify(getFriendlyErrorMessage(error), "error", getAuthErrorTarget(error));
     });
 }
 
@@ -131,25 +217,27 @@ function logInUser(email, password) {
         getDoc(docRef)
         .then((docSnap) => {
             if (!docSnap.exists()) {
-                window.location.href = "./chooseRoles.html";
+                redirectTo("./chooseRoles.html");
             } else {
                 const role = docSnap.data().role;
 
                 if (role === "applicant") {
-                    window.location.href = "../Applicant_homepage/index.html";
+                    redirectTo("../Applicant_homepage/index.html");
+                } else if (role === "recruiter") {
+                    redirectTo("../Recruiter_homepage/index.html");
                 } else {
-                    window.location.href = "../Recruiter_homepage/index.html";
+                    redirectTo("./chooseRoles.html");
                 }
             }
         })
         .catch((error) => {
             console.error("Firestore error:", error);
-            showToast("Failed to load user data", "error");
+            notify("Failed to load user data", "error", "form");
         });
 
     })
     .catch((error) => {
-        showToast(getFriendlyErrorMessage(error), "error");
+        notify(getFriendlyErrorMessage(error), "error", getAuthErrorTarget(error));
     });
 }
 
@@ -188,19 +276,37 @@ function logInUser(email, password) {
 
 function forgotPassword(email) {
     if (!email) {
-        showToast("Please enter your email first.", "error");
-        document.getElementById("email").focus();
+        notify("Please enter your email first.", "error", "email");
+        const emailField = document.getElementById("email");
+        if (typeof emailField?.focus === "function") {
+            emailField.focus();
+        }
         return;
     }
 
     sendPasswordResetEmail(auth,email)
     .then(() => {
-        showToast("If an account exists, a reset email has been sent.", "success");
+        notify("If an account exists, a reset email has been sent.", "success", "email");
     })
     .catch((error) => {
         console.error(error);
-        showToast(getFriendlyErrorMessage(error), "error");
+        notify(getFriendlyErrorMessage(error), "error", getAuthErrorTarget(error));
     });
+}
+
+function getAuthErrorTarget(error) {
+    switch (error.code) {
+        case "auth/email-already-in-use":
+        case "auth/invalid-email":
+        case "auth/user-not-found":
+            return "email";
+        case "auth/weak-password":
+        case "auth/wrong-password":
+        case "auth/invalid-credential":
+            return "password";
+        default:
+            return "form";
+    }
 }
 // Attach Event Listeners (Once the DOM is ready)
 document.addEventListener("DOMContentLoaded", () => {
@@ -209,8 +315,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (signupForm) {
         signupForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            const email = signupForm.querySelector('input[type="email"]').value;
+            clearInlineMessages(signupForm);
+            const email = signupForm.querySelector('input[type="email"]').value.trim();
             const password = document.getElementById("password").value;
+            const confirmPasswordInput = document.getElementById("confirmPassword");
+            const confirmPassword = confirmPasswordInput?.value;
+
+            if (confirmPasswordInput && password !== confirmPassword) {
+                notify("Passwords do not match.", "error", "confirmPassword");
+                return;
+            }
+
             signUpUser(email, password);
         });
     }
@@ -220,50 +335,49 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginForm) {
         loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            const email = document.getElementById("email").value;
+            clearInlineMessages(loginForm);
+            const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
             logInUser(email, password);
         });
     }
 
-    // Handle Google Sign Up Button
-    const signupGoogleBtn = document.querySelector(".google-btn");
-    if (signupGoogleBtn) {
-        signupGoogleBtn.onclick = (e) => {
+    // Handle Google Sign Up and Log In buttons
+    const googleButtons = document.querySelectorAll(".google-btn, .option a");
+    googleButtons.forEach((button) => {
+        button.onclick = (e) => {
             e.preventDefault();
-            googleLogin("signup");
+            clearInlineMessages();
+            const action = button.classList?.contains("google-btn") ? "signup" : "login";
+            googleLogin(action);
         };
-    }
-
-    // Handle Google Log In Button
-    const loginGoogleBtn = document.querySelector(".option a");
-    if (loginGoogleBtn) {
-        loginGoogleBtn.onclick = (e) => {
-            e.preventDefault();
-            googleLogin("login");
-        };
-    }
+    });
 
     // Handle Forgot Password Link
     const forgotPasswordLink = document.getElementById("forgotPassword");
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener("click", (e) => {
             e.preventDefault();
+            clearInlineMessages(loginForm);
 
-            const email = document.getElementById("email").value;
+            const email = document.getElementById("email").value.trim();
             forgotPassword(email);
         });
     }
     // Handle Password Toggle(show and hide password)
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
+    const passwordToggles = document.querySelectorAll(".toggle-password");
+    passwordToggles.forEach((togglePassword) => {
+        const targetId = togglePassword.dataset?.target || "password";
+        const passwordInput = document.getElementById(targetId);
 
-    if (togglePassword && passwordInput) {
+        if (!passwordInput) return;
+
         togglePassword.addEventListener("click", () => {
             const isPassword = passwordInput.type === "password";
 
             passwordInput.type = isPassword ? "text" : "password";
             togglePassword.textContent = isPassword ? "Hide" : "Show";
         });
-    }
+    });
 });
+
