@@ -183,7 +183,7 @@ const elements = {
         ["educationPerformance", "add-education-performance-input"],
         ["educationStartDate", "add-education-start-date-input"],
         ["sharedTitle", "add-shared-title-input"],
-        ["sharedType", "add-shared-type-input"],
+        ["sharedType", "qualificationSelect"],
         ["sharedSubtitle", "add-shared-subtitle-input"],
         ["sharedIssueDate", "add-shared-issue-date-input"],
         ["sharedExpiryDate", "add-shared-expiry-date-input"],

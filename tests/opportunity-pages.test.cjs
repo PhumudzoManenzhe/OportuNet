@@ -82,7 +82,9 @@ function createActionButton(role, id) {
 
     return {
         dataset: { id, role },
+        disabled: false,
         listeners,
+        textContent: role === "apply" ? "Apply" : "View More Details",
         addEventListener: jest.fn((eventName, handler) => {
             listeners[eventName] = handler;
         })
@@ -177,6 +179,15 @@ function loadOpportunityPage(config, options = {}) {
         })
     };
     const db = { service: "db" };
+    const auth = {
+        currentUser: Object.prototype.hasOwnProperty.call(options, "currentUser")
+            ? options.currentUser
+            : {
+                displayName: "Naledi Mokoena",
+                email: "naledi@example.com",
+                uid: "applicant-123"
+            }
+    };
     const collection = jest.fn((dbArg, collectionName) => ({ collectionName, db: dbArg }));
     const doc = jest.fn((dbArg, collectionName, id) => ({ collectionName, db: dbArg, id }));
     const where = jest.fn((field, operator, value) => ({ field, operator, value }));
@@ -185,12 +196,21 @@ function loadOpportunityPage(config, options = {}) {
         Promise.resolve(createFirestoreSnapshots(options.snapshots || []))
     );
     const getDoc = options.getDoc || jest.fn((docRef) => {
-        const userData = options.userDocs?.[docRef.id];
+        const documentGroup = docRef.collectionName === "applications"
+            ? options.applicationDocs
+            : options.userDocs;
+        const documentData = documentGroup?.[docRef.id];
 
         return Promise.resolve({
-            data: () => userData || {},
-            exists: () => Boolean(userData)
+            data: () => documentData || {},
+            exists: () => Boolean(documentData)
         });
+    });
+    const setDoc = options.setDoc || jest.fn(() => Promise.resolve());
+    const onAuthStateChanged = options.onAuthStateChanged || jest.fn((_auth, onUser) => {
+        const unsubscribe = jest.fn();
+        Promise.resolve().then(() => onUser(auth.currentUser));
+        return unsubscribe;
     });
     const alert = jest.fn();
     const consoleMock = { error: jest.fn() };
@@ -211,6 +231,7 @@ globalThis.__testExports = {
 };`;
     const context = vm.createContext({
         alert,
+        auth,
         collection,
         console: consoleMock,
         db,
@@ -218,7 +239,9 @@ globalThis.__testExports = {
         getDoc,
         document: documentMock,
         getDocs,
+        onAuthStateChanged,
         query,
+        setDoc,
         where
     });
 
@@ -240,9 +263,11 @@ globalThis.__testExports = {
             elements,
             getDoc,
             getDocs,
+            onAuthStateChanged,
             query,
             searchButton,
             searchInput,
+            setDoc,
             where
         }
     };
@@ -350,8 +375,31 @@ describe.each(PAGES)("$name page", (config) => {
         expect(api.escapeHtml("A&B<C>")).toBe("A&amp;B&lt;C&gt;");
     });
 
-    test("renders cards, shows details and apply alerts, and supports the empty state", () => {
-        const { api, mocks } = loadOpportunityPage(config);
+    test("renders cards, shows details and submits applications, and supports the empty state", async () => {
+        const { api, mocks } = loadOpportunityPage(config, {
+            userDocs: {
+                "applicant-123": {
+                    applicantProfile: {
+                        cv: {
+                            fileName: "Naledi-CV.pdf",
+                            fileUrl: "https://example.com/cv.pdf"
+                        },
+                        profile: {
+                            name: "Naledi Mokoena"
+                        },
+                        qualifications: {
+                            items: [
+                                { title: "Diploma in IT" }
+                            ]
+                        },
+                        skills: {
+                            softSkills: ["Communication"],
+                            technicalSkills: ["JavaScript", "React"]
+                        }
+                    }
+                }
+            }
+        });
 
         api.items = [
             {
@@ -362,6 +410,7 @@ describe.each(PAGES)("$name page", (config) => {
                 id: "1",
                 location: "Soweto",
                 requirements: ["CV", "Matric"],
+                recruiterId: "recruiter-456",
                 stipend: "R7000",
                 title: "Frontend Role"
             }
@@ -373,7 +422,7 @@ describe.each(PAGES)("$name page", (config) => {
         const applyButton = mocks.container.getRenderedButtons("apply")[0];
 
         detailsButton.listeners.click();
-        applyButton.listeners.click();
+        await applyButton.listeners.click();
 
         expect(mocks.alert).toHaveBeenNthCalledWith(
             1,
@@ -387,15 +436,43 @@ describe.each(PAGES)("$name page", (config) => {
         );
         expect(mocks.alert).toHaveBeenNthCalledWith(
             2,
-            "Application started for Frontend Role at Bright Future."
+            "Application submitted for Frontend Role at Bright Future."
         );
+        expect(mocks.setDoc).toHaveBeenCalledWith(
+            {
+                collectionName: "applications",
+                db: mocks.db,
+                id: "applicant-123_1"
+            },
+            expect.objectContaining({
+                applicantEmail: "naledi@example.com",
+                applicantId: "applicant-123",
+                applicantName: "Naledi Mokoena",
+                companyName: "Bright Future",
+                cvFileName: "Naledi-CV.pdf",
+                cvFileUrl: "https://example.com/cv.pdf",
+                jobId: "1",
+                opportunityTitle: "Frontend Role",
+                opportunityType: config.opportunityType,
+                qualifications: "Diploma in IT | Skills: JavaScript, React",
+                recruiterId: "recruiter-456",
+                status: "pending"
+            })
+        );
+        expect(applyButton.disabled).toBe(true);
+        expect(applyButton.textContent).toBe("Applied");
 
         api.renderData([]);
         expect(mocks.container.innerHTML).toContain(config.emptyMessage);
     });
 
-    test("handles missing requirements and ignores card actions when the item cannot be found", () => {
-        const { api, mocks } = loadOpportunityPage(config);
+    test("handles missing requirements, permission errors, and ignores card actions when the item cannot be found", async () => {
+        const { api, mocks } = loadOpportunityPage(config, {
+            setDoc: jest.fn(() => Promise.reject({
+                code: "permission-denied",
+                message: "Missing or insufficient permissions."
+            }))
+        });
 
         api.items = [
             {
@@ -406,6 +483,7 @@ describe.each(PAGES)("$name page", (config) => {
                 id: "no-requirements",
                 location: "Durban",
                 requirements: [],
+                recruiterId: "recruiter-999",
                 stipend: "R0",
                 title: "Support Role"
             }
@@ -413,8 +491,10 @@ describe.each(PAGES)("$name page", (config) => {
 
         api.renderData(api.items);
         mocks.container.getRenderedButtons("details")[0].listeners.click();
+        await mocks.container.getRenderedButtons("apply")[0].listeners.click();
 
-        expect(mocks.alert).toHaveBeenCalledWith(
+        expect(mocks.alert).toHaveBeenNthCalledWith(
+            1,
             "Support Role\nStudio\n\n"
             + "Location: Durban\n"
             + "Duration: 3 months\n"
@@ -423,6 +503,11 @@ describe.each(PAGES)("$name page", (config) => {
             + "No description provided.\n\n"
             + "Requirements:\nNo requirements specified."
         );
+        expect(mocks.alert).toHaveBeenNthCalledWith(
+            2,
+            "Firestore permissions are blocking application submissions right now."
+        );
+        expect(mocks.setDoc).toHaveBeenCalled();
         expect(api.findItem("missing-id")).toBeUndefined();
 
         mocks.container.innerHTML = `

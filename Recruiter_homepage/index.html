@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recruiter Dashboard</title>
+    <title>Recruiter Dashboard | SA Skills Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -119,6 +119,72 @@
         </section>
     </main>
 
+    <dialog id="applicationViewModal" class="modal application-view-modal">
+        <div class="modal-content application-view-content">
+            <header class="modal-header application-view-header">
+                <div>
+                    <p class="application-view-kicker">Applicant review</p>
+                    <h2 id="applicationViewTitle">Application details</h2>
+                    <p id="applicationViewSubtitle" class="application-view-subtitle"></p>
+                </div>
+                <button class="close-modal" id="closeApplicationViewModalBtn" type="button" aria-label="Close application view">&times;</button>
+            </header>
+
+            <section class="application-view-body">
+                <div class="application-overview-grid">
+                    <article class="application-overview-card">
+                        <span class="overview-label">Status</span>
+                        <strong id="applicationViewStatus" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Applied</span>
+                        <strong id="applicationViewAppliedDate" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Opportunity</span>
+                        <strong id="applicationViewOpportunity" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Email</span>
+                        <strong id="applicationViewEmail" class="overview-value"></strong>
+                    </article>
+                </div>
+
+                <section class="application-view-section">
+                    <h3>Qualification snapshot</h3>
+                    <p id="applicationViewQualifications" class="application-summary-copy"></p>
+                </section>
+
+                <section class="application-view-section">
+                    <h3>Skills</h3>
+                    <div id="applicationViewSkills" class="application-skill-list">
+                        <p class="application-empty-copy">No skills listed yet.</p>
+                    </div>
+                </section>
+
+                <section class="application-view-section">
+                    <h3>Qualifications</h3>
+                    <div id="applicationViewQualificationItems" class="application-detail-list">
+                        <p class="application-empty-copy">No qualifications added yet.</p>
+                    </div>
+                </section>
+
+                <section class="application-view-section">
+                    <h3>Profile highlights</h3>
+                    <div id="applicationViewHighlights" class="application-detail-list">
+                        <p class="application-empty-copy">No additional profile details available yet.</p>
+                    </div>
+                </section>
+            </section>
+
+            <footer class="form-buttons application-view-actions">
+                <a id="applicationViewCvLink" class="btn-secondary application-link-btn" href="#" target="_blank" rel="noopener noreferrer" hidden>View CV</a>
+                <a id="applicationViewProfileLink" class="btn-primary application-link-btn" href="#">Open Applicant Profile</a>
+                <button class="btn-secondary" id="closeApplicationViewFooterBtn" type="button">Close</button>
+            </footer>
+        </div>
+    </dialog>
+
     <!-- ========== MODAL DIALOGS ========== -->
     <!-- Post Job Modal -->
     <dialog id="postJobModal" class="modal">
@@ -129,10 +195,10 @@
             </header>
             <form id="postJobForm">
                 <div class="form-group">
-                    <label for="jobTitleField">Job Title *</label>
-                    <div class="job-title-row">
-                        <input type="text" id="jobTitleField" placeholder="e.g., Software Development, Data Analytics" required>
-                        <select id="jobTitleType" aria-label="Opportunity type" required>
+                    <label>Job Title *</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="jobTitleField" placeholder="e.g., Software Development, Data Analytics" style="flex: 2; min-width: 180px;" required>
+                        <select id="jobTitleType" style="flex: 1; min-width: 140px;" required>
                             <option value="">Select Type</option>
                             <option value="Learnership">Learnership</option>
                             <option value="Internship">Internship</option>
@@ -155,6 +221,23 @@
                 <div class="form-group">
                     <label for="jobClosingDate">Closing Date *</label>
                     <input type="date" id="jobClosingDate" required>
+                </div>
+                <!-- SAQA NQF Level Dropdown -->
+                <div class="form-group">
+                    <label>Minimum NQF Level Required (SAQA) *</label>
+                    <select id="nqfLevel" required>
+                        <option value="">Select NQF Level</option>
+                        <option value="1">NQF Level 1 (Grade 9)</option>
+                        <option value="2">NQF Level 2 (Grade 10)</option>
+                        <option value="3">NQF Level 3 (Grade 11)</option>
+                        <option value="4">NQF Level 4 (Matric)</option>
+                        <option value="5">NQF Level 5 (Higher Certificate)</option>
+                        <option value="6">NQF Level 6 (Diploma)</option>
+                        <option value="7">NQF Level 7 (Degree)</option>
+                        <option value="8">NQF Level 8 (Honours)</option>
+                        <option value="9">NQF Level 9 (Master's)</option>
+                        <option value="10">NQF Level 10 (Doctorate)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="jobRequirements">Requirements (one per line) *</label>

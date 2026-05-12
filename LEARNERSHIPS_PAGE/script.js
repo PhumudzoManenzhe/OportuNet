@@ -1,7 +1,9 @@
-import { db } from "../FireStore_db/firebase.js";
-import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "../FireStore_db/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const OPPORTUNITY_TYPE = "Learnership";
+const APPLICATIONS_COLLECTION = "applications";
 
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search-Learnerships");
@@ -54,7 +56,8 @@ async function loadOpportunities(searchTerm) {
             description: job.description || "",
             closingDate: job.closingDate || "Not specified",
             requirements: Array.isArray(job.requirements) ? job.requirements : [],
-            postedDate: formatIsoDate(job.postedAt || job.updatedAt || "")
+            postedDate: formatIsoDate(job.postedAt || job.updatedAt || ""),
+            recruiterId: job.ownerUid || ""
         };
     });
 
@@ -135,11 +138,11 @@ function bindCardActions() {
     });
 
     container.querySelectorAll('[data-role="apply"]').forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", async () => {
             const opportunity = findOpportunity(button.dataset.id);
             if (!opportunity) return;
 
-            alert(`Application started for ${opportunity.title} at ${opportunity.companyName}.`);
+            await applyForOpportunity(opportunity, button);
         });
     });
 }
@@ -157,6 +160,113 @@ function renderStatusMessage(message) {
     if (!container) return;
 
     container.innerHTML = `<p class="status-message">${escapeHtml(message)}</p>`;
+}
+
+async function applyForOpportunity(opportunity, button) {
+    const user = await resolveCurrentUser();
+    if (!user) {
+        alert("Please log in before applying.");
+        return;
+    }
+
+    const applicationId = `${user.uid}_${opportunity.id}`;
+    const applicationRef = doc(db, APPLICATIONS_COLLECTION, applicationId);
+    const originalLabel = button?.textContent || "Apply";
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Applying...";
+    }
+
+    try {
+        const userSnapshot = await getDoc(doc(db, "users", user.uid));
+        const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+
+        await setDoc(applicationRef, buildApplicationPayload(opportunity, userData, user));
+        markApplyButtonComplete(button);
+        alert(`Application submitted for ${opportunity.title} at ${opportunity.companyName}.`);
+    } catch (error) {
+        console.error("Unable to submit application.", error);
+        if (button) {
+            button.disabled = false;
+            button.textContent = originalLabel;
+        }
+        alert(getApplicationErrorMessage(error));
+    }
+}
+
+function buildApplicationPayload(opportunity, userData, user) {
+    const applicantProfile = userData?.applicantProfile || {};
+
+    return {
+        applicantEmail: user.email || applicantProfile?.personalDetails?.email || "",
+        applicantId: user.uid,
+        applicantName: getApplicantName(userData, user),
+        appliedAt: new Date().toISOString(),
+        companyName: opportunity.companyName || "",
+        cvFileName: applicantProfile?.cv?.fileName || "",
+        cvFileUrl: applicantProfile?.cv?.fileUrl || "",
+        jobId: opportunity.id,
+        opportunityTitle: opportunity.title || "Opportunity",
+        opportunityType: OPPORTUNITY_TYPE,
+        qualifications: getApplicantQualificationSummary(applicantProfile),
+        recruiterId: opportunity.recruiterId || "",
+        status: "pending"
+    };
+}
+
+function getApplicantName(userData, user = {}) {
+    return userData?.applicantProfile?.profile?.name
+        || userData?.displayName
+        || userData?.fullName
+        || user?.displayName
+        || user?.email
+        || "Applicant";
+}
+
+function getApplicantQualificationSummary(applicantProfile = {}) {
+    const qualificationTitles = (applicantProfile?.qualifications?.items || [])
+        .map((item) => String(item?.title || "").trim())
+        .filter(Boolean);
+    const technicalSkills = (applicantProfile?.skills?.technicalSkills || [])
+        .map((item) => String(item || "").trim())
+        .filter(Boolean);
+    const softSkills = (applicantProfile?.skills?.softSkills || [])
+        .map((item) => String(item || "").trim())
+        .filter(Boolean);
+    const summary = [];
+
+    if (qualificationTitles.length > 0) {
+        summary.push(qualificationTitles.slice(0, 2).join(", "));
+    }
+
+    if (technicalSkills.length > 0) {
+        summary.push(`Skills: ${technicalSkills.slice(0, 3).join(", ")}`);
+    } else if (softSkills.length > 0) {
+        summary.push(`Strengths: ${softSkills.slice(0, 3).join(", ")}`);
+    }
+
+    return summary.join(" | ") || "Profile details not provided";
+}
+
+function markApplyButtonComplete(button) {
+    if (!button) return;
+    button.disabled = true;
+    button.textContent = "Applied";
+}
+
+function getApplicationErrorMessage(error) {
+    if (isPermissionError(error)) {
+        return "Firestore permissions are blocking application submissions right now.";
+    }
+
+    const message = String(error?.message || "").trim();
+    return message || "Your application could not be submitted right now.";
+}
+
+function isPermissionError(error) {
+    return error?.code === "permission-denied"
+        || /insufficient permissions|missing or insufficient permissions/i.test(String(error?.message || ""));
 }
 
 async function loadRecruiterNames(activeJobs) {
@@ -223,5 +333,25 @@ function escapeHtml(text) {
         if (match === "&") return "&amp;";
         if (match === "<") return "&lt;";
         return "&gt;";
+    });
+}
+
+async function resolveCurrentUser() {
+    if (auth.currentUser) {
+        return auth.currentUser;
+    }
+
+    if (typeof onAuthStateChanged !== "function") {
+        return null;
+    }
+
+    return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        }, (error) => {
+            unsubscribe();
+            reject(error);
+        });
     });
 }

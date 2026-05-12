@@ -12,6 +12,19 @@
     <script type="module" src="global_profile.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="profile" data-shell-base=".." data-shell-profile-href="../Applicant_Editable_Profile/profile_index.html" data-shell-replace-header="true">
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const isRecruiterViewer = params.get("viewer") === "recruiter";
+
+            if (!isRecruiterViewer) return;
+
+            document.body.dataset.shellRole = "recruiter";
+            document.body.dataset.shellActive = "home";
+            document.body.dataset.shellBase = "..";
+            document.body.removeAttribute("data-shell-profile-href");
+        })();
+    </script>
     <header class="app-header">
         <nav class="toolbar toolbar-profile" aria-label="Profile navigation">
             <form id="profile-search-form" class="toolbar-search" role="search" aria-label="Search">

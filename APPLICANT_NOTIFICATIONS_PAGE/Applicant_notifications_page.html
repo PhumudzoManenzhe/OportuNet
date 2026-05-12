@@ -11,27 +11,19 @@
   <link rel="stylesheet" href="Applicant_notifications_page.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="Applicant_notifications_page.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="notifications" data-shell-base="..">
   <main class="container">
     <header class="page-header">
       <h1>Notifications</h1>
+      <p id="notificationsMeta" class="page-meta">Loading your updates...</p>
     </header>
 
-    <section class="notification-list" aria-label="Applicant notifications">
-      <article class="notification-card unread">
-        <h2>Profile reminder</h2>
-        <p>Complete your applicant profile so recruiters can review your information faster.</p>
-      </article>
-
+    <section id="notificationList" class="notification-list" aria-label="Applicant notifications">
       <article class="notification-card">
-        <h2>New opportunities available</h2>
-        <p>Fresh internships, learnerships, and apprenticeships have been added to your dashboard.</p>
-      </article>
-
-      <article class="notification-card">
-        <h2>Application tips</h2>
-        <p>Keep your CV and supporting documents updated before submitting new applications.</p>
+        <h2>Loading notifications</h2>
+        <p>Your application updates are loading.</p>
       </article>
     </section>
   </main>
