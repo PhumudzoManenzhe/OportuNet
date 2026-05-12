@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Form in HTML and CSS | CodingNepal</title>
+  <title>Log In | OportuNet</title>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <link rel="stylesheet" href="./logIn_style.css" />
 </head>
 <body>
 
   <main class="login_form">
-    <!-- Login form container -->
     <form action="#">
       <h3>Log in with</h3>
 
       <section class="login_option">
-        <!-- Google button -->
         <article class="option">
           <a href="#">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
@@ -24,18 +22,15 @@
         </article>
       </section>
 
-      <!-- Login option separator -->
       <p class="separator">
         <span>or</span>
       </p>
 
-      <!-- Email input box -->
       <section class="input_box">
         <label for="email">Email</label>
         <input type="email" id="email" placeholder="Enter email address" required />
       </section>
 
-      <!-- Password input box -->
       <section class="input_box password_box">
         <header class="password_title">
           <label for="password">Password</label>
@@ -44,11 +39,10 @@
 
         <section class="password_wrapper">
           <input type="password" id="password" placeholder="Enter your password" required />
-          <span id="togglePassword" class="toggle-password">Show</span>
+          <button type="button" id="togglePassword" class="toggle-password" data-target="password">Show</button>
         </section>
       </section>
 
-      <!-- Login button -->
       <button type="submit">Log In</button>
 
       <p class="sign_up">
