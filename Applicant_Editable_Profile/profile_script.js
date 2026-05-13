@@ -419,7 +419,7 @@ function bindEvents() {
     on(elements.viewProfileOption, "click", handleViewProfile);
     on(elements.changePhotoOption, "click", triggerPhotoPicker);
     on(elements.deletePhotoOption, "click", handleDeleteProfilePhoto);
-    on(elements.uploadCvButton, "click", triggerCvPicker);
+    on(elements.uploadCvButton, "click", handleCvButtonClick);
     on(elements.photoInput, "change", handlePhotoSelection);
     on(elements.cvInput, "change", handleCvSelection);
     on(elements.editorForm, "submit", handleSave);
@@ -523,7 +523,7 @@ function renderCv(cv) {
     const hasCv = Boolean(cv.fileUrl);
     setText(elements.cvFileName, hasCv ? cv.fileName : "No CV uploaded yet");
     setText(elements.cvFileNote, hasCv ? "PDF uploaded and ready to view." : "Upload a PDF version of your CV. Only PDF files are accepted.");
-    setText(elements.uploadCvButton, hasCv ? "Replace PDF CV" : "Upload PDF CV");
+    setText(elements.uploadCvButton, hasCv ? "Delete CV" : "Upload PDF CV");
 
     if (!hasCv) {
         elements.viewCvLink.hidden = true;
@@ -1125,6 +1125,32 @@ async function handleDeleteProfilePhoto() {
 
 function triggerCvPicker() {
     elements.cvInput.click();
+}
+
+function handleCvButtonClick() {
+    if (state.pageData?.cv?.fileUrl) {
+        handleDeleteCv();
+        return;
+    }
+
+    triggerCvPicker();
+}
+
+async function handleDeleteCv() {
+    if (!state.pageData?.cv?.fileUrl) {
+        return;
+    }
+
+    try {
+        state.pageData.cv.fileName = "";
+        state.pageData.cv.fileUrl = "";
+        state.pageData = await profileGateway.savePageData(state.pageData);
+        renderCv(state.pageData.cv);
+        setFeedback("CV deleted.");
+    } catch (error) {
+        console.error("Unable to delete the CV.", error);
+        setFeedback(error?.message || "The CV could not be deleted.");
+    }
 }
 
 async function handlePhotoSelection(event) {

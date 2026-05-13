@@ -11,27 +11,21 @@
   <link rel="stylesheet" href="recruiter_notifications_page.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="recruiter_notifications_page.js"></script>
 </head>
 <body data-shell-role="recruiter" data-shell-active="notifications" data-shell-base="..">
   <main class="container">
     <header class="page-header">
-      <h1>Notifications</h1>
+      <div>
+        <h1>Notifications</h1>
+        <p id="notificationsMeta" class="page-meta">Loading your recruiter updates...</p>
+      </div>
     </header>
 
-    <section class="notification-list" aria-label="Recruiter notifications">
-      <article class="notification-card unread">
-        <h2>Applications ready to review</h2>
-        <p>New applications have been submitted for your active opportunities and are waiting for your review.</p>
-      </article>
-
+    <section id="notificationList" class="notification-list" aria-label="Recruiter notifications">
       <article class="notification-card">
-        <h2>Post closing soon</h2>
-        <p>Your Front-End Internship listing closes in 2 days. Extend the deadline if you still need more applicants.</p>
-      </article>
-
-      <article class="notification-card">
-        <h2>Shortlist reminder</h2>
-        <p>Remember to update shortlisted candidates so they can track their application progress in time.</p>
+        <h2>Loading notifications</h2>
+        <p>Your recruiter updates are loading.</p>
       </article>
     </section>
   </main>

@@ -219,7 +219,69 @@ function handleBackNavigation() {
 
 function handleSearchSubmit(event) {
     event.preventDefault();
-    setFeedback("Search will be connected to the wider application shell.");
+    const searchField = document.getElementById("profile-search");
+    const query = searchField?.value.trim().toLowerCase() || "";
+
+    if (!query) {
+        setFeedback("Search will be connected to the wider application shell.");
+        return;
+    }
+
+    const match = findProfileSectionMatch(query);
+    if (!match) {
+        setFeedback(`No profile section matches "${query}".`);
+        return;
+    }
+
+    match.section.scrollIntoView({ behavior: "smooth", block: "start" });
+    setFeedback(`Showing the ${match.label} section.`);
+}
+
+function findProfileSectionMatch(query) {
+    const sectionIndex = [
+        {
+            label: "About",
+            section: elements.aboutSection,
+            text: `${state.pageData?.about?.intro || ""} ${state.pageData?.about?.passion || ""}`
+        },
+        {
+            label: "Education",
+            section: elements.educationSection,
+            text: (state.pageData?.education || []).map((item) => [item.school, item.level, item.field, item.description].join(" ")).join(" ")
+        },
+        {
+            label: "Experience",
+            section: elements.experienceSection,
+            text: (state.pageData?.experience || []).map((item) => [item.title, item.company, item.description].join(" ")).join(" ")
+        },
+        {
+            label: "Qualifications",
+            section: elements.qualificationsSection,
+            text: (state.pageData?.qualifications?.items || []).map((item) => [item.title, item.subtitle, item.description].join(" ")).join(" ")
+        },
+        {
+            label: "Skills",
+            section: elements.skillsSection,
+            text: [...(state.pageData?.skills?.softSkills || []), ...(state.pageData?.skills?.technicalSkills || [])].join(" ")
+        },
+        {
+            label: "Projects",
+            section: elements.projectsSection,
+            text: (state.pageData?.projects?.items || []).map((item) => [item.title, item.subtitle, item.description].join(" ")).join(" ")
+        },
+        {
+            label: "Achievements",
+            section: elements.achievementsSection,
+            text: (state.pageData?.achievements?.items || []).map((item) => [item.title, item.subtitle, item.description].join(" ")).join(" ")
+        },
+        {
+            label: "Personal details",
+            section: elements.personalDetailsSection,
+            text: [state.pageData?.personalDetails?.phone, state.pageData?.personalDetails?.email, state.pageData?.personalDetails?.address].join(" ")
+        }
+    ];
+
+    return sectionIndex.find((entry) => entry.section && !entry.section.hidden && entry.text.toLowerCase().includes(query)) || null;
 }
 
 function renderPage() {

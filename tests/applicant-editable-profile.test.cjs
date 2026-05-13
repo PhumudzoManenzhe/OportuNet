@@ -559,11 +559,35 @@ describe("Applicant editable profile DOM behavior", () => {
         expect(app.profileGateway.uploadCv).toHaveBeenCalledWith(file);
         expect(nodes["cv-file-name"].textContent).toBe("Naledi-CV.PDF");
         expect(nodes["cv-file-note"].textContent).toBe("PDF uploaded and ready to view.");
-        expect(nodes["upload-cv-button"].textContent).toBe("Replace PDF CV");
+        expect(nodes["upload-cv-button"].textContent).toBe("Delete CV");
         expect(nodes["view-cv-link"].hidden).toBe(false);
         expect(nodes["view-cv-link"].href).toBe("data:application/pdf;base64,abc");
         expect(nodes["view-cv-link"].download).toBe("Naledi-CV.PDF");
         expect(nodes["page-feedback"].textContent).toBe("PDF CV uploaded.");
         expect(nodes["cv-input"].value).toBe("");
+    });
+
+    test("the CV action button deletes an uploaded CV instead of replacing it", async () => {
+        const { app, nodes } = loadProfileScript({ withDocument: true });
+        const pageData = await createMinimalPageData(app);
+        pageData.cv = {
+            fileName: "Naledi-CV.PDF",
+            fileUrl: "data:application/pdf;base64,abc"
+        };
+        app.profileGateway.fetchPageData = jest.fn().mockResolvedValue(pageData);
+        app.profileGateway.savePageData = jest.fn(async (nextPageData) => app.cloneData(nextPageData));
+
+        await app.initializePage();
+
+        nodes["upload-cv-button"].listeners.click();
+
+        expect(app.profileGateway.savePageData).toHaveBeenCalled();
+        expect(nodes["cv-file-name"].textContent).toBe("No CV uploaded yet");
+        expect(nodes["cv-file-note"].textContent).toBe("Upload a PDF version of your CV. Only PDF files are accepted.");
+        expect(nodes["upload-cv-button"].textContent).toBe("Upload PDF CV");
+        expect(nodes["view-cv-link"].hidden).toBe(true);
+        expect(nodes["view-cv-link"].removeAttribute).toHaveBeenCalledWith("href");
+        expect(nodes["view-cv-link"].removeAttribute).toHaveBeenCalledWith("download");
+        expect(nodes["page-feedback"].textContent).toBe("CV deleted.");
     });
 });

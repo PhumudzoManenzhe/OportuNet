@@ -10,7 +10,7 @@ const APPLICATIONS_COLLECTION = "applications";
 let jobs = [];
 let applications = [];
 let notifications = [];
-let currentFilter = "all";
+let currentFilter = "pending";
 let searchTerm = "";
 let currentSort = "date";
 let currentPage = 1;
@@ -19,8 +19,11 @@ let selectedJobs = new Set();
 let bulkMode = false;
 let editingJobId = null;
 let pendingDeleteJobId = null;
+let activeApplicationsJobId = "";
+let activeApplicationsJobTitle = "";
 let isSubmittingJob = false;
 let isDeletingJob = false;
+let confirmActionHandler = null;
 let currentRecruiter = {
     uid: "",
     email: "",
@@ -165,9 +168,10 @@ function getTotalPages(jobs) {
 
 function filterJobsBySearch(jobs, searchTerm) {
     if (!searchTerm) return jobs;
+    const normalizedTerm = searchTerm.toLowerCase();
     return jobs.filter(job => 
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.location.toLowerCase().includes(searchTerm.toLowerCase())
+        String(job.title || "").toLowerCase().includes(normalizedTerm) ||
+        String(job.location || "").toLowerCase().includes(normalizedTerm)
     );
 }
 
@@ -177,6 +181,112 @@ function getApplicantCount(jobId) {
 
 function getPendingApplicantCount(jobId) {
     return applications.filter(app => app.jobId === jobId && app.status === "pending").length;
+}
+
+function getAcceptedApplicantCount(jobId) {
+    return applications.filter((app) => app.jobId === jobId && app.status === "accepted").length;
+}
+
+function pushRecruiterNotification(title, message, createdAt = new Date().toISOString()) {
+    notifications.unshift({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        title,
+        message,
+        createdAt,
+        read: false
+    });
+}
+
+function formatRelativeTime(value) {
+    if (!value) return "Recently";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    const diffMs = Date.now() - date.getTime();
+    const diffMinutes = Math.max(1, Math.round(diffMs / 60000));
+
+    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+    const diffHours = Math.round(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours} hr ago`;
+
+    const diffDays = Math.round(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+
+    return formatIsoDate(value) || "Recently";
+}
+
+function buildReminderNotifications() {
+    const reminders = [];
+    const pendingApplications = applications.filter((application) => application.status === "pending");
+
+    if (pendingApplications.length > 0) {
+        const latestPending = pendingApplications
+            .map((application) => application.statusUpdatedAt || application.appliedAt)
+            .filter(Boolean)
+            .sort()
+            .slice(-1)[0];
+
+        reminders.push({
+            id: "system-pending-review",
+            title: "Applications ready to review",
+            message: `${pendingApplications.length} application${pendingApplications.length === 1 ? "" : "s"} are waiting for your review.`,
+            createdAt: latestPending || new Date().toISOString(),
+            isSystem: true,
+            read: false
+        });
+    }
+
+    jobs
+        .filter((job) => job.status === "active" && job.closingDate)
+        .forEach((job) => {
+            const closingDate = new Date(job.closingDate);
+            if (Number.isNaN(closingDate.getTime())) return;
+
+            const diffDays = Math.ceil((closingDate.getTime() - Date.now()) / 86400000);
+            if (diffDays < 0 || diffDays > 3) return;
+
+            reminders.push({
+                id: `system-closing-${job.id}`,
+                title: "Post closing soon",
+                message: `"${job.title}" closes ${diffDays === 0 ? "today" : `in ${diffDays} day${diffDays === 1 ? "" : "s"}`}.`,
+                createdAt: closingDate.toISOString(),
+                isSystem: true,
+                read: false
+            });
+        });
+
+    return reminders;
+}
+
+function getCombinedNotifications() {
+    return [...buildReminderNotifications(), ...notifications]
+        .map((notification) => ({
+            ...notification,
+            createdAt: notification.createdAt || ""
+        }))
+        .sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
+}
+
+function updateDashboardMetrics() {
+    const metrics = {
+        applicants: applications.length,
+        successRate: applications.length === 0
+            ? "0%"
+            : `${Math.round((applications.filter((application) => application.status === "accepted").length / applications.length) * 100)}%`,
+        totalPosts: jobs.length
+    };
+
+    const totalPostsMetric = document.getElementById("totalPostsMetric");
+    const applicantsMetric = document.getElementById("applicantsMetric");
+    const successRateMetric = document.getElementById("successRateMetric");
+
+    if (totalPostsMetric) totalPostsMetric.textContent = String(metrics.totalPosts);
+    if (applicantsMetric) applicantsMetric.textContent = String(metrics.applicants);
+    if (successRateMetric) successRateMetric.textContent = metrics.successRate;
 }
 
 async function saveToLocalStorage() {
@@ -244,7 +354,12 @@ async function loadFromLocalStorage() {
         }
     }
 
-    notifications = Array.isArray(dashboardData?.notifications) ? dashboardData.notifications : [];
+    notifications = Array.isArray(dashboardData?.notifications)
+        ? dashboardData.notifications.map((notification) => ({
+            ...notification,
+            createdAt: notification?.createdAt || ""
+        }))
+        : [];
 }
 
 function isPermissionError(error) {
@@ -312,7 +427,7 @@ function renderOpportunities() {
     const container = document.getElementById("opportunitiesList");
     if (!container) return;
 
-    let filteredJobs = jobs.filter(job => searchTerm === "" || job.title.toLowerCase().includes(searchTerm.toLowerCase()) || job.location.toLowerCase().includes(searchTerm.toLowerCase()));
+    let filteredJobs = filterJobsBySearch(jobs, searchTerm);
     filteredJobs = sortJobs(filteredJobs);
 
     const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
@@ -414,6 +529,9 @@ function renderOpportunities() {
         `;
     });
     container.innerHTML = html;
+    updateDashboardMetrics();
+    updateSortButtons();
+    updateBulkModeButton();
     updateApplicationsTabBadge();
 
     if (bulkMode) {
@@ -616,6 +734,84 @@ function closeApplicationViewModal() {
     modal.removeAttribute("open");
 }
 
+function renderOpportunityView(job) {
+    if (!job) return;
+
+    const title = document.getElementById("opportunityViewTitle");
+    const subtitle = document.getElementById("opportunityViewSubtitle");
+    const status = document.getElementById("opportunityViewStatus");
+    const applicants = document.getElementById("opportunityViewApplicants");
+    const postedDate = document.getElementById("opportunityViewPostedDate");
+    const closingDate = document.getElementById("opportunityViewClosingDate");
+    const meta = document.getElementById("opportunityViewMeta");
+    const description = document.getElementById("opportunityViewDescription");
+    const requirements = document.getElementById("opportunityViewRequirements");
+    const reviewApplicantsBtn = document.getElementById("opportunityReviewApplicantsBtn");
+
+    if (title) title.textContent = job.title || "Opportunity details";
+    if (subtitle) subtitle.textContent = `${job.companyName || "Recruiter"} | ${job.opportunityType || "Opportunity"}`;
+    if (status) status.textContent = getApplicationStatusLabel(job.status);
+    if (applicants) applicants.textContent = `${getApplicantCount(job.id)} applicant${getApplicantCount(job.id) === 1 ? "" : "s"}`;
+    if (postedDate) postedDate.textContent = job.postedDate || "Not available";
+    if (closingDate) closingDate.textContent = job.closingDate || "Not specified";
+    if (description) description.textContent = job.description || "No description provided for this opportunity yet.";
+
+    if (meta) {
+        meta.innerHTML = [
+            { label: "Location", value: job.location || "Not specified" },
+            { label: "Compensation", value: job.stipend || "Not specified" },
+            { label: "Duration", value: job.duration || "Not specified" },
+            { label: "NQF Level", value: job.nqfLevel ? `NQF Level ${job.nqfLevel}` : "Not specified" }
+        ].map((item) => `
+            <article class="opportunity-meta-card">
+                <span class="overview-label">${escapeHtml(item.label)}</span>
+                <strong class="overview-value">${escapeHtml(item.value)}</strong>
+            </article>
+        `).join("");
+    }
+
+    if (requirements) {
+        requirements.innerHTML = Array.isArray(job.requirements) && job.requirements.length > 0
+            ? job.requirements.map((item) => `
+                <article class="application-detail-card">
+                    <h4>${escapeHtml(item)}</h4>
+                </article>
+            `).join("")
+            : '<p class="application-empty-copy">No requirements have been listed for this opportunity.</p>';
+    }
+
+    if (reviewApplicantsBtn) {
+        reviewApplicantsBtn.disabled = getApplicantCount(job.id) === 0;
+        reviewApplicantsBtn.textContent = getApplicantCount(job.id) === 0 ? "No Applicants Yet" : "Review Applicants";
+        reviewApplicantsBtn.onclick = () => reviewApplicants(job.id);
+    }
+}
+
+function openOpportunityViewModal() {
+    const modal = document.getElementById("opportunityViewModal");
+    if (!modal) return;
+
+    if (typeof modal.showModal === "function") {
+        modal.showModal();
+        return;
+    }
+
+    modal.setAttribute("open", "open");
+    modal.style.display = "flex";
+}
+
+function closeOpportunityViewModal() {
+    const modal = document.getElementById("opportunityViewModal");
+    if (!modal) return;
+
+    if (typeof modal.close === "function") {
+        modal.close();
+    }
+
+    modal.style.display = "none";
+    modal.removeAttribute("open");
+}
+
 async function loadApplicantProfileForReview(applicantId) {
     if (!applicantId) {
         return null;
@@ -635,16 +831,37 @@ async function loadApplicantProfileForReview(applicantId) {
 }
 
 function reviewApplicants(jobId) {
-    const job = jobs.find(j => j.id === jobId);
-    const applicantCount = getApplicantCount(jobId);
-    const pendingCount = getPendingApplicantCount(jobId);
-    
-    if (job && applicantCount > 0) {
-        alert(`Reviewing "${job.title}"\n\nTotal Applicants: ${applicantCount}\nPending Review: ${pendingCount}\n\nThis opens the applications view for this job.`);
-        switchTab('applications');
-    } else {
-        alert(`No applicants to review for "${job?.title || 'this job'}" yet.`);
+    const job = jobs.find((item) => item.id === jobId);
+    activeApplicationsJobId = jobId || "";
+    activeApplicationsJobTitle = job?.title || "this opportunity";
+    setApplicationStatusFilter("all");
+    closeOpportunityViewModal();
+    switchTab("applications");
+}
+
+function clearApplicationsJobContext() {
+    activeApplicationsJobId = "";
+    activeApplicationsJobTitle = "";
+}
+
+function setApplicationStatusFilter(filterValue) {
+    currentFilter = filterValue;
+    document.querySelectorAll(".filter-btn").forEach((button) => {
+        button.classList.toggle("active", button.id === `filter${filterValue.charAt(0).toUpperCase()}${filterValue.slice(1)}`);
+    });
+}
+
+function renderApplicationsContext() {
+    const contextCopy = document.getElementById("applicationsContextCopy");
+
+    if (!contextCopy) return;
+
+    if (!activeApplicationsJobId) {
+        contextCopy.textContent = "Pending applications are shown first, and reviewed applicants move into their own status lists.";
+        return;
     }
+
+    contextCopy.textContent = "Only applicants linked to the selected opportunity card are shown below.";
 }
 
 function updateBulkDeleteBar() {
@@ -666,7 +883,16 @@ function toggleBulkMode() {
         selectedJobs.clear();
         updateBulkDeleteBar();
     }
+    updateBulkModeButton();
     renderOpportunities();
+}
+
+function updateBulkModeButton() {
+    const selectPostsBtn = document.getElementById("selectPostsBtn");
+    if (!selectPostsBtn) return;
+
+    selectPostsBtn.textContent = bulkMode ? "Done Selecting" : "Select Posts";
+    selectPostsBtn.classList.toggle("is-active", bulkMode);
 }
 
 async function bulkDelete() {
@@ -687,13 +913,7 @@ async function bulkDelete() {
 
         jobs = jobs.filter(job => !selectedJobs.has(job.id));
         applications = applications.filter(app => !selectedJobs.has(app.jobId));
-        notifications.unshift({
-            id: Date.now(),
-            title: "Bulk Delete",
-            message: `You deleted ${deletedCount} opportunities`,
-            time: "Just now",
-            read: false
-        });
+        pushRecruiterNotification("Bulk Delete", `You deleted ${deletedCount} opportunities`);
 
         selectedJobs.clear();
         bulkMode = false;
@@ -728,7 +948,7 @@ async function toggleJobStatus(jobId) {
                 status: "closed",
                 updatedAt: job.updatedAt
             });
-            notifications.unshift({ id: Date.now(), title: "Job Closed", message: `You closed "${job.title}"`, time: "Just now", read: false });
+            pushRecruiterNotification("Job Closed", `You closed "${job.title}"`, job.updatedAt);
             alert(`"${job.title}" has been closed.`);
         } else if (job.status === "closed") {
             job.status = "active";
@@ -737,7 +957,7 @@ async function toggleJobStatus(jobId) {
                 status: "active",
                 updatedAt: job.updatedAt
             });
-            notifications.unshift({ id: Date.now(), title: "Job Reactivated", message: `You reactivated "${job.title}"`, time: "Just now", read: false });
+            pushRecruiterNotification("Job Reactivated", `You reactivated "${job.title}"`, job.updatedAt);
             alert(`"${job.title}" has been reactivated.`);
         }
 
@@ -754,39 +974,86 @@ function renderApplications() {
     const container = document.getElementById("applicationsList");
     if (!container) return;
 
+    renderApplicationsContext();
+
     if (applications.length === 0) {
         container.innerHTML = '<div class="empty-state"><p>No applications yet.</p><p>When students apply to your opportunities, they will appear here.</p></div>';
         return;
     }
 
     let filteredApps = applications;
-    if (currentFilter === "pending") {
-        filteredApps = applications.filter(a => a.status === "pending");
-    } else if (currentFilter === "reviewed") {
-        filteredApps = applications.filter(a => a.status !== "pending");
+    if (activeApplicationsJobId) {
+        filteredApps = filteredApps.filter((application) => application.jobId === activeApplicationsJobId);
+    }
+    if (currentFilter !== "all") {
+        if (currentFilter === "reviewed") {
+            filteredApps = filteredApps.filter((application) => application.status !== "pending");
+        } else {
+            filteredApps = filteredApps.filter((application) => application.status === currentFilter);
+        }
+    }
+
+    if (filteredApps.length === 0) {
+        container.innerHTML = activeApplicationsJobId
+            ? `<div class="empty-state"><p>No applications for "${escapeHtml(activeApplicationsJobTitle)}" match this filter yet.</p><p>Try another application status view or return to all applications.</p></div>`
+            : '<div class="empty-state"><p>No applications match this filter yet.</p><p>Try another application status view.</p></div>';
+        return;
     }
 
     let html = '<table><thead><tr><th>Name</th><th>Opportunity</th><th>Date</th><th>Qualifications</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
     filteredApps.forEach(app => {
         const job = jobs.find(j => j.id === app.jobId);
-        html += `<tr><td data-label="Name">${escapeHtml(app.applicantName)}</td><td data-label="Opportunity">${escapeHtml(job?.title || app.opportunityTitle || 'Unknown')}</td><td data-label="Date">${app.appliedDate}</td><td data-label="Qualifications">${escapeHtml(app.qualifications)}</td><td data-label="Status">${app.status}</td><td data-label="Actions" class="action-buttons"><button class="application-action-btn view-application-btn" onclick="viewApplicant('${app.id}')">View</button><button class="application-action-btn shortlist-application-btn" onclick="shortlistApplicant('${app.id}')">Shortlist</button><button class="application-action-btn reject-application-btn" onclick="rejectApplicant('${app.id}')">Reject</button></td></tr>`;
+        const isAccepted = app.status === "accepted";
+        const isRejected = app.status === "rejected";
+        const isShortlisted = app.status === "shortlisted";
+
+        html += `<tr><td data-label="Name">${escapeHtml(app.applicantName)}</td><td data-label="Opportunity">${escapeHtml(job?.title || app.opportunityTitle || "Unknown")}</td><td data-label="Date">${app.appliedDate}</td><td data-label="Qualifications">${escapeHtml(app.qualifications)}</td><td data-label="Status">${escapeHtml(getApplicationStatusLabel(app.status))}</td><td data-label="Actions" class="action-buttons"><button class="application-action-btn view-application-btn" onclick="viewApplicant('${app.id}')">View</button><button class="application-action-btn shortlist-application-btn" onclick="shortlistApplicant('${app.id}')" ${isShortlisted || isAccepted ? "disabled" : ""}>Shortlist</button><button class="application-action-btn accept-application-btn" onclick="acceptApplicant('${app.id}')" ${isAccepted ? "disabled" : ""}>Accept</button><button class="application-action-btn reject-application-btn" onclick="rejectApplicant('${app.id}')" ${isRejected ? "disabled" : ""}>Reject</button></td></tr>`;
     });
     html += "</tbody></table>";
     container.innerHTML = html;
+}
+
+function moveApplicationToStatus(app, statusValue, successMessage, notificationTitle) {
+    if (!app) return Promise.resolve();
+
+    const previousStatus = app.status;
+    const previousStatusUpdatedAt = app.statusUpdatedAt;
+    const statusUpdatedAt = new Date().toISOString();
+
+    return updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), {
+        status: statusValue,
+        statusUpdatedAt
+    }).then(async () => {
+        app.status = statusValue;
+        app.statusUpdatedAt = statusUpdatedAt;
+        setApplicationStatusFilter(statusValue);
+        pushRecruiterNotification(notificationTitle, successMessage, statusUpdatedAt);
+        await saveToLocalStorage();
+        renderApplications();
+        updateDashboardMetrics();
+        renderNotifications();
+        alert(successMessage);
+    }).catch((error) => {
+        app.status = previousStatus;
+        app.statusUpdatedAt = previousStatusUpdatedAt;
+        throw error;
+    });
 }
 
 function renderNotifications() {
     const container = document.getElementById("notificationsList");
     if (!container) return;
 
-    if (notifications.length === 0) {
+    const feed = getCombinedNotifications();
+
+    if (feed.length === 0) {
         container.innerHTML = '<div class="empty-state"><p>No notifications.</p></div>';
         return;
     }
 
     let html = "";
-    notifications.forEach(n => {
-        html += `<div class="notification-item ${n.read ? "" : "unread"}"><div><div class="notification-title">${escapeHtml(n.title)}</div><div class="notification-message">${escapeHtml(n.message)}</div><div class="notification-time">${n.time}</div></div>${!n.read ? `<button class="notification-read-btn" onclick="markNotificationRead(${n.id})">Mark read</button>` : ""}</div>`;
+    feed.forEach((notification) => {
+        html += `<div class="notification-item ${notification.read ? "" : "unread"}"><div><div class="notification-title">${escapeHtml(notification.title)}</div><div class="notification-message">${escapeHtml(notification.message)}</div><div class="notification-time">${escapeHtml(formatRelativeTime(notification.createdAt || notification.time))}</div></div>${!notification.read && !notification.isSystem ? `<button class="notification-read-btn" onclick="markNotificationRead('${escapeAttribute(notification.id)}')">Mark read</button>` : ""}</div>`;
     });
     container.innerHTML = html;
 }
@@ -803,13 +1070,23 @@ function searchOpportunities() {
 function setSortByDate() {
     currentSort = "date";
     currentPage = 1;
+    updateSortButtons();
     renderOpportunities();
 }
 
 function setSortByApplicants() {
     currentSort = "applicants";
     currentPage = 1;
+    updateSortButtons();
     renderOpportunities();
+}
+
+function updateSortButtons() {
+    const sortDateBtn = document.getElementById("sortDateBtn");
+    const sortApplicantsBtn = document.getElementById("sortApplicantsBtn");
+
+    if (sortDateBtn) sortDateBtn.classList.toggle("active", currentSort === "date");
+    if (sortApplicantsBtn) sortApplicantsBtn.classList.toggle("active", currentSort === "applicants");
 }
 
 function prevPage() {
@@ -820,8 +1097,7 @@ function prevPage() {
 }
 
 function nextPage() {
-    const total = jobs.filter(j => searchTerm === "" || j.title.toLowerCase().includes(searchTerm.toLowerCase())).length;
-    const totalPages = Math.ceil(total / jobsPerPage);
+    const totalPages = getTotalPages(sortJobs(filterJobsBySearch(jobs, searchTerm)));
     if (currentPage < totalPages) {
         currentPage++;
         renderOpportunities();
@@ -852,29 +1128,34 @@ function validateJobForm() {
     const nqfLevel = document.getElementById("nqfLevel");
     const requirements = document.getElementById("jobRequirements");
     
-    if (!titleField.value.trim()) { alert("Please enter a job title field"); return false; }
-    if (!titleType.value) { alert("Please select a job type (Learnership, Internship, or Apprenticeship)"); return false; }
-    if (!location.value.trim()) { alert("Please enter a location"); return false; }
-    if (!stipend.value.trim()) { alert("Please enter stipend/salary"); return false; }
-    if (!duration.value.trim()) { alert("Please enter duration"); return false; }
-    //if (!closingDate.value) { alert("Please select closing date"); return false; }
-    if (!nqfLevel.value) { alert("Please select the minimum NQF Level (SAQA requirement)"); return false; }
-    if (!requirements.value.trim()) { alert("Please enter requirements"); return false; }
+    if (!titleField?.value.trim()) { alert("Please enter a job title field"); return false; }
+    if (!titleType?.value) { alert("Please select a job type (Learnership, Internship, or Apprenticeship)"); return false; }
+    if (!location?.value.trim()) { alert("Please enter a location"); return false; }
+    if (!stipend?.value.trim()) { alert("Please enter stipend/salary"); return false; }
+    if (!duration?.value.trim()) { alert("Please enter duration"); return false; }
+    if (closingDate && !closingDate.value) { alert("Please select closing date"); return false; }
+    if (nqfLevel && !nqfLevel.value) { alert("Please select the minimum NQF Level (SAQA requirement)"); return false; }
+    if (!requirements?.value.trim()) { alert("Please enter requirements"); return false; }
     
     return true;
 }
 
 function openPostJobModal() {
-    document.getElementById("postJobForm").reset();
+    document.getElementById("postJobForm")?.reset();
     editingJobId = null;
-    document.getElementById("modalTitle").textContent = "Post New Opportunity";
-    document.getElementById("submitJobBtn").textContent = "Post Opportunity";
-    document.getElementById("jobStatus").value = "active";
-    document.getElementById("postJobModal").style.display = "flex";
+    const modalTitle = document.getElementById("modalTitle");
+    const submitJobBtn = document.getElementById("submitJobBtn");
+    const jobStatus = document.getElementById("jobStatus");
+    const postJobModal = document.getElementById("postJobModal");
+    if (modalTitle) modalTitle.textContent = "Post New Opportunity";
+    if (submitJobBtn) submitJobBtn.textContent = "Post Opportunity";
+    if (jobStatus) jobStatus.value = "active";
+    if (postJobModal) postJobModal.style.display = "flex";
 }
 
 function closePostJobModal() {
-    document.getElementById("postJobModal").style.display = "none";
+    const postJobModal = document.getElementById("postJobModal");
+    if (postJobModal) postJobModal.style.display = "none";
 }
 
 async function postJob(event) {
@@ -914,13 +1195,17 @@ async function postJob(event) {
         await saveOpportunity(jobData);
         if (editingJobId) {
             jobs = jobs.map((job) => job.id === editingJobId ? jobData : job);
+            pushRecruiterNotification("Opportunity Updated", `"${fullTitle}" was updated.`, now);
         } else {
             jobs = [jobData, ...jobs];
+            pushRecruiterNotification("Opportunity Posted", `"${fullTitle}" is now live on your dashboard.`, now);
         }
         currentPage = 1;
         closePostJobModal();
         switchTab("opportunities");
+        updateDashboardMetrics();
         renderNotifications();
+        saveToLocalStorage().catch((error) => console.error("Unable to save recruiter dashboard state.", error));
         alert(editingJobId ? `Job updated successfully: ${fullTitle}` : `Job posted successfully: ${fullTitle}`);
         editingJobId = null;
     } catch (error) {
@@ -947,27 +1232,67 @@ function editJob(jobId) {
         }
     }
     
-    document.getElementById("jobTitleField").value = titleField;
-    document.getElementById("jobTitleType").value = titleType;
-    document.getElementById("jobLocation").value = job.location;
-    document.getElementById("jobStipend").value = job.stipend;
-    document.getElementById("jobDuration").value = job.duration;
-    //document.getElementById("jobClosingDate").value = job.closingDate;
-    document.getElementById("nqfLevel").value = job.nqfLevel || "";
-    document.getElementById("jobRequirements").value = job.requirements.join("\n");
-    document.getElementById("jobDescription").value = job.description || "";
-    document.getElementById("jobStatus").value = job.status;
-    document.getElementById("modalTitle").textContent = "Edit Opportunity";
-    document.getElementById("submitJobBtn").textContent = "Update Opportunity";
-    document.getElementById("postJobModal").style.display = "flex";
+    const jobTitleField = document.getElementById("jobTitleField");
+    const jobTitleType = document.getElementById("jobTitleType");
+    const jobLocation = document.getElementById("jobLocation");
+    const jobStipend = document.getElementById("jobStipend");
+    const jobDuration = document.getElementById("jobDuration");
+    const jobClosingDate = document.getElementById("jobClosingDate");
+    const nqfLevel = document.getElementById("nqfLevel");
+    const jobRequirements = document.getElementById("jobRequirements");
+    const jobDescription = document.getElementById("jobDescription");
+    const jobStatus = document.getElementById("jobStatus");
+    const modalTitle = document.getElementById("modalTitle");
+    const submitJobBtn = document.getElementById("submitJobBtn");
+    const postJobModal = document.getElementById("postJobModal");
+
+    if (jobTitleField) jobTitleField.value = titleField;
+    if (jobTitleType) jobTitleType.value = titleType;
+    if (jobLocation) jobLocation.value = job.location;
+    if (jobStipend) jobStipend.value = job.stipend;
+    if (jobDuration) jobDuration.value = job.duration;
+    if (jobClosingDate) jobClosingDate.value = job.closingDate || "";
+    if (nqfLevel) nqfLevel.value = job.nqfLevel || "";
+    if (jobRequirements) jobRequirements.value = job.requirements.join("\n");
+    if (jobDescription) jobDescription.value = job.description || "";
+    if (jobStatus) jobStatus.value = job.status;
+    if (modalTitle) modalTitle.textContent = "Edit Opportunity";
+    if (submitJobBtn) submitJobBtn.textContent = "Update Opportunity";
+    if (postJobModal) postJobModal.style.display = "flex";
 }
 
 function openDeleteModal(jobTitle) {
     const confirmModal = document.getElementById("confirmModal");
+    const confirmTitle = document.getElementById("confirmTitle");
     const confirmMessage = document.getElementById("confirmMessage");
+    const confirmOkBtn = document.getElementById("confirmOkBtn");
+    const confirmIcon = document.getElementById("confirmIcon");
+    const confirmIconGlyph = document.getElementById("confirmIconGlyph");
+
+    confirmActionHandler = performDeleteJob;
+
+    if (confirmTitle) {
+        confirmTitle.textContent = "Delete opportunity?";
+    }
 
     if (confirmMessage) {
-        confirmMessage.textContent = `Are you sure you want to delete "${jobTitle}"?`;
+        confirmMessage.textContent = `Are you sure you want to delete "${jobTitle}"? This action cannot be undone.`;
+    }
+
+    if (confirmOkBtn) {
+        confirmOkBtn.textContent = "Yes, Delete";
+        confirmOkBtn.classList.remove("btn-primary");
+        confirmOkBtn.classList.add("btn-danger");
+        confirmOkBtn.disabled = false;
+    }
+
+    if (confirmIcon) {
+        confirmIcon.classList.remove("is-primary");
+        confirmIcon.classList.add("is-danger");
+    }
+
+    if (confirmIconGlyph) {
+        confirmIconGlyph.className = "fa-solid fa-trash";
     }
 
     if (confirmModal?.showModal) {
@@ -978,9 +1303,12 @@ function openDeleteModal(jobTitle) {
     }
 }
 
-function closeDeleteModal() {
+function closeDeleteModal(forceClose = false) {
     const confirmModal = document.getElementById("confirmModal");
+    if (isDeletingJob && !forceClose) return;
+
     pendingDeleteJobId = null;
+    confirmActionHandler = null;
 
     if (confirmModal?.close) {
         confirmModal.close();
@@ -1002,7 +1330,8 @@ function confirmDeleteJob(jobId) {
 async function performDeleteJob() {
     if (pendingDeleteJobId === null || isDeletingJob) return;
 
-    const job = jobs.find(j => j.id === pendingDeleteJobId);
+    const jobIdToDelete = pendingDeleteJobId;
+    const job = jobs.find(j => j.id === jobIdToDelete);
     if (!job) {
         closeDeleteModal();
         return;
@@ -1018,15 +1347,15 @@ async function performDeleteJob() {
     if (confirmOkBtn) confirmOkBtn.disabled = true;
 
     try {
-        await deleteDoc(doc(db, OPPORTUNITIES_COLLECTION, String(pendingDeleteJobId)));
-        await deleteApplicationsForJob(String(pendingDeleteJobId));
+        await deleteDoc(doc(db, OPPORTUNITIES_COLLECTION, String(jobIdToDelete)));
+        await deleteApplicationsForJob(String(jobIdToDelete));
 
-        jobs = jobs.filter(j => j.id !== pendingDeleteJobId);
-        applications = applications.filter(a => a.jobId !== pendingDeleteJobId);
-        selectedJobs.delete(pendingDeleteJobId);
-        notifications.unshift({ id: Date.now(), title: "Job Deleted", message: `You deleted "${job.title}"`, time: "Just now", read: false });
+        jobs = jobs.filter(j => j.id !== jobIdToDelete);
+        applications = applications.filter(a => a.jobId !== jobIdToDelete);
+        selectedJobs.delete(jobIdToDelete);
+        pushRecruiterNotification("Job Deleted", `You deleted "${job.title}"`);
 
-        closeDeleteModal();
+        closeDeleteModal(true);
         updateBulkDeleteBar();
         renderOpportunities();
         renderApplications();
@@ -1052,9 +1381,65 @@ async function performDeleteJob() {
 function viewJobDetails(jobId) {
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
-    
-    let reqText = job.requirements.map(r => `- ${r}`).join("\n");
-    alert(`${job.title}\n\nLocation: ${job.location}\nStipend: ${job.stipend}\nDuration: ${job.duration}\nClosing: ${job.closingDate}\nNQF Level: ${job.nqfLevel || 'Not specified'}\nApplicants: ${getApplicantCount(jobId)}\nStatus: ${job.status}\n\nRequirements:\n${reqText}\n\n${job.description || "No description"}`);
+
+    renderOpportunityView(job);
+    openOpportunityViewModal();
+}
+
+function openLogoutModal() {
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmTitle = document.getElementById("confirmTitle");
+    const confirmMessage = document.getElementById("confirmMessage");
+    const confirmOkBtn = document.getElementById("confirmOkBtn");
+    const confirmIcon = document.getElementById("confirmIcon");
+    const confirmIconGlyph = document.getElementById("confirmIconGlyph");
+
+    confirmActionHandler = performLogout;
+
+    if (confirmTitle) {
+        confirmTitle.textContent = "Log out now?";
+    }
+
+    if (confirmMessage) {
+        confirmMessage.textContent = "You will be signed out of the recruiter dashboard and returned to the login page.";
+    }
+
+    if (confirmOkBtn) {
+        confirmOkBtn.textContent = "Log Out";
+        confirmOkBtn.classList.remove("btn-danger");
+        confirmOkBtn.classList.add("btn-primary");
+        confirmOkBtn.disabled = false;
+    }
+
+    if (confirmIcon) {
+        confirmIcon.classList.remove("is-danger");
+        confirmIcon.classList.add("is-primary");
+    }
+
+    if (confirmIconGlyph) {
+        confirmIconGlyph.className = "fa-solid fa-right-from-bracket";
+    }
+
+    if (confirmModal?.showModal) {
+        confirmModal.showModal();
+    } else if (confirmModal) {
+        confirmModal.setAttribute("open", "open");
+        confirmModal.style.display = "flex";
+    }
+}
+
+function performLogout() {
+    closeDeleteModal();
+    localStorage.removeItem("recruiter_jobs");
+    localStorage.removeItem("recruiter_applications");
+    sessionStorage.clear();
+    window.location.href = "../SignUp_LogIn_pages/logIn.html";
+}
+
+function handleConfirmModalAction() {
+    if (typeof confirmActionHandler === "function") {
+        confirmActionHandler();
+    }
 }
 
 async function viewApplicant(id) {
@@ -1069,24 +1454,30 @@ async function viewApplicant(id) {
 async function shortlistApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
-        const previousStatus = app.status;
-        const previousStatusUpdatedAt = app.statusUpdatedAt;
-        const statusUpdatedAt = new Date().toISOString();
         try {
-            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), {
-                status: "shortlisted",
-                statusUpdatedAt
-            });
-            app.status = "shortlisted";
-            app.statusUpdatedAt = statusUpdatedAt;
-            notifications.unshift({ id: Date.now(), title: "Shortlisted", message: `You shortlisted ${app.applicantName}`, time: "Just now", read: false });
-            await saveToLocalStorage();
-            renderApplications();
-            renderNotifications();
-            alert(`${app.applicantName} shortlisted`);
+            await moveApplicationToStatus(
+                app,
+                "shortlisted",
+                `${app.applicantName} shortlisted`,
+                "Shortlisted"
+            );
         } catch (error) {
-            app.status = previousStatus;
-            app.statusUpdatedAt = previousStatusUpdatedAt;
+            alert(error?.message || "This application could not be updated.");
+        }
+    }
+}
+
+async function acceptApplicant(id) {
+    const app = applications.find((application) => application.id === id);
+    if (app) {
+        try {
+            await moveApplicationToStatus(
+                app,
+                "accepted",
+                `${app.applicantName} accepted`,
+                "Application Accepted"
+            );
+        } catch (error) {
             alert(error?.message || "This application could not be updated.");
         }
     }
@@ -1095,31 +1486,21 @@ async function shortlistApplicant(id) {
 async function rejectApplicant(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
-        const previousStatus = app.status;
-        const previousStatusUpdatedAt = app.statusUpdatedAt;
-        const statusUpdatedAt = new Date().toISOString();
         try {
-            await updateDoc(doc(db, APPLICATIONS_COLLECTION, String(app.id)), {
-                status: "rejected",
-                statusUpdatedAt
-            });
-            app.status = "rejected";
-            app.statusUpdatedAt = statusUpdatedAt;
-            notifications.unshift({ id: Date.now(), title: "Rejected", message: `You rejected ${app.applicantName}`, time: "Just now", read: false });
-            await saveToLocalStorage();
-            renderApplications();
-            renderNotifications();
-            alert(`${app.applicantName} rejected`);
+            await moveApplicationToStatus(
+                app,
+                "rejected",
+                `${app.applicantName} rejected`,
+                "Rejected"
+            );
         } catch (error) {
-            app.status = previousStatus;
-            app.statusUpdatedAt = previousStatusUpdatedAt;
             alert(error?.message || "This application could not be updated.");
         }
     }
 }
 
 async function markNotificationRead(id) {
-    const n = notifications.find(n => n.id === id);
+    const n = notifications.find((notification) => String(notification.id) === String(id));
     if (n) {
         n.read = true;
         await saveToLocalStorage();
@@ -1152,17 +1533,96 @@ function exportJobsToCSV() {
     a.download = `jobs_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    alert(`✅ Exported ${jobs.length} jobs`);
+    alert(`Exported ${jobs.length} jobs`);
+}
+
+function exportAnalyticsToPdf() {
+    if (jobs.length === 0 && applications.length === 0) {
+        alert("No analytics data is available to export yet.");
+        return;
+    }
+
+    if (typeof window.open !== "function") {
+        alert("PDF export is not available in this environment.");
+        return;
+    }
+
+    const reportWindow = window.open("", "_blank", "noopener,noreferrer,width=960,height=720");
+    if (!reportWindow) {
+        alert("Please allow pop-ups to export the dashboard report.");
+        return;
+    }
+
+    const acceptedApplications = applications.filter((application) => application.status === "accepted").length;
+    const placementRate = applications.length === 0
+        ? "0%"
+        : `${Math.round((acceptedApplications / applications.length) * 100)}%`;
+    const rows = jobs.map((job) => `
+        <tr>
+            <td>${escapeHtml(job.title)}</td>
+            <td>${escapeHtml(job.opportunityType || "Opportunity")}</td>
+            <td>${escapeHtml(job.location)}</td>
+            <td>${escapeHtml(job.status)}</td>
+            <td>${getApplicantCount(job.id)}</td>
+            <td>${getAcceptedApplicantCount(job.id)}</td>
+        </tr>
+    `).join("");
+
+    reportWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recruiter Dashboard Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #162033; padding: 32px; }
+        h1 { margin-bottom: 8px; }
+        p { color: #475569; }
+        .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0; }
+        .metric { border: 1px solid #dbe3ef; border-radius: 12px; padding: 16px; }
+        .metric strong { display: block; margin-top: 10px; font-size: 24px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dbe3ef; padding: 10px; text-align: left; }
+        th { background: #f8fbff; }
+    </style>
+</head>
+<body>
+    <h1>Recruiter Dashboard Report</h1>
+    <p>Generated on ${new Date().toLocaleDateString("en-ZA")}.</p>
+    <section class="metrics">
+        <article class="metric"><span>Total Posts</span><strong>${jobs.length}</strong></article>
+        <article class="metric"><span>Applications</span><strong>${applications.length}</strong></article>
+        <article class="metric"><span>Placement Rate</span><strong>${placementRate}</strong></article>
+    </section>
+    <table>
+        <thead>
+            <tr>
+                <th>Opportunity</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th>Accepted</th>
+            </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    </table>
+</body>
+</html>`);
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
 }
 
 function setupCharCounter() {
     const ta = document.getElementById("jobRequirements");
     const counter = document.getElementById("charCounter");
     if (ta && counter) {
-        ta.addEventListener("input", () => {
+        const updateCounter = () => {
             counter.textContent = `${ta.value.length} characters`;
             counter.style.color = ta.value.length > 500 ? "#f59e0b" : "#64748b";
-        });
+        };
+        ta.addEventListener("input", updateCounter);
+        updateCounter();
     }
 }
 
@@ -1200,9 +1660,13 @@ async function initializeRecruiterHomepage() {
     await loadFromLocalStorage();
     setupCharCounter();
     applyRecruiterBranding();
+    updateDashboardMetrics();
 
     const opportunitiesBtn = document.getElementById("opportunitiesBtn");
     const applicationsBtn = document.getElementById("applicationsBtn");
+    const sortDateBtn = document.getElementById("sortDateBtn");
+    const sortApplicantsBtn = document.getElementById("sortApplicantsBtn");
+    const selectPostsBtn = document.getElementById("selectPostsBtn");
     const settingsOnlyBtn = document.getElementById("settingsOnlyBtn");
     const settingsNavBtn = document.getElementById("settingsNavBtn");
     const hamburgerBtn = document.getElementById("hamburgerBtn");
@@ -1213,7 +1677,14 @@ async function initializeRecruiterHomepage() {
     const logoutBtn = document.getElementById("sidebarLogoutBtn");
 
     if (opportunitiesBtn) opportunitiesBtn.addEventListener("click", () => switchTab("opportunities"));
-    if (applicationsBtn) applicationsBtn.addEventListener("click", () => switchTab("applications"));
+    if (applicationsBtn) applicationsBtn.addEventListener("click", () => {
+        clearApplicationsJobContext();
+        setApplicationStatusFilter("pending");
+        switchTab("applications");
+    });
+    if (sortDateBtn) sortDateBtn.addEventListener("click", setSortByDate);
+    if (sortApplicantsBtn) sortApplicantsBtn.addEventListener("click", setSortByApplicants);
+    if (selectPostsBtn) selectPostsBtn.addEventListener("click", toggleBulkMode);
     if (settingsOnlyBtn) settingsOnlyBtn.addEventListener("click", (e) => { e.preventDefault(); alert("⚙️ Settings - Coming in Sprint 2"); });
     if (settingsNavBtn) settingsNavBtn.addEventListener("click", () => alert("⚙️ Settings - Coming in Sprint 2"));
 
@@ -1238,15 +1709,7 @@ async function initializeRecruiterHomepage() {
     }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-            const isConfirmed = window.confirm("Are you sure you want to log out?");
-            if (!isConfirmed) return;
-
-            localStorage.removeItem("recruiter_jobs");
-            localStorage.removeItem("recruiter_applications");
-            sessionStorage.clear();
-            window.location.href = "../SignUp_LogIn_pages/logIn.html";
-        });
+        logoutBtn.addEventListener("click", openLogoutModal);
     }
 
     if (deleteAccountBtn) {
@@ -1258,6 +1721,8 @@ async function initializeRecruiterHomepage() {
             const target = event.currentTarget.getAttribute("href");
             if (target === "#applicationsSection") {
                 event.preventDefault();
+                clearApplicationsJobContext();
+                setApplicationStatusFilter("pending");
                 switchTab("applications");
             } else if (target === "#opportunitiesSection") {
                 event.preventDefault();
@@ -1274,6 +1739,7 @@ async function initializeRecruiterHomepage() {
     });
 
     if (window.location.hash === "#applicationsSection") {
+        setApplicationStatusFilter("pending");
         switchTab("applications");
     } else if (window.location.hash === "#notificationsSection") {
         switchTab("notifications");
@@ -1293,13 +1759,19 @@ async function initializeRecruiterHomepage() {
     const cancelBulkBtn = document.getElementById("cancelBulkBtn");
     const confirmCancelBtn = document.getElementById("confirmCancelBtn");
     const confirmOkBtn = document.getElementById("confirmOkBtn");
+    const confirmCloseBtn = document.getElementById("confirmCloseBtn");
     const confirmModal = document.getElementById("confirmModal");
     const applicationViewModal = document.getElementById("applicationViewModal");
+    const opportunityViewModal = document.getElementById("opportunityViewModal");
     const closeApplicationViewModalBtn = document.getElementById("closeApplicationViewModalBtn");
     const closeApplicationViewFooterBtn = document.getElementById("closeApplicationViewFooterBtn");
+    const closeOpportunityViewModalBtn = document.getElementById("closeOpportunityViewModalBtn");
+    const closeOpportunityViewFooterBtn = document.getElementById("closeOpportunityViewFooterBtn");
     const filterAll = document.getElementById("filterAll");
     const filterPending = document.getElementById("filterPending");
-    const filterReviewed = document.getElementById("filterReviewed");
+    const filterShortlisted = document.getElementById("filterShortlisted");
+    const filterAccepted = document.getElementById("filterAccepted");
+    const filterRejected = document.getElementById("filterRejected");
 
     if (postJobBtn) postJobBtn.addEventListener("click", openPostJobModal);
     if (closeModalBtn) closeModalBtn.addEventListener("click", closePostJobModal);
@@ -1311,9 +1783,12 @@ async function initializeRecruiterHomepage() {
     if (bulkDeleteBtn) bulkDeleteBtn.addEventListener("click", bulkDelete);
     if (cancelBulkBtn) cancelBulkBtn.addEventListener("click", () => toggleBulkMode());
     if (confirmCancelBtn) confirmCancelBtn.addEventListener("click", closeDeleteModal);
-    if (confirmOkBtn) confirmOkBtn.addEventListener("click", performDeleteJob);
+    if (confirmCloseBtn) confirmCloseBtn.addEventListener("click", closeDeleteModal);
+    if (confirmOkBtn) confirmOkBtn.addEventListener("click", handleConfirmModalAction);
     if (closeApplicationViewModalBtn) closeApplicationViewModalBtn.addEventListener("click", closeApplicationViewModal);
     if (closeApplicationViewFooterBtn) closeApplicationViewFooterBtn.addEventListener("click", closeApplicationViewModal);
+    if (closeOpportunityViewModalBtn) closeOpportunityViewModalBtn.addEventListener("click", closeOpportunityViewModal);
+    if (closeOpportunityViewFooterBtn) closeOpportunityViewFooterBtn.addEventListener("click", closeOpportunityViewModal);
     if (confirmModal) {
         confirmModal.addEventListener("cancel", (event) => {
             event.preventDefault();
@@ -1336,31 +1811,49 @@ async function initializeRecruiterHomepage() {
             }
         });
     }
+    if (opportunityViewModal) {
+        opportunityViewModal.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            closeOpportunityViewModal();
+        });
+        opportunityViewModal.addEventListener("click", (event) => {
+            if (event.target === opportunityViewModal) {
+                closeOpportunityViewModal();
+            }
+        });
+    }
 
     if (filterAll) filterAll.addEventListener("click", () => {
-        currentFilter = "all";
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-        filterAll.classList.add("active");
+        setApplicationStatusFilter("all");
         renderApplications();
     });
 
     if (filterPending) filterPending.addEventListener("click", () => {
-        currentFilter = "pending";
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-        filterPending.classList.add("active");
+        setApplicationStatusFilter("pending");
         renderApplications();
     });
 
-    if (filterReviewed) filterReviewed.addEventListener("click", () => {
-        currentFilter = "reviewed";
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-        filterReviewed.classList.add("active");
+    if (filterShortlisted) filterShortlisted.addEventListener("click", () => {
+        setApplicationStatusFilter("shortlisted");
+        renderApplications();
+    });
+
+    if (filterAccepted) filterAccepted.addEventListener("click", () => {
+        setApplicationStatusFilter("accepted");
+        renderApplications();
+    });
+
+    if (filterRejected) filterRejected.addEventListener("click", () => {
+        setApplicationStatusFilter("rejected");
         renderApplications();
     });
 
     if (!window.location.hash) {
         switchTab("opportunities");
     }
+
+    updateApplicationsTabBadge();
+    updateBulkModeButton();
 }
 
 async function startDeleteAccountFlow() {
@@ -1404,6 +1897,7 @@ async function resolveCurrentUser() {
 }
 
 Object.assign(window, {
+    acceptApplicant,
     bulkDelete,
     confirmDeleteJob,
     editJob,

@@ -42,7 +42,6 @@
     </aside>
     <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
 
-    <!-- ========== HEADER / TOP NAVIGATION ========== -->
     <header class="navbar">
         <div class="nav-left">
             <button class="icon-btn menu-btn" id="hamburgerBtn" type="button" aria-label="Open sidebar">
@@ -55,18 +54,41 @@
                 <i class="fa-regular fa-bell"></i>
             </a>
         </div>
-        
     </header>
 
-    <!-- ========== MAIN CONTENT ========== -->
     <main class="container">
-        <!-- Welcome Section -->
         <section class="welcome">
             <h1>Welcome back, Recruiter</h1>
             <p>Track your opportunities, review applications, and find the next great candidate.</p>
         </section>
 
-        <!-- Opportunities Section -->
+        <section class="analytics-panel" aria-labelledby="analyticsHeading">
+            <header class="section-header analytics-header">
+                <div>
+                    <h2 id="analyticsHeading">Dashboard Snapshot</h2>
+                    <p class="section-copy">Quick metrics for your current opportunity pipeline and placement progress.</p>
+                </div>
+            </header>
+
+            <div class="analytics-grid">
+                <article class="analytics-card">
+                    <span class="analytics-label">Total Posts</span>
+                    <strong id="totalPostsMetric" class="analytics-value">0</strong>
+                    <p class="analytics-copy">All opportunities currently saved on your dashboard.</p>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-label">Applications</span>
+                    <strong id="applicantsMetric" class="analytics-value">0</strong>
+                    <p class="analytics-copy">Total applicant submissions across your current posts.</p>
+                </article>
+                <article class="analytics-card">
+                    <span class="analytics-label">Placement Rate</span>
+                    <strong id="successRateMetric" class="analytics-value">0%</strong>
+                    <p class="analytics-copy">Accepted applications as a share of all submissions received.</p>
+                </article>
+            </div>
+        </section>
+
         <section id="opportunitiesSection" aria-labelledby="opportunitiesHeading">
             <header class="section-header">
                 <h2 id="opportunitiesHeading">My Posts</h2>
@@ -76,40 +98,56 @@
                 </div>
             </header>
 
-            <!-- Bulk Delete Sidebar -->
+            <section class="opportunity-tools" aria-label="Opportunity tools">
+                <label class="search-shell" for="searchInput">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="searchInput" type="search" placeholder="Search by title or location">
+                </label>
+
+                <div class="tool-actions">
+                    <div class="sort-buttons" aria-label="Opportunity sorting">
+                        <span>Sort by</span>
+                        <button class="sort-btn active" id="sortDateBtn" type="button">Date</button>
+                        <button class="sort-btn" id="sortApplicantsBtn" type="button">Applicants</button>
+                    </div>
+                    <button class="btn-secondary" id="selectPostsBtn" type="button">Select Posts</button>
+                </div>
+            </section>
+
             <aside id="bulkDeleteBar" class="bulk-delete-bar" style="display: none;">
                 <span><strong id="selectedCount">0</strong> jobs selected</span>
                 <div class="bulk-actions">
-                    <button class="btn-danger" id="bulkDeleteBtn" type="button">🗑️ Delete Selected</button>
+                    <button class="btn-danger" id="bulkDeleteBtn" type="button">Delete Selected</button>
                     <button class="btn-secondary" id="cancelBulkBtn" type="button">Cancel</button>
                 </div>
             </aside>
 
-            <!-- Job Listings -->
             <section id="opportunitiesList" class="opportunities-grid"></section>
 
-            <!-- Pagination Navigation -->
             <nav id="paginationControls" class="pagination-controls">
-                <button id="prevPageBtn" class="pagination-btn" disabled>◀ Previous</button>
+                <button id="prevPageBtn" class="pagination-btn" disabled>Previous</button>
                 <span id="pageInfo">Page 1 of 1</span>
-                <button id="nextPageBtn" class="pagination-btn" disabled>Next ▶</button>
+                <button id="nextPageBtn" class="pagination-btn" disabled>Next</button>
             </nav>
         </section>
 
-        <!-- Applications Section (hidden by default) -->
         <section id="applicationsSection" style="display: none;">
             <header class="section-header">
-                <h2 id="applicationsHeading">All Applications</h2>
+                <div>
+                    <h2 id="applicationsHeading">Applications</h2>
+                    <p id="applicationsContextCopy" class="section-copy">Pending applications are shown first, and reviewed applicants move into their own status lists.</p>
+                </div>
                 <div class="filter-buttons">
-                    <button class="filter-btn active" id="filterAll" type="button">All</button>
-                    <button class="filter-btn" id="filterPending" type="button">Pending</button>
-                    <button class="filter-btn" id="filterReviewed" type="button">Reviewed</button>
+                    <button class="filter-btn" id="filterAll" type="button">All</button>
+                    <button class="filter-btn active" id="filterPending" type="button">Pending</button>
+                    <button class="filter-btn" id="filterShortlisted" type="button">Shortlisted</button>
+                    <button class="filter-btn" id="filterAccepted" type="button">Accepted</button>
+                    <button class="filter-btn" id="filterRejected" type="button">Rejected</button>
                 </div>
             </header>
             <div id="applicationsList" class="applications-table"></div>
         </section>
 
-        <!-- Notifications Section (hidden by default) -->
         <section id="notificationsSection" style="display: none;">
             <header class="section-header">
                 <h2 id="notificationsHeading">Notifications</h2>
@@ -185,13 +223,65 @@
         </div>
     </dialog>
 
-    <!-- ========== MODAL DIALOGS ========== -->
-    <!-- Post Job Modal -->
+    <dialog id="opportunityViewModal" class="modal opportunity-view-modal">
+        <div class="modal-content opportunity-view-content">
+            <header class="modal-header application-view-header">
+                <div>
+                    <p class="application-view-kicker">Opportunity overview</p>
+                    <h2 id="opportunityViewTitle">Opportunity details</h2>
+                    <p id="opportunityViewSubtitle" class="application-view-subtitle"></p>
+                </div>
+                <button class="close-modal" id="closeOpportunityViewModalBtn" type="button" aria-label="Close opportunity details">&times;</button>
+            </header>
+
+            <section class="application-view-body">
+                <div class="application-overview-grid">
+                    <article class="application-overview-card">
+                        <span class="overview-label">Status</span>
+                        <strong id="opportunityViewStatus" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Applicants</span>
+                        <strong id="opportunityViewApplicants" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Posted</span>
+                        <strong id="opportunityViewPostedDate" class="overview-value"></strong>
+                    </article>
+                    <article class="application-overview-card">
+                        <span class="overview-label">Closing Date</span>
+                        <strong id="opportunityViewClosingDate" class="overview-value"></strong>
+                    </article>
+                </div>
+
+                <section class="application-view-section">
+                    <h3>Role snapshot</h3>
+                    <div id="opportunityViewMeta" class="opportunity-view-meta-grid"></div>
+                </section>
+
+                <section class="application-view-section">
+                    <h3>Description</h3>
+                    <p id="opportunityViewDescription" class="application-summary-copy"></p>
+                </section>
+
+                <section class="application-view-section">
+                    <h3>Requirements</h3>
+                    <div id="opportunityViewRequirements" class="application-detail-list"></div>
+                </section>
+            </section>
+
+            <footer class="form-buttons application-view-actions">
+                <button class="btn-primary" id="opportunityReviewApplicantsBtn" type="button">Review Applicants</button>
+                <button class="btn-secondary" id="closeOpportunityViewFooterBtn" type="button">Close</button>
+            </footer>
+        </div>
+    </dialog>
+
     <dialog id="postJobModal" class="modal">
         <div class="modal-content">
             <header class="modal-header">
                 <h2 id="modalTitle">Post New Opportunity</h2>
-                <button class="close-modal" id="closeModalBtn">&times;</button>
+                <button class="close-modal" id="closeModalBtn" type="button">&times;</button>
             </header>
             <form id="postJobForm">
                 <div class="form-group">
@@ -222,9 +312,8 @@
                     <label for="jobClosingDate">Closing Date *</label>
                     <input type="date" id="jobClosingDate" required>
                 </div>
-                <!-- SAQA NQF Level Dropdown -->
                 <div class="form-group">
-                    <label>Minimum NQF Level Required (SAQA) *</label>
+                    <label for="nqfLevel">Minimum NQF Level Required (SAQA) *</label>
                     <select id="nqfLevel" required>
                         <option value="">Select NQF Level</option>
                         <option value="1">NQF Level 1 (Grade 9)</option>
@@ -263,18 +352,20 @@
         </div>
     </dialog>
 
-    <!-- Confirm Delete Modal -->
     <dialog id="confirmModal" class="modal confirm-modal">
-        <div class="modal-content confirm-content">
-            <header class="modal-header">
-                <h3>Confirm Action</h3>
-            </header>
+        <div class="modal-content confirm-content" data-intent="danger">
+            <button class="close-modal confirm-close" id="confirmCloseBtn" type="button" aria-label="Close confirmation">&times;</button>
             <div class="confirm-body">
+                <div class="confirm-icon is-danger" id="confirmIcon" aria-hidden="true">
+                    <i id="confirmIconGlyph" class="fa-solid fa-trash"></i>
+                </div>
+                <p class="confirm-eyebrow">Please confirm</p>
+                <h3 id="confirmTitle" class="confirm-title">Delete opportunity?</h3>
                 <p id="confirmMessage">Are you sure?</p>
             </div>
-            <footer class="form-buttons">
-                <button class="btn-secondary" id="confirmCancelBtn">Cancel</button>
-                <button class="btn-danger" id="confirmOkBtn">Yes, Delete</button>
+            <footer class="form-buttons confirm-actions">
+                <button class="btn-secondary" id="confirmCancelBtn" type="button">Cancel</button>
+                <button class="btn-danger" id="confirmOkBtn" type="button">Yes, Delete</button>
             </footer>
         </div>
     </dialog>

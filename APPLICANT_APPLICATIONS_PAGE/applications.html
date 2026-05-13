@@ -15,12 +15,28 @@
 </head>
 <body data-shell-role="applicant" data-shell-active="applications" data-shell-base="..">
   <main class="page-shell">
+    <section class="summary-grid" aria-label="Application summary">
+      <article class="summary-card">
+        <span class="summary-label">Pending</span>
+        <strong id="pendingCount" class="summary-value">0</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Wish listed</span>
+        <strong id="wishListedCount" class="summary-value">0</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Accepted</span>
+        <strong id="acceptedCount" class="summary-value">0</strong>
+      </article>
+    </section>
+
     <section class="page-toolbar" aria-label="Application filters">
       <div class="filter-group">
         <button type="button" class="filter-btn active" data-filter="all">All</button>
         <button type="button" class="filter-btn" data-filter="pending">Pending</button>
         <button type="button" class="filter-btn" data-filter="wishlisted">Wish listed</button>
         <button type="button" class="filter-btn" data-filter="accepted">Accepted</button>
+        <button type="button" class="filter-btn" data-filter="other">Other updates</button>
       </div>
     </section>
 
