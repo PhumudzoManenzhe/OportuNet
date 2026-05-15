@@ -108,7 +108,7 @@ function renderApplications() {
   }
 
   container.innerHTML = filteredApplications.map((application) => `
-    <article class="application-card">
+    <article class="application-card" data-status="${escapeHtml(application.statusKey)}">
       <header class="application-card-header">
         <div>
           <p class="application-company">${escapeHtml(application.companyName || "Opportunity update")}</p>
