@@ -221,6 +221,7 @@ describe("shared/app-shell.js", () => {
         expect(header.innerHTML).toContain("../Applicant_profile_page/global_profile.html");
         expect(header.innerHTML).toContain("../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html");
         expect(sidebar.innerHTML).toContain("Applicant portal");
+        expect(sidebar.innerHTML).toContain("../APPLICANT_SETTINGS_PAGE/settings.html");
         expect(sidebar.innerHTML).toContain('class="app-shell-sidebar-link active">Internships<');
         expect(shell.documentMock.body.classList.contains("app-shell-offset")).toBe(true);
 

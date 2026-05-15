@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applicant Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="settings.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="settings.js"></script>
+</head>
+<body data-shell-role="applicant" data-shell-active="settings" data-shell-base="..">
+  <main class="settings-shell">
+    <header class="page-hero">
+      <div>
+        <p class="hero-kicker">Applicant settings</p>
+        <h1>Manage your experience</h1>
+        <p id="settingsMeta" class="hero-copy">Loading your preferences...</p>
+      </div>
+      <div class="hero-actions">
+        <button id="resetSettingsBtn" class="ghost-btn" type="button">Reset defaults</button>
+        <button id="saveSettingsBtn" class="primary-btn" type="submit" form="settingsForm">Save changes</button>
+      </div>
+    </header>
+
+    <section class="account-panel" aria-labelledby="accountHeading">
+      <div class="account-copy">
+        <p class="section-kicker">Account</p>
+        <h2 id="accountHeading">Signed-in applicant</h2>
+        <p id="accountSummary" class="section-copy">We are loading your account details.</p>
+      </div>
+      <div class="account-badges" aria-label="Account details">
+        <span id="accountEmail" class="badge-pill">No email available</span>
+        <span id="accountRole" class="badge-pill badge-pill-soft">Applicant portal</span>
+      </div>
+    </section>
+
+    <form id="settingsForm" class="settings-grid">
+      <section class="settings-card" aria-labelledby="notificationsHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Notifications</p>
+            <h2 id="notificationsHeading">Updates you want to receive</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Application progress alerts</strong>
+            <small>Keep me updated when recruiters review or move my applications.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="applicationUpdates" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Shortlist notifications</strong>
+            <small>Highlight wish listed and shortlisted changes as soon as they happen.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="shortlistAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Acceptance notifications</strong>
+            <small>Show clear alerts when an application is accepted.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="acceptanceAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Closing date reminders</strong>
+            <small>Remind me when saved opportunities are nearing their closing dates.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="closingReminders" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="privacyHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Privacy</p>
+            <h2 id="privacyHeading">Profile visibility</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Visible to recruiters</strong>
+            <small>Allow recruiters reviewing your applications to open your profile.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="profileVisible" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Share CV with applications</strong>
+            <small>Use your uploaded CV as the main document recruiters can view.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="shareCv" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Show contact details after shortlist</strong>
+            <small>Only reveal phone and email details when your application moves forward.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="shareContactsAfterShortlist" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="preferencesHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Preferences</p>
+            <h2 id="preferencesHeading">Opportunity interests</h2>
+            <p class="section-copy">Choose the opportunity types and page behavior you want the portal to remember.</p>
+          </div>
+        </header>
+
+        <fieldset class="chip-group">
+          <legend>Preferred opportunity types</legend>
+          <label class="choice-chip">
+            <input id="prefInternships" type="checkbox">
+            <span>Internships</span>
+          </label>
+          <label class="choice-chip">
+            <input id="prefLearnerships" type="checkbox">
+            <span>Learnerships</span>
+          </label>
+          <label class="choice-chip">
+            <input id="prefApprenticeships" type="checkbox">
+            <span>Apprenticeships</span>
+          </label>
+        </fieldset>
+
+        <label class="toggle-row toggle-row-compact">
+          <span class="toggle-copy">
+            <strong>Remember my filters</strong>
+            <small>Keep my last-used listing and application filters ready for next time.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="rememberFilters" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row toggle-row-compact">
+          <span class="toggle-copy">
+            <strong>Reduce motion</strong>
+            <small>Prefer a calmer interface with fewer animated transitions.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="reducedMotion" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="actionsHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Shortcuts</p>
+            <h2 id="actionsHeading">Useful account actions</h2>
+            <p class="section-copy">Jump to the pages you manage most often, or remove your account if needed.</p>
+          </div>
+        </header>
+
+        <div class="quick-actions">
+          <button id="openProfileBtn" class="quick-action-btn" type="button">
+            <i class="fa-regular fa-user"></i>
+            <span>Edit profile</span>
+          </button>
+          <button id="openApplicationsBtn" class="quick-action-btn" type="button">
+            <i class="fa-regular fa-folder-open"></i>
+            <span>View applications</span>
+          </button>
+          <button id="openNotificationsBtn" class="quick-action-btn" type="button">
+            <i class="fa-regular fa-bell"></i>
+            <span>Open notifications</span>
+          </button>
+          <button id="settingsDeleteAccountBtn" class="quick-action-btn quick-action-danger" type="button">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Delete account</span>
+          </button>
+        </div>
+      </section>
+    </form>
+
+    <p id="settingsFeedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+  </main>
+</body>
+</html>

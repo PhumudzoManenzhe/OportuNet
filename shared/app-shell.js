@@ -43,7 +43,8 @@
                 { key: "apprenticeships", label: "Apprenticeships", href: `${base}/APPRENTICESHIPS_PAGE/Apprenticeships_page.html` },
                 { key: "applications", label: "My Applications", href: `${base}/APPLICANT_APPLICATIONS_PAGE/applications.html` },
                 { key: "profile", label: "Profile", href: profileHrefOverride || `${base}/Applicant_profile_page/global_profile.html` },
-                { key: "notifications", label: "Notifications", href: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html` }
+                { key: "notifications", label: "Notifications", href: `${base}/APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html` },
+                { key: "settings", label: "Settings", href: `${base}/APPLICANT_SETTINGS_PAGE/settings.html` }
             ]
         },
         recruiter: {
