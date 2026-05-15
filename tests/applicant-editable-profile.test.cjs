@@ -579,7 +579,7 @@ describe("Applicant editable profile DOM behavior", () => {
 
         await app.initializePage();
 
-        nodes["upload-cv-button"].listeners.click();
+        await nodes["upload-cv-button"].listeners.click();
 
         expect(app.profileGateway.savePageData).toHaveBeenCalled();
         expect(nodes["cv-file-name"].textContent).toBe("No CV uploaded yet");
