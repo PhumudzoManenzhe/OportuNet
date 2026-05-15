@@ -109,6 +109,7 @@ function loadRecruiterHomepage(options = {}) {
     const elements = {
         appSidebar: createFakeNode({ attributes: { "aria-hidden": "true" } }),
         applicationsBtn: createFakeNode(),
+        applicationsContextCopy: createFakeNode(),
         applicationsList: createFakeNode(),
         applicationsSection: createFakeNode({ style: { display: "none" } }),
         bulkDeleteBar: createFakeNode({ style: { display: "none" } }),
@@ -118,12 +119,18 @@ function loadRecruiterHomepage(options = {}) {
         charCounter: createFakeNode(),
         closeModalBtn: createFakeNode(),
         confirmCancelBtn: createFakeNode(),
+        confirmCloseBtn: createFakeNode(),
+        confirmIcon: createFakeNode(),
+        confirmIconGlyph: createFakeNode(),
         confirmMessage: createFakeNode(),
         confirmModal: createFakeNode({ style: { display: "none" } }),
         confirmOkBtn: createFakeNode(),
-        filterAll: createFakeNode(),
-        filterPending: createFakeNode(),
-        filterReviewed: createFakeNode(),
+        confirmTitle: createFakeNode(),
+        filterAccepted: createFakeNode({ id: "filterAccepted" }),
+        filterAll: createFakeNode({ id: "filterAll" }),
+        filterPending: createFakeNode({ id: "filterPending" }),
+        filterRejected: createFakeNode({ id: "filterRejected" }),
+        filterShortlisted: createFakeNode({ id: "filterShortlisted" }),
         hamburgerBtn: createFakeNode(),
         jobClosingDate: createFakeNode(),
         jobDescription: createFakeNode(),
@@ -137,6 +144,7 @@ function loadRecruiterHomepage(options = {}) {
         markAllReadBtn: createFakeNode(),
         modalTitle: createFakeNode(),
         nextPageBtn: createFakeNode(),
+        nqfLevel: createFakeNode(),
         notificationsList: createFakeNode(),
         notificationsSection: createFakeNode({ style: { display: "none" } }),
         opportunitiesBtn: createFakeNode(),
@@ -159,7 +167,13 @@ function loadRecruiterHomepage(options = {}) {
     };
     const welcomeHeading = createFakeNode();
     const sidebarName = createFakeNode();
-    const filterButtons = [elements.filterAll, elements.filterPending, elements.filterReviewed];
+    const filterButtons = [
+        elements.filterAll,
+        elements.filterPending,
+        elements.filterShortlisted,
+        elements.filterAccepted,
+        elements.filterRejected
+    ];
     const sidebarLinks = [
         createSidebarLink("#opportunitiesSection"),
         createSidebarLink("#applicationsSection")
@@ -572,7 +586,7 @@ describe("Recruiter homepage helpers", () => {
             })
         );
         expect(api.getNotifications()).toEqual([
-            { id: 99, message: "Reminder", read: false, time: "Now", title: "Check applicants" }
+            { createdAt: "", id: 99, message: "Reminder", read: false, time: "Now", title: "Check applicants" }
         ]);
         expect(api.getCurrentRecruiter()).toEqual({
             companyName: "Acme Labs",
@@ -627,6 +641,7 @@ describe("Recruiter homepage helpers", () => {
         mocks.elements.jobStipend.value = "R8000";
         mocks.elements.jobDuration.value = "12 months";
         mocks.elements.jobClosingDate.value = "2026-05-01";
+        mocks.elements.nqfLevel.value = "6";
         mocks.elements.jobRequirements.value = "Matric\nCV";
 
         expect(api.validateJobForm()).toBe(true);
@@ -730,10 +745,14 @@ describe("Recruiter homepage DOM behavior", () => {
         expect(mocks.elements.applicationsSection.style.display).toBe("block");
 
         api.reviewApplicants("job-1");
-        expect(mocks.alert).toHaveBeenCalledWith(
-            'Reviewing "Frontend Internship"\n\nTotal Applicants: 2\nPending Review: 1\n\nThis opens the applications view for this job.'
-        );
+        expect(mocks.alert).not.toHaveBeenCalled();
+        expect(api.getCurrentFilter()).toBe("all");
         expect(mocks.elements.applicationsSection.style.display).toBe("block");
+        expect(mocks.elements.applicationsContextCopy.textContent).toBe(
+            "Only applicants linked to the selected opportunity card are shown below."
+        );
+        expect(mocks.elements.applicationsList.innerHTML).toContain("Naledi Mokoena");
+        expect(mocks.elements.applicationsList.innerHTML).toContain("Aphiwe Dlamini");
     });
 
     test("opens, closes, and populates the recruiter opportunity modal for editing", () => {
@@ -752,6 +771,7 @@ describe("Recruiter homepage DOM behavior", () => {
                 duration: "12 months",
                 id: "job-1",
                 location: "Johannesburg",
+                nqfLevel: "6",
                 requirements: ["Matric", "CV"],
                 status: "closed",
                 stipend: "R8000",
@@ -763,6 +783,7 @@ describe("Recruiter homepage DOM behavior", () => {
         expect(api.getEditingJobId()).toBe("job-1");
         expect(mocks.elements.jobTitleField.value).toBe("Software Development");
         expect(mocks.elements.jobTitleType.value).toBe("Internship");
+        expect(mocks.elements.nqfLevel.value).toBe("6");
         expect(mocks.elements.jobRequirements.value).toBe("Matric\nCV");
         expect(mocks.elements.modalTitle.textContent).toBe("Edit Opportunity");
         expect(mocks.elements.submitJobBtn.textContent).toBe("Update Opportunity");
@@ -791,6 +812,7 @@ describe("Recruiter homepage DOM behavior", () => {
         mocks.elements.jobStipend.value = "R8000";
         mocks.elements.jobDuration.value = "12 months";
         mocks.elements.jobClosingDate.value = "2026-05-01";
+        mocks.elements.nqfLevel.value = "6";
         mocks.elements.jobRequirements.value = "Matric\nCV";
         mocks.elements.jobDescription.value = "Grow quickly";
         mocks.elements.jobStatus.value = "active";
@@ -806,6 +828,7 @@ describe("Recruiter homepage DOM behavior", () => {
             expect.objectContaining({
                 companyName: "Acme Labs",
                 location: "Johannesburg",
+                nqfLevel: "6",
                 opportunityType: "Internship",
                 ownerUid: "recruiter-123",
                 postedByName: "Acme Labs",
@@ -817,6 +840,7 @@ describe("Recruiter homepage DOM behavior", () => {
         expect(api.getJobs()[0]).toEqual(
             expect.objectContaining({
                 id: "generated-job-id",
+                nqfLevel: "6",
                 opportunityType: "Internship",
                 title: "Software Development Internship"
             })
@@ -852,13 +876,23 @@ describe("Recruiter homepage DOM behavior", () => {
         mocks.documentListeners.keydown({ key: "Escape" });
         expect(mocks.elements.appSidebar.classList.contains("is-open")).toBe(false);
 
-        mocks.windowMock.confirm.mockReturnValue(false);
         mocks.elements.sidebarLogoutBtn.listeners.click();
+        expect(mocks.elements.confirmModal.showModal).toHaveBeenCalledTimes(1);
+        expect(mocks.elements.confirmTitle.textContent).toBe("Log out now?");
+        expect(mocks.elements.confirmMessage.textContent).toBe(
+            "You will be signed out of the recruiter dashboard and returned to the login page."
+        );
+        expect(mocks.elements.confirmOkBtn.textContent).toBe("Log Out");
         expect(mocks.localStorageMock.removeItem).not.toHaveBeenCalled();
         expect(mocks.sessionStorageMock.clear).not.toHaveBeenCalled();
 
-        mocks.windowMock.confirm.mockReturnValue(true);
+        mocks.elements.confirmCancelBtn.listeners.click();
+        expect(mocks.localStorageMock.removeItem).not.toHaveBeenCalled();
+        expect(mocks.sessionStorageMock.clear).not.toHaveBeenCalled();
+        expect(mocks.elements.confirmModal.style.display).toBe("none");
+
         mocks.elements.sidebarLogoutBtn.listeners.click();
+        mocks.elements.confirmOkBtn.listeners.click();
         expect(mocks.localStorageMock.removeItem).toHaveBeenCalledWith("recruiter_jobs");
         expect(mocks.localStorageMock.removeItem).toHaveBeenCalledWith("recruiter_applications");
         expect(mocks.sessionStorageMock.clear).toHaveBeenCalledTimes(1);

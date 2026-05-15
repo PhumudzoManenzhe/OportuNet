@@ -1129,11 +1129,10 @@ function triggerCvPicker() {
 
 function handleCvButtonClick() {
     if (state.pageData?.cv?.fileUrl) {
-        handleDeleteCv();
-        return;
+        return handleDeleteCv();
     }
 
-    triggerCvPicker();
+    return triggerCvPicker();
 }
 
 async function handleDeleteCv() {
