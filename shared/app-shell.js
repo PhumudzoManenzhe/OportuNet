@@ -51,6 +51,7 @@
             caption: "Recruiter",
             profileHref: `${base}/Applicant_profile_page/global_profile.html`,
             notificationHref: `${base}/RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html`,
+            showDeleteAccount: true,
             links: [
                 { key: "home", label: "Home", href: `${base}/Recruiter_homepage/index.html` },
                 { key: "posts", label: "My Posts", href: `${base}/Recruiter_homepage/index.html#opportunitiesSection` },
@@ -109,7 +110,7 @@
             `).join("")}
         </nav>
         <div class="app-shell-sidebar-footer">
-            <button class="app-shell-sidebar-link app-shell-delete-account-btn" id="appShellDeleteAccountBtn" type="button">Delete Account</button>
+            ${config.showDeleteAccount ? '<button class="app-shell-sidebar-link app-shell-delete-account-btn" id="appShellDeleteAccountBtn" type="button">Delete Account</button>' : ""}
             <button class="app-shell-sidebar-link app-shell-logout-btn" id="appShellLogoutBtn" type="button">Log Out</button>
         </div>
     `;

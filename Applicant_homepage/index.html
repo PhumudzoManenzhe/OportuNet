@@ -40,7 +40,6 @@
       <a href="../APPLICANT_SETTINGS_PAGE/settings.html" class="sidebar-link">Settings</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="sidebar-link delete-account-btn" id="sidebarDeleteAccountBtn" type="button">Delete Account</button>
       <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
     </div>
   </aside>
@@ -68,6 +67,59 @@
       <h1>Welcome back.</h1>
       <p>Explore opportunities, stay on top of updates, and keep your profile ready for the next application.</p>
     </section>
+
+    <section class="snapshot-layout" aria-label="Applicant dashboard snapshot">
+      <section class="stats-panel">
+        <header class="stats-header">
+          <div>
+            <p class="stats-kicker">Dashboard Snapshot</p>
+            <h2>Your applicant activity</h2>
+          </div>
+          <p class="stats-copy">A quick view of your applications and profile readiness.</p>
+        </header>
+
+        <div class="stats-grid">
+          <article class="stats-card">
+            <span class="stats-label">Applications</span>
+            <strong id="totalApplicationsMetric" class="stats-value">0</strong>
+            <p class="stats-note">Total submissions you have made so far.</p>
+          </article>
+          <article class="stats-card">
+            <span class="stats-label">Pending Review</span>
+            <strong id="pendingApplicationsMetric" class="stats-value">0</strong>
+            <p class="stats-note">Applications still waiting for recruiter feedback.</p>
+          </article>
+          <article class="stats-card">
+            <span class="stats-label">Wish Listed</span>
+            <strong id="shortlistedApplicationsMetric" class="stats-value">0</strong>
+            <p class="stats-note">Applications moved forward for closer consideration.</p>
+          </article>
+          <article class="stats-card">
+            <span class="stats-label">Accepted</span>
+            <strong id="acceptedApplicationsMetric" class="stats-value">0</strong>
+            <p class="stats-note">Opportunities that have already accepted you.</p>
+          </article>
+        </div>
+      </section>
+
+      <aside class="focus-panel" aria-labelledby="focusPanelHeading">
+        <p class="stats-kicker">Profile Strength</p>
+        <h2 id="focusPanelHeading" class="focus-value">0%</h2>
+        <p id="snapshotLead" class="focus-copy">We are preparing your applicant snapshot.</p>
+        <div class="focus-meta">
+          <span id="cvStatusPill" class="focus-pill">CV status</span>
+          <span id="latestActivityPill" class="focus-pill focus-pill-muted">Recent activity</span>
+        </div>
+      </aside>
+    </section>
+
+    <header class="overview-header">
+      <div>
+        <p class="stats-kicker">Explore</p>
+        <h2>Choose your next move</h2>
+      </div>
+      <p class="overview-copy">Browse opportunity categories and jump back into the areas you use most often.</p>
+    </header>
 
     <section class="overview" aria-label="Opportunity categories">
       <button type="button" class="card-btn" onclick="window.location.href='../INTERNSHIPS_PAGE/Internships_page.html'">

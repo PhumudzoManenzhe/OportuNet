@@ -57,9 +57,17 @@ function createFakeDocument(options = {}) {
     const elements = {
         appSidebar: options.withSidebar === false ? null : createFakeNode({ attributes: { "aria-hidden": "true" } }),
         hamburgerBtn: options.withOpenButton === false ? null : createFakeNode(),
+        acceptedApplicationsMetric: createFakeNode(),
+        cvStatusPill: createFakeNode(),
+        focusPanelHeading: createFakeNode(),
+        latestActivityPill: createFakeNode(),
+        pendingApplicationsMetric: createFakeNode(),
         sidebarBackdrop: options.withBackdrop === false ? null : createFakeNode({ hidden: true }),
         sidebarCloseBtn: options.withCloseButton === false ? null : createFakeNode(),
-        sidebarLogoutBtn: options.withLogoutButton === false ? null : createFakeNode()
+        sidebarLogoutBtn: options.withLogoutButton === false ? null : createFakeNode(),
+        shortlistedApplicationsMetric: createFakeNode(),
+        snapshotLead: createFakeNode(),
+        totalApplicationsMetric: createFakeNode()
     };
     const welcomeHeading = createFakeNode();
     const sidebarName = createFakeNode();
@@ -101,11 +109,21 @@ function loadApplicantHomepage(options = {}) {
             : null
     };
     const db = { service: "db" };
+    const collection = jest.fn((dbArg, collectionName) => ({ collectionName, db: dbArg }));
     const doc = jest.fn((dbArg, collectionName, id) => ({ collectionName, db: dbArg, id }));
+    const where = jest.fn((field, operator, value) => ({ field, operator, value }));
+    const query = jest.fn((collectionRef, whereRef) => ({ collectionRef, whereRef }));
     const getDoc = options.getDoc || jest.fn(() =>
         Promise.resolve({
             data: () => options.userDocData || {},
             exists: () => Boolean(options.userDocExists)
+        })
+    );
+    const getDocs = options.getDocs || jest.fn(() =>
+        Promise.resolve({
+            docs: (options.applicationDocs || []).map((application) => ({
+                data: () => application
+            }))
         })
     );
     const onAuthStateChanged = options.onAuthStateChanged || jest.fn((_auth, onUser, onError) => {
@@ -122,15 +140,19 @@ function loadApplicantHomepage(options = {}) {
     });
     const context = vm.createContext({
         auth,
+        collection,
         console: consoleMock,
         db,
         doc,
         document: documentMock,
         getDoc,
+        getDocs,
         localStorage: localStorageMock,
         onAuthStateChanged,
+        query,
         sessionStorage: sessionStorageMock,
-        window: windowMock
+        window: windowMock,
+        where
     });
 
     context.globalThis = context;
@@ -157,16 +179,20 @@ globalThis.__testExports = {
         windowMock,
         mocks: {
             consoleMock,
+            collection,
             db,
             doc,
             documentListeners,
             documentMock,
             elements,
             getDoc,
+            getDocs,
             localStorageMock,
             onAuthStateChanged,
+            query,
             sessionStorageMock,
             sidebarName,
+            where,
             welcomeHeading,
             windowMock
         }
@@ -228,8 +254,45 @@ describe("Applicant homepage script", () => {
         await api.initializeApplicantHomepage();
 
         expect(mocks.doc).toHaveBeenCalledWith(mocks.db, "users", "applicant-123");
+        expect(mocks.collection).toHaveBeenCalledWith(mocks.db, "applications");
         expect(mocks.welcomeHeading.textContent).toBe("Welcome Naledi Mokoena");
         expect(mocks.sidebarName.textContent).toBe("Naledi Mokoena");
+    });
+
+    test("renders applicant statistics and profile strength from stored applications and profile data", async () => {
+        const { api, mocks } = loadApplicantHomepage({
+            applicationDocs: [
+                { applicantId: "applicant-123", appliedAt: "2026-05-01T08:00:00.000Z", status: "pending" },
+                { applicantId: "applicant-123", appliedAt: "2026-05-04T08:00:00.000Z", status: "shortlisted" },
+                { applicantId: "applicant-123", statusUpdatedAt: "2026-05-10T08:00:00.000Z", status: "accepted" }
+            ],
+            currentUser: {
+                displayName: "Auth Name",
+                email: "applicant@example.com",
+                uid: "applicant-123"
+            },
+            userDocData: {
+                applicantProfile: {
+                    about: { intro: "Junior developer" },
+                    cv: { fileUrl: "https://example.test/cv.pdf" },
+                    education: [{ school: "Wits" }],
+                    personalDetails: { email: "applicant@example.com", phone: "0123456789" },
+                    profile: { name: "Naledi Mokoena" },
+                    skills: { softSkills: ["Communication"], technicalSkills: ["JavaScript"] }
+                }
+            },
+            userDocExists: true
+        });
+
+        await api.initializeApplicantHomepage();
+
+        expect(mocks.elements.totalApplicationsMetric.textContent).toBe("3");
+        expect(mocks.elements.pendingApplicationsMetric.textContent).toBe("1");
+        expect(mocks.elements.shortlistedApplicationsMetric.textContent).toBe("1");
+        expect(mocks.elements.acceptedApplicationsMetric.textContent).toBe("1");
+        expect(mocks.elements.focusPanelHeading.textContent).toBe("86%");
+        expect(mocks.elements.cvStatusPill.textContent).toBe("CV ready to share");
+        expect(mocks.elements.latestActivityPill.textContent).toBe("Last update 2026-05-10");
     });
 
     test("applicant display names never fall back to the user's email address", () => {
