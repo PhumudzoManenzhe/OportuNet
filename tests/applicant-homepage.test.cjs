@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
+const INDEX_PATH = path.resolve(__dirname, "../Applicant_homepage/index.html");
 const SCRIPT_PATH = path.resolve(__dirname, "../Applicant_homepage/script.js");
 
 function stripImports(source) {
@@ -58,8 +59,6 @@ function createFakeNode(initial = {}) {
 
 function createFakeDocument(options = {}) {
     const elements = {
-        appSidebar: options.withSidebar === false ? null : createFakeNode({ attributes: { "aria-hidden": "true" } }),
-        hamburgerBtn: options.withOpenButton === false ? null : createFakeNode(),
         acceptedApplicationsMetric: createFakeNode(),
         cvStatusPill: createFakeNode(),
         focusPanelHeading: createFakeNode(),
@@ -67,15 +66,11 @@ function createFakeDocument(options = {}) {
         latestActivityPill: createFakeNode(),
         pendingApplicationsMetric: createFakeNode(),
         rejectedApplicationsMetric: createFakeNode(),
-        sidebarBackdrop: options.withBackdrop === false ? null : createFakeNode({ hidden: true }),
-        sidebarCloseBtn: options.withCloseButton === false ? null : createFakeNode(),
-        sidebarLogoutBtn: options.withLogoutButton === false ? null : createFakeNode(),
         shortlistedApplicationsMetric: createFakeNode(),
         snapshotLead: createFakeNode(),
         totalApplicationsMetric: createFakeNode()
     };
     const welcomeHeading = createFakeNode();
-    const sidebarName = createFakeNode();
     const documentListeners = {};
     const documentMock = {
         body: createFakeNode(),
@@ -85,17 +80,16 @@ function createFakeDocument(options = {}) {
         getElementById: jest.fn((id) => elements[id] || null),
         querySelector: jest.fn((selector) => {
             if (selector === ".welcome h1") return welcomeHeading;
-            if (selector === ".sidebar-brand .user-name") return sidebarName;
             if (selector === ".focus-panel") return elements.focusPanel;
             return null;
         })
     };
 
-    return { documentListeners, documentMock, elements, sidebarName, welcomeHeading };
+    return { documentListeners, documentMock, elements, welcomeHeading };
 }
 
 function loadApplicantHomepage(options = {}) {
-    const { documentListeners, documentMock, elements, sidebarName, welcomeHeading } = createFakeDocument(options);
+    const { documentListeners, documentMock, elements, welcomeHeading } = createFakeDocument(options);
     const windowMock = {
         confirm: jest.fn(() => true),
         location: { href: "about:blank" }
@@ -166,7 +160,6 @@ function loadApplicantHomepage(options = {}) {
     const source = `${stripImports(fs.readFileSync(SCRIPT_PATH, "utf8"))}
 globalThis.__testExports = {
     applyApplicantBranding,
-    bindApplicantShell,
     getApplicantDisplayName,
     initializeApplicantHomepage,
     loadApplicantDisplayName,
@@ -197,7 +190,6 @@ globalThis.__testExports = {
             onAuthStateChanged,
             query,
             sessionStorageMock,
-            sidebarName,
             where,
             welcomeHeading,
             windowMock
@@ -206,8 +198,20 @@ globalThis.__testExports = {
 }
 
 describe("Applicant homepage script", () => {
-    test("registers the DOMContentLoaded handler and wires the homepage controls", async () => {
-        const { documentListeners, documentMock, elements } = loadApplicantHomepage();
+    test("uses the shared applicant app shell instead of the old custom sidebar", () => {
+        const html = fs.readFileSync(INDEX_PATH, "utf8");
+
+        expect(html).toContain("../shared/app-shell.css");
+        expect(html).toContain("../shared/app-shell.js");
+        expect(html).toContain('data-shell-role="applicant"');
+        expect(html).toContain('data-shell-active="home"');
+        expect(html).not.toContain('id="appSidebar"');
+        expect(html).not.toContain('id="hamburgerBtn"');
+        expect(html).not.toContain('class="navbar"');
+    });
+
+    test("registers the DOMContentLoaded handler and initializes homepage data", async () => {
+        const { documentListeners, documentMock, elements, mocks } = loadApplicantHomepage();
 
         expect(documentMock.addEventListener).toHaveBeenCalledWith(
             "DOMContentLoaded",
@@ -217,29 +221,11 @@ describe("Applicant homepage script", () => {
         documentListeners.DOMContentLoaded();
         await flushAsyncWork();
 
-        expect(elements.hamburgerBtn.addEventListener).toHaveBeenCalledWith(
-            "click",
-            expect.any(Function)
-        );
-        expect(elements.sidebarCloseBtn.addEventListener).toHaveBeenCalledWith(
-            "click",
-            expect.any(Function)
-        );
-        expect(elements.sidebarBackdrop.addEventListener).toHaveBeenCalledWith(
-            "click",
-            expect.any(Function)
-        );
-        expect(elements.sidebarLogoutBtn.addEventListener).toHaveBeenCalledWith(
-            "click",
-            expect.any(Function)
-        );
-        expect(documentMock.addEventListener).toHaveBeenCalledWith(
-            "keydown",
-            expect.any(Function)
-        );
+        expect(mocks.welcomeHeading.textContent).toBe("Welcome Applicant");
+        expect(elements.totalApplicationsMetric.textContent).toBe("0");
     });
 
-    test("loads the applicant profile name and applies it to the welcome and sidebar text", async () => {
+    test("loads the applicant profile name and applies it to the welcome text", async () => {
         const { api, mocks } = loadApplicantHomepage({
             currentUser: {
                 displayName: "Auth Name",
@@ -262,7 +248,6 @@ describe("Applicant homepage script", () => {
         expect(mocks.doc).toHaveBeenCalledWith(mocks.db, "users", "applicant-123");
         expect(mocks.collection).toHaveBeenCalledWith(mocks.db, "applications");
         expect(mocks.welcomeHeading.textContent).toBe("Welcome Naledi Mokoena");
-        expect(mocks.sidebarName.textContent).toBe("Naledi Mokoena");
     });
 
     test("renders applicant statistics and profile strength from stored applications and profile data", async () => {
@@ -313,85 +298,4 @@ describe("Applicant homepage script", () => {
         expect(api.getApplicantDisplayName({ email: "applicant@example.com" }, { email: "applicant@example.com" })).toBe("Applicant");
     });
 
-    test("opens the sidebar from the hamburger button and closes it with the close button", async () => {
-        const { documentListeners, elements, documentMock } = loadApplicantHomepage();
-
-        documentListeners.DOMContentLoaded();
-        await flushAsyncWork();
-
-        elements.hamburgerBtn.listeners.click();
-        expect(elements.appSidebar.classList.contains("is-open")).toBe(true);
-        expect(elements.appSidebar.getAttribute("aria-hidden")).toBe("false");
-        expect(elements.sidebarBackdrop.hidden).toBe(false);
-        expect(documentMock.body.classList.contains("sidebar-open")).toBe(true);
-
-        elements.sidebarCloseBtn.listeners.click();
-        expect(elements.appSidebar.classList.contains("is-open")).toBe(false);
-        expect(elements.appSidebar.getAttribute("aria-hidden")).toBe("true");
-        expect(elements.sidebarBackdrop.hidden).toBe(true);
-        expect(documentMock.body.classList.contains("sidebar-open")).toBe(false);
-    });
-
-    test("closes the sidebar from the backdrop or Escape key and ignores other keys", async () => {
-        const { documentListeners, elements, documentMock } = loadApplicantHomepage();
-
-        documentListeners.DOMContentLoaded();
-        await flushAsyncWork();
-
-        elements.hamburgerBtn.listeners.click();
-        documentListeners.keydown({ key: "Enter" });
-        expect(elements.appSidebar.classList.contains("is-open")).toBe(true);
-        expect(documentMock.body.classList.contains("sidebar-open")).toBe(true);
-
-        documentListeners.keydown({ key: "Escape" });
-        expect(elements.appSidebar.classList.contains("is-open")).toBe(false);
-        expect(documentMock.body.classList.contains("sidebar-open")).toBe(false);
-
-        elements.hamburgerBtn.listeners.click();
-        elements.sidebarBackdrop.listeners.click();
-        expect(elements.appSidebar.classList.contains("is-open")).toBe(false);
-        expect(elements.sidebarBackdrop.hidden).toBe(true);
-    });
-
-    test("does not log out when the user cancels the confirmation prompt", async () => {
-        const { documentListeners, elements, localStorageMock, sessionStorageMock, windowMock } = loadApplicantHomepage();
-        windowMock.confirm.mockReturnValue(false);
-
-        documentListeners.DOMContentLoaded();
-        await flushAsyncWork();
-        elements.sidebarLogoutBtn.listeners.click();
-
-        expect(windowMock.confirm).toHaveBeenCalledWith("Are you sure you want to log out?");
-        expect(localStorageMock.removeItem).not.toHaveBeenCalled();
-        expect(sessionStorageMock.clear).not.toHaveBeenCalled();
-        expect(windowMock.location.href).toBe("about:blank");
-    });
-
-    test("logs out confirmed users, clears applicant session data, and redirects to login", async () => {
-        const { documentListeners, elements, localStorageMock, sessionStorageMock, windowMock } = loadApplicantHomepage();
-
-        documentListeners.DOMContentLoaded();
-        await flushAsyncWork();
-        elements.sidebarLogoutBtn.listeners.click();
-
-        expect(windowMock.confirm).toHaveBeenCalledWith("Are you sure you want to log out?");
-        expect(localStorageMock.removeItem).toHaveBeenNthCalledWith(1, "recruiter_jobs");
-        expect(localStorageMock.removeItem).toHaveBeenNthCalledWith(2, "recruiter_applications");
-        expect(sessionStorageMock.clear).toHaveBeenCalledTimes(1);
-        expect(windowMock.location.href).toBe("../SignUp_LogIn_pages/logIn.html");
-    });
-
-    test("safely no-ops when sidebar state elements are missing", async () => {
-        const { documentListeners, elements, documentMock } = loadApplicantHomepage({
-            withBackdrop: false,
-            withSidebar: false
-        });
-
-        documentListeners.DOMContentLoaded();
-        await flushAsyncWork();
-
-        expect(() => elements.hamburgerBtn.listeners.click()).not.toThrow();
-        expect(() => documentListeners.keydown({ key: "Escape" })).not.toThrow();
-        expect(documentMock.body.classList.contains("sidebar-open")).toBe(false);
-    });
 });

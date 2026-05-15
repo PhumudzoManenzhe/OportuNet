@@ -7,62 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
 </head>
-<body>
+<body data-shell-role="applicant" data-shell-active="home" data-shell-base="..">
   <a class="skip-link" href="#main-content">Skip to main content</a>
-
-  <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
-    <div class="sidebar-header">
-      <div class="sidebar-brand" aria-label="OpportuNet applicant portal">
-        <div class="avatar-sm" aria-hidden="true">
-          <span class="brand-orbit brand-orbit-one"></span>
-          <span class="brand-orbit brand-orbit-two"></span>
-          <span class="brand-node"></span>
-        </div>
-        <div class="profile-info">
-          <span class="user-name">OpportuNet</span>
-          <span class="profile-caption">Applicant portal</span>
-        </div>
-      </div>
-      <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close sidebar">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <nav class="sidebar-nav" aria-label="Applicant navigation">
-      <a href="index.html" class="sidebar-link active"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
-      <a href="../INTERNSHIPS_PAGE/Internships_page.html" class="sidebar-link"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Internships</span></a>
-      <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="sidebar-link"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i><span>Learnerships</span></a>
-      <a href="../APPRENTICESHIPS_PAGE/Apprenticeships_page.html" class="sidebar-link"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Apprenticeships</span></a>
-      <a href="../APPLICANT_APPLICATIONS_PAGE/applications.html" class="sidebar-link"><i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>My Applications</span></a>
-      <a href="../Applicant_Editable_Profile/profile_index.html" class="sidebar-link"><i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Profile</span></a>
-      <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link"><i class="fa-solid fa-bell" aria-hidden="true"></i><span>Notifications</span></a>
-      <a href="../APPLICANT_SETTINGS_PAGE/settings.html" class="sidebar-link"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
-    </nav>
-    <div class="sidebar-footer">
-      <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Log Out</span></button>
-    </div>
-  </aside>
-  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
-
-  <header class="navbar">
-    <div class="nav-left">
-      <button class="icon-btn menu-btn" id="hamburgerBtn" type="button" aria-label="Open sidebar">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-
-    <div class="nav-right">
-      <a class="icon-btn nav-link-icon" href="../Applicant_Editable_Profile/profile_index.html" aria-label="Go to profile page">
-        <i class="fa-regular fa-user"></i>
-      </a>
-      <a class="icon-btn nav-link-icon" href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" aria-label="Go to notifications page">
-        <i class="fa-regular fa-bell"></i>
-      </a>
-    </div>
-  </header>
 
   <main class="container" id="main-content">
     <section class="welcome">
