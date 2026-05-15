@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
   <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
     <div class="sidebar-header">
       <div class="sidebar-brand" aria-label="OpportuNet applicant portal">
@@ -30,17 +32,17 @@
     </div>
 
     <nav class="sidebar-nav" aria-label="Applicant navigation">
-      <a href="index.html" class="sidebar-link active">Home</a>
-      <a href="../INTERNSHIPS_PAGE/Internships_page.html" class="sidebar-link">Internships</a>
-      <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="sidebar-link">Learnerships</a>
-      <a href="../APPRENTICESHIPS_PAGE/Apprenticeships_page.html" class="sidebar-link">Apprenticeships</a>
-      <a href="../APPLICANT_APPLICATIONS_PAGE/applications.html" class="sidebar-link">My Applications</a>
-      <a href="../Applicant_Editable_Profile/profile_index.html" class="sidebar-link">Profile</a>
-      <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link">Notifications</a>
-      <a href="../APPLICANT_SETTINGS_PAGE/settings.html" class="sidebar-link">Settings</a>
+      <a href="index.html" class="sidebar-link active"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
+      <a href="../INTERNSHIPS_PAGE/Internships_page.html" class="sidebar-link"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Internships</span></a>
+      <a href="../LEARNERSHIPS_PAGE/Learnerships_page.html" class="sidebar-link"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i><span>Learnerships</span></a>
+      <a href="../APPRENTICESHIPS_PAGE/Apprenticeships_page.html" class="sidebar-link"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Apprenticeships</span></a>
+      <a href="../APPLICANT_APPLICATIONS_PAGE/applications.html" class="sidebar-link"><i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>My Applications</span></a>
+      <a href="../Applicant_Editable_Profile/profile_index.html" class="sidebar-link"><i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Profile</span></a>
+      <a href="../APPLICANT_NOTIFICATIONS_PAGE/Applicant_notifications_page.html" class="sidebar-link"><i class="fa-solid fa-bell" aria-hidden="true"></i><span>Notifications</span></a>
+      <a href="../APPLICANT_SETTINGS_PAGE/settings.html" class="sidebar-link"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
     </nav>
     <div class="sidebar-footer">
-      <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
+      <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Log Out</span></button>
     </div>
   </aside>
   <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
@@ -62,53 +64,72 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="welcome">
-      <h1>Welcome back.</h1>
-      <p>Explore opportunities, stay on top of updates, and keep your profile ready for the next application.</p>
+      <div class="welcome-copy">
+        <p class="welcome-eyebrow">Applicant dashboard</p>
+        <h1>Welcome back.</h1>
+        <p>Track your applications, keep your profile ready, and move quickly when a good opportunity opens.</p>
+      </div>
     </section>
 
     <section class="snapshot-layout" aria-label="Applicant dashboard snapshot">
       <section class="stats-panel">
         <header class="stats-header">
           <div>
-            <p class="stats-kicker">Dashboard Snapshot</p>
             <h2>Your applicant activity</h2>
           </div>
-          <p class="stats-copy">A quick view of your applications and profile readiness.</p>
         </header>
 
         <div class="stats-grid">
-          <article class="stats-card">
-            <span class="stats-label">Applications</span>
+          <article class="stats-card stats-card-total">
+            <div class="stats-card-head">
+              <span class="metric-icon" aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+              <span class="stats-label">Applications</span>
+            </div>
             <strong id="totalApplicationsMetric" class="stats-value">0</strong>
             <p class="stats-note">Total submissions you have made so far.</p>
           </article>
-          <article class="stats-card">
-            <span class="stats-label">Pending Review</span>
+          <article class="stats-card stats-card-pending">
+            <div class="stats-card-head">
+              <span class="metric-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+              <span class="stats-label">Pending Review</span>
+            </div>
             <strong id="pendingApplicationsMetric" class="stats-value">0</strong>
             <p class="stats-note">Applications still waiting for recruiter feedback.</p>
           </article>
-          <article class="stats-card">
-            <span class="stats-label">Wish Listed</span>
+          <article class="stats-card stats-card-shortlisted">
+            <div class="stats-card-head">
+              <span class="metric-icon" aria-hidden="true"><i class="fa-solid fa-star"></i></span>
+              <span class="stats-label">Shortlisted</span>
+            </div>
             <strong id="shortlistedApplicationsMetric" class="stats-value">0</strong>
             <p class="stats-note">Applications moved forward for closer consideration.</p>
           </article>
-          <article class="stats-card">
-            <span class="stats-label">Accepted</span>
+          <article class="stats-card stats-card-accepted">
+            <div class="stats-card-head">
+              <span class="metric-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+              <span class="stats-label">Accepted</span>
+            </div>
             <strong id="acceptedApplicationsMetric" class="stats-value">0</strong>
             <p class="stats-note">Opportunities that have already accepted you.</p>
+          </article>
+          <article class="stats-card stats-card-rejected">
+            <div class="stats-card-head">
+              <span class="metric-icon" aria-hidden="true"><i class="fa-solid fa-circle-xmark"></i></span>
+              <span class="stats-label">Rejected</span>
+            </div>
+            <strong id="rejectedApplicationsMetric" class="stats-value">0</strong>
+            <p class="stats-note">Applications that were not selected.</p>
           </article>
         </div>
       </section>
 
-      <aside class="focus-panel" aria-labelledby="focusPanelHeading">
-        <p class="stats-kicker">Profile Strength</p>
-        <h2 id="focusPanelHeading" class="focus-value">0%</h2>
-        <p id="snapshotLead" class="focus-copy">We are preparing your applicant snapshot.</p>
-        <div class="focus-meta">
-          <span id="cvStatusPill" class="focus-pill">CV status</span>
-          <span id="latestActivityPill" class="focus-pill focus-pill-muted">Recent activity</span>
+      <aside class="focus-panel" aria-labelledby="profileStrengthLabel">
+        <p id="profileStrengthLabel" class="stats-kicker">Profile Strength</p>
+        <div class="focus-meter" role="img" aria-labelledby="profileStrengthLabel focusPanelHeading">
+          <h2 id="focusPanelHeading" class="focus-value">0%</h2>
+          <span>complete</span>
         </div>
       </aside>
     </section>
@@ -118,37 +139,40 @@
         <p class="stats-kicker">Explore</p>
         <h2>Choose your next move</h2>
       </div>
-      <p class="overview-copy">Browse opportunity categories and jump back into the areas you use most often.</p>
     </header>
 
     <section class="overview" aria-label="Opportunity categories">
-      <button type="button" class="card-btn" onclick="window.location.href='../INTERNSHIPS_PAGE/Internships_page.html'">
+      <a class="card-btn" data-tone="internship" href="../INTERNSHIPS_PAGE/Internships_page.html">
+        <span class="card-icon" aria-hidden="true"><i class="fa-solid fa-briefcase"></i></span>
         <span class="card-btn-kicker">Opportunity Category</span>
         <span class="card-btn-title">Internships</span>
         <span class="card-btn-copy">Browse currently available internship positions from participating employers.</span>
-        <span class="card-btn-link">View listings</span>
-      </button>
+        <span class="card-btn-link">View listings <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+      </a>
 
-      <button type="button" class="card-btn" onclick="window.location.href='../LEARNERSHIPS_PAGE/Learnerships_page.html'">
+      <a class="card-btn" data-tone="learnership" href="../LEARNERSHIPS_PAGE/Learnerships_page.html">
+        <span class="card-icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
         <span class="card-btn-kicker">Opportunity Category</span>
         <span class="card-btn-title">Learnerships</span>
         <span class="card-btn-copy">Review structured learnership opportunities and entry requirements.</span>
-        <span class="card-btn-link">View listings</span>
-      </button>
+        <span class="card-btn-link">View listings <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+      </a>
 
-      <button type="button" class="card-btn" onclick="window.location.href='../APPRENTICESHIPS_PAGE/Apprenticeships_page.html'">
+      <a class="card-btn" data-tone="apprenticeship" href="../APPRENTICESHIPS_PAGE/Apprenticeships_page.html">
+        <span class="card-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
         <span class="card-btn-kicker">Opportunity Category</span>
         <span class="card-btn-title">Apprenticeships</span>
         <span class="card-btn-copy">Explore apprenticeship openings focused on practical workplace training.</span>
-        <span class="card-btn-link">View listings</span>
-      </button>
+        <span class="card-btn-link">View listings <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+      </a>
 
-      <button type="button" class="card-btn" onclick="window.location.href='../APPLICANT_APPLICATIONS_PAGE/applications.html'">
+      <a class="card-btn" data-tone="applications" href="../APPLICANT_APPLICATIONS_PAGE/applications.html">
+        <span class="card-icon" aria-hidden="true"><i class="fa-solid fa-file-lines"></i></span>
         <span class="card-btn-kicker">Application Tracker</span>
         <span class="card-btn-title">My Applications</span>
         <span class="card-btn-copy">Review every application you have submitted and follow its latest status update.</span>
-        <span class="card-btn-link">Track progress</span>
-      </button>
+        <span class="card-btn-link">Track progress <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+      </a>
     </section>
   </main>
 

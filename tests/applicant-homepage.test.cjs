@@ -38,6 +38,9 @@ function createFakeNode(initial = {}) {
         classList: createClassList(),
         hidden: false,
         listeners,
+        style: {
+            setProperty: jest.fn()
+        },
         textContent: "",
         addEventListener: jest.fn((type, handler) => {
             listeners[type] = handler;
@@ -60,8 +63,10 @@ function createFakeDocument(options = {}) {
         acceptedApplicationsMetric: createFakeNode(),
         cvStatusPill: createFakeNode(),
         focusPanelHeading: createFakeNode(),
+        focusPanel: createFakeNode(),
         latestActivityPill: createFakeNode(),
         pendingApplicationsMetric: createFakeNode(),
+        rejectedApplicationsMetric: createFakeNode(),
         sidebarBackdrop: options.withBackdrop === false ? null : createFakeNode({ hidden: true }),
         sidebarCloseBtn: options.withCloseButton === false ? null : createFakeNode(),
         sidebarLogoutBtn: options.withLogoutButton === false ? null : createFakeNode(),
@@ -81,6 +86,7 @@ function createFakeDocument(options = {}) {
         querySelector: jest.fn((selector) => {
             if (selector === ".welcome h1") return welcomeHeading;
             if (selector === ".sidebar-brand .user-name") return sidebarName;
+            if (selector === ".focus-panel") return elements.focusPanel;
             return null;
         })
     };
@@ -264,7 +270,8 @@ describe("Applicant homepage script", () => {
             applicationDocs: [
                 { applicantId: "applicant-123", appliedAt: "2026-05-01T08:00:00.000Z", status: "pending" },
                 { applicantId: "applicant-123", appliedAt: "2026-05-04T08:00:00.000Z", status: "shortlisted" },
-                { applicantId: "applicant-123", statusUpdatedAt: "2026-05-10T08:00:00.000Z", status: "accepted" }
+                { applicantId: "applicant-123", statusUpdatedAt: "2026-05-10T08:00:00.000Z", status: "accepted" },
+                { applicantId: "applicant-123", statusUpdatedAt: "2026-05-08T08:00:00.000Z", status: "rejected" }
             ],
             currentUser: {
                 displayName: "Auth Name",
@@ -286,11 +293,13 @@ describe("Applicant homepage script", () => {
 
         await api.initializeApplicantHomepage();
 
-        expect(mocks.elements.totalApplicationsMetric.textContent).toBe("3");
+        expect(mocks.elements.totalApplicationsMetric.textContent).toBe("4");
         expect(mocks.elements.pendingApplicationsMetric.textContent).toBe("1");
         expect(mocks.elements.shortlistedApplicationsMetric.textContent).toBe("1");
         expect(mocks.elements.acceptedApplicationsMetric.textContent).toBe("1");
-        expect(mocks.elements.focusPanelHeading.textContent).toBe("86%");
+        expect(mocks.elements.rejectedApplicationsMetric.textContent).toBe("1");
+        expect(mocks.elements.focusPanelHeading.textContent).toBe("100%");
+        expect(mocks.elements.focusPanel.style.setProperty).toHaveBeenCalledWith("--profile-strength", "100%");
         expect(mocks.elements.cvStatusPill.textContent).toBe("CV ready to share");
         expect(mocks.elements.latestActivityPill.textContent).toBe("Last update 2026-05-10");
     });

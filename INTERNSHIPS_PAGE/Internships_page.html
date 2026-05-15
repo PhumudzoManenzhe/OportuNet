@@ -4,35 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Internships</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="../shared/opportunity-board.css" />
   <link rel="stylesheet" href="Internships_page.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="../shared/app-shell.js" defer></script>
   <script type="module" src="script.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="internships" data-shell-base="..">
+  <a class="skip-link" href="#internships-heading">Skip to internships</a>
   <main class="page-content">
     <header class="page-header">
       <section class="heading-text">
-        <h2>Available Internships</h2>
-        <p>Search and explore internship opportunities that match your interests.</p>
+        <p class="hero-eyebrow">Opportunity board</p>
+        <h1>Available Internships</h1>
+        <p>Search active internship openings and apply from one focused workspace.</p>
       </section>
+      <aside class="hero-summary" aria-label="Internship page status">
+        <span class="hero-summary-icon" aria-hidden="true"><i class="fa-solid fa-briefcase"></i></span>
+        <div>
+          <span>Category</span>
+          <strong>Internships</strong>
+        </div>
+      </aside>
     </header>
 
     <section class="search-area" aria-label="Search internships">
+      <span class="search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
       <label for="search-internships" class="visually-hidden">Search internships</label>
       <input
         type="search"
         id="search-internships"
         placeholder="Search internships by title, company, or location"
       />
-      <button type="button">Search</button>
+      <button type="button"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span>Search</span></button>
     </section>
 
     <section class="internships-section" aria-labelledby="internships-heading">
       <header class="section-header">
-        <h3 id="internships-heading">Available internships</h3>
-        <p>Browse currently available positions</p>
+        <div>
+          <p class="section-kicker">Results</p>
+          <h2 id="internships-heading">Available internships</h2>
+        </div>
       </header>
 
       <section class="internship-list" id="internship-list" aria-label="Internship results">

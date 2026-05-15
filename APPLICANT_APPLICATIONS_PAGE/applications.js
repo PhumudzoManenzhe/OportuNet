@@ -189,10 +189,10 @@ function getStatusPresentation(status) {
     };
   }
 
-  if (normalizedStatus === "rejected") {
+  if (normalizedStatus === "rejected" || normalizedStatus === "declined") {
     return {
-      key: "other",
-      label: "Not selected",
+      key: "rejected",
+      label: "Rejected",
       summary: "This application was not selected this time, but you can keep applying to new opportunities."
     };
   }
@@ -208,6 +208,7 @@ function updateSummaryCounts(applications) {
   setCount("pendingCount", applications.filter((item) => item.statusKey === "pending").length);
   setCount("wishListedCount", applications.filter((item) => item.statusKey === "wishlisted").length);
   setCount("acceptedCount", applications.filter((item) => item.statusKey === "accepted").length);
+  setCount("rejectedCount", applications.filter((item) => item.statusKey === "rejected").length);
 }
 
 function setCount(id, value) {

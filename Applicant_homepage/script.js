@@ -125,6 +125,7 @@ function buildApplicantSnapshot({ user, userData, applications }) {
     const pendingCount = normalizedApplications.filter((application) => normalizeApplicationStatus(application?.status) === "pending").length;
     const shortlistedCount = normalizedApplications.filter((application) => normalizeApplicationStatus(application?.status) === "shortlisted").length;
     const acceptedCount = normalizedApplications.filter((application) => normalizeApplicationStatus(application?.status) === "accepted").length;
+    const rejectedCount = normalizedApplications.filter((application) => normalizeApplicationStatus(application?.status) === "rejected").length;
     const profileCompletion = calculateProfileCompletion(profile);
     const hasCv = Boolean(profile?.cv?.fileUrl);
     const latestActivity = getLatestApplicationDate(normalizedApplications);
@@ -136,6 +137,7 @@ function buildApplicantSnapshot({ user, userData, applications }) {
             lead: "Sign in to see your applications, profile readiness, and next best step.",
             pendingCount: 0,
             profileCompletion,
+            rejectedCount: 0,
             shortlistedCount: 0,
             totalApplications: 0,
             cvStatusLabel: "CV status unavailable"
@@ -144,7 +146,7 @@ function buildApplicantSnapshot({ user, userData, applications }) {
 
     return {
         acceptedCount,
-        latestActivityLabel: latestActivity || "No applications yet",
+        latestActivityLabel: latestActivity || "",
         lead: buildSnapshotLead({
             acceptedCount,
             hasCv,
@@ -155,9 +157,10 @@ function buildApplicantSnapshot({ user, userData, applications }) {
         }),
         pendingCount,
         profileCompletion,
+        rejectedCount,
         shortlistedCount,
         totalApplications: normalizedApplications.length,
-        cvStatusLabel: hasCv ? "CV ready to share" : "Add your CV"
+        cvStatusLabel: hasCv ? "CV ready to share" : ""
     };
 }
 
@@ -166,10 +169,22 @@ function renderApplicantSnapshot(snapshot) {
     setMetricText("pendingApplicationsMetric", snapshot.pendingCount);
     setMetricText("shortlistedApplicationsMetric", snapshot.shortlistedCount);
     setMetricText("acceptedApplicationsMetric", snapshot.acceptedCount);
-    setMetricText("focusPanelHeading", `${snapshot.profileCompletion}%`);
-    setMetricText("snapshotLead", snapshot.lead);
-    setMetricText("cvStatusPill", snapshot.cvStatusLabel);
-    setMetricText("latestActivityPill", snapshot.latestActivityLabel);
+    setMetricText("rejectedApplicationsMetric", snapshot.rejectedCount);
+    setOptionalText("snapshotLead", snapshot.lead);
+    setOptionalText("cvStatusPill", snapshot.cvStatusLabel);
+    setOptionalText("latestActivityPill", snapshot.latestActivityLabel);
+
+    updateProfileStrength(snapshot.profileCompletion);
+}
+
+function updateProfileStrength(profileCompletion) {
+    const focusPanel = document.querySelector(".focus-panel");
+    const profileStrength = Math.max(0, Math.min(100, Number(profileCompletion) || 0));
+    setMetricText("focusPanelHeading", `${profileStrength}%`);
+
+    if (!focusPanel) return;
+
+    focusPanel.style?.setProperty("--profile-strength", `${profileStrength}%`);
 }
 
 function setMetricText(id, value) {
@@ -178,11 +193,24 @@ function setMetricText(id, value) {
     element.textContent = String(value ?? "");
 }
 
+function setOptionalText(id, value) {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    const text = String(value ?? "").trim();
+    element.textContent = text;
+    element.hidden = text.length === 0;
+}
+
 function normalizeApplicationStatus(status) {
     const normalizedStatus = String(status || "").trim().toLowerCase();
 
     if (normalizedStatus === "wishlisted" || normalizedStatus === "wish listed") {
         return "shortlisted";
+    }
+
+    if (normalizedStatus === "declined") {
+        return "rejected";
     }
 
     return normalizedStatus;
@@ -223,7 +251,7 @@ function buildSnapshotLead({ acceptedCount, hasCv, pendingCount, profileCompleti
     }
 
     if (profileCompletion < 70 || !hasCv) {
-        return "Complete your profile and upload your CV to make your next application stronger.";
+        return "";
     }
 
     if (totalApplications === 0) {

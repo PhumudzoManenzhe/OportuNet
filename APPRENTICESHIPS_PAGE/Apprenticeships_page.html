@@ -4,35 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apprenticeships</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="../shared/opportunity-board.css" />
   <link rel="stylesheet" href="Apprenticeships_page.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="../shared/app-shell.js" defer></script>
   <script type="module" src="script.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="apprenticeships" data-shell-base="..">
+  <a class="skip-link" href="#Apprenticeships-heading">Skip to apprenticeships</a>
   <main class="page-content">
     <header class="page-header">
       <section class="heading-text">
-        <h2>Available Apprenticeships</h2>
-        <p>Search and explore Apprenticeships opportunities that match your interests.</p>
+        <p class="hero-eyebrow">Opportunity board</p>
+        <h1>Available Apprenticeships</h1>
+        <p>Explore practical training pathways and apply to roles that fit your goals.</p>
       </section>
+      <aside class="hero-summary" aria-label="Apprenticeship page status">
+        <span class="hero-summary-icon" aria-hidden="true"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+        <div>
+          <span>Category</span>
+          <strong>Apprenticeships</strong>
+        </div>
+      </aside>
     </header>
 
     <section class="search-area" aria-label="Search Apprenticeships">
+      <span class="search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
       <label for="search-Apprenticeships" class="visually-hidden">Search Apprenticeships</label>
       <input
         type="search"
         id="search-Apprenticeships"
         placeholder="Search Apprenticeships by title, company, or location"
       />
-      <button type="button">Search</button>
+      <button type="button"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span>Search</span></button>
     </section>
 
     <section class="Apprenticeships-section" aria-labelledby="Apprenticeships-heading">
       <header class="section-header">
-        <h3 id="Apprenticeships-heading">Available Apprenticeships</h3>
-        <p>Browse currently available positions</p>
+        <div>
+          <p class="section-kicker">Results</p>
+          <h2 id="Apprenticeships-heading">Available Apprenticeships</h2>
+        </div>
       </header>
 
       <section class="Apprenticeships-list" id="apprenticeships-list" aria-label="Apprenticeships results">

@@ -14,19 +14,43 @@
   <script type="module" src="applications.js"></script>
 </head>
 <body data-shell-role="applicant" data-shell-active="applications" data-shell-base="..">
+  <a class="skip-link" href="#applicationsHeading">Skip to applications</a>
   <main class="page-shell">
+    <header class="applications-hero">
+      <div>
+        <p class="hero-eyebrow">Application tracker</p>
+        <h1>My Applications</h1>
+        <p>Review every submission, filter status updates, and keep your next step easy to scan.</p>
+      </div>
+      <aside class="hero-summary" aria-label="Application page status">
+        <span class="hero-summary-icon" aria-hidden="true"><i class="fa-solid fa-file-lines"></i></span>
+        <div>
+          <span>Status</span>
+          <strong>Live tracker</strong>
+        </div>
+      </aside>
+    </header>
+
     <section class="summary-grid" aria-label="Application summary">
-      <article class="summary-card">
+      <article class="summary-card" data-tone="pending">
+        <span class="summary-icon" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
         <span class="summary-label">Pending</span>
         <strong id="pendingCount" class="summary-value">0</strong>
       </article>
-      <article class="summary-card">
+      <article class="summary-card" data-tone="wishlisted">
+        <span class="summary-icon" aria-hidden="true"><i class="fa-solid fa-star"></i></span>
         <span class="summary-label">Wish listed</span>
         <strong id="wishListedCount" class="summary-value">0</strong>
       </article>
-      <article class="summary-card">
+      <article class="summary-card" data-tone="accepted">
+        <span class="summary-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
         <span class="summary-label">Accepted</span>
         <strong id="acceptedCount" class="summary-value">0</strong>
+      </article>
+      <article class="summary-card" data-tone="rejected">
+        <span class="summary-icon" aria-hidden="true"><i class="fa-solid fa-circle-xmark"></i></span>
+        <span class="summary-label">Rejected</span>
+        <strong id="rejectedCount" class="summary-value">0</strong>
       </article>
     </section>
 
@@ -36,6 +60,7 @@
         <button type="button" class="filter-btn" data-filter="pending">Pending</button>
         <button type="button" class="filter-btn" data-filter="wishlisted">Wish listed</button>
         <button type="button" class="filter-btn" data-filter="accepted">Accepted</button>
+        <button type="button" class="filter-btn" data-filter="rejected">Rejected</button>
         <button type="button" class="filter-btn" data-filter="other">Other updates</button>
       </div>
     </section>
