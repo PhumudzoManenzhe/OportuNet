@@ -8,21 +8,23 @@
   --brand: #0369a1;
   --brand-deep: #172554;
   --brand-soft: #e0f2fe;
-  --warning: #0ea5e9;
-  --success: #0284c7;
-  --danger: #172554;
+  --warning: #a16207;
+  --success: #15803d;
+  --danger: #b91c1c;
+  --card-blue: #2563eb;
+  --card-orange: #b45309;
   --shadow-sm: 0 8px 22px rgba(15, 23, 42, 0.07);
   --shadow-md: 0 18px 38px rgba(3, 105, 161, 0.12);
   --radius: 8px;
   --focus: 0 0 0 4px rgba(125, 211, 252, 0.28);
-  --pending-bg: #eaf4ff;
-  --pending-text: #172554;
-  --wish-bg: #e0f2fe;
-  --wish-text: #0369a1;
-  --accepted-bg: #e0f7ff;
-  --accepted-text: #075985;
-  --rejected-bg: #e0f2fe;
-  --rejected-text: #172554;
+  --pending-bg: #fff6dd;
+  --pending-text: #9a6700;
+  --wish-bg: #f6e9df;
+  --wish-text: #9a4b00;
+  --accepted-bg: #e9f8ef;
+  --accepted-text: #166534;
+  --rejected-bg: #fee2e2;
+  --rejected-text: #991b1b;
   --other-bg: #f3f4f6;
   --other-text: #475569;
 }
@@ -80,7 +82,7 @@ button:focus-visible {
 
 .applications-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: 28px;
   margin-bottom: 22px;
@@ -117,48 +119,11 @@ button:focus-visible {
   line-height: 1.65;
 }
 
-.hero-summary {
-  min-height: 116px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-}
-
-.hero-summary-icon,
 .summary-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius);
-}
-
-.hero-summary-icon {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  font-size: 1.15rem;
-}
-
-.hero-summary span:not(.hero-summary-icon) {
-  display: block;
-  color: rgba(239, 246, 255, 0.82);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-summary strong {
-  display: block;
-  margin-top: 4px;
-  color: #ffffff;
-  font: 800 1.3rem/1.1 "Space Grotesk", "Manrope", sans-serif;
 }
 
 .summary-grid {
@@ -196,7 +161,7 @@ button:focus-visible {
 }
 
 .summary-card[data-tone="wishlisted"] {
-  --card-tone: var(--brand);
+  --card-tone: var(--card-orange);
 }
 
 .summary-card[data-tone="accepted"] {
@@ -298,6 +263,7 @@ button:focus-visible {
 }
 
 .application-card {
+  --application-tone: var(--brand);
   position: relative;
   overflow: hidden;
   display: grid;
@@ -314,7 +280,23 @@ button:focus-visible {
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
-  background: var(--brand);
+  background: var(--application-tone);
+}
+
+.application-card[data-status="pending"] {
+  --application-tone: var(--warning);
+}
+
+.application-card[data-status="wishlisted"] {
+  --application-tone: var(--card-orange);
+}
+
+.application-card[data-status="accepted"] {
+  --application-tone: var(--success);
+}
+
+.application-card[data-status="rejected"] {
+  --application-tone: var(--danger);
 }
 
 .application-card-header {
@@ -426,10 +408,6 @@ button:focus-visible {
   .applications-hero {
     grid-template-columns: 1fr;
     align-items: stretch;
-  }
-
-  .hero-summary {
-    min-height: 0;
   }
 
   .summary-grid {
