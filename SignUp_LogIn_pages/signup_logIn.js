@@ -8,7 +8,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 //Firebase Configuration
 // const firebaseConfig = {
 //   apiKey: "AIzaSyDyIr2fg2uUtJPeHmvTJhePkt6DWti12Vw",
@@ -23,6 +23,12 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 // firebase.initializeApp(firebaseConfig);
 // const auth = firebase.auth();
 const googleProvider = new GoogleAuthProvider();
+
+const ROLE_ROUTES = Object.freeze({
+    admin: "../ADMIN_DASHBOARD_PAGE/index.html",
+    applicant: "../Applicant_homepage/index.html",
+    recruiter: "../Recruiter_homepage/index.html"
+});
 
 function canRenderInlineMessage() {
     return Boolean(
@@ -54,6 +60,62 @@ function redirectTo(path, delay = 0) {
     }
 
     redirect();
+}
+
+function isSuspendedAccount(userData) {
+    return String(userData?.accountStatus || "").trim().toLowerCase() === "suspended";
+}
+
+function getRoleRoute(role) {
+    return ROLE_ROUTES[String(role || "").trim().toLowerCase()] || "";
+}
+
+async function findExistingUserProfile(user) {
+    if (!user?.email) return null;
+
+    const usersQuery = query(collection(db, "users"), where("email", "==", user.email));
+    const querySnapshot = await getDocs(usersQuery);
+    const matchedDoc = querySnapshot.docs.find((snapshot) => snapshot.id === user.uid) || querySnapshot.docs[0];
+
+    if (!matchedDoc) return null;
+
+    const matchedData = matchedDoc.data() || {};
+
+    if (matchedDoc.id !== user.uid) {
+        await setDoc(doc(db, "users", user.uid), {
+            ...matchedData,
+            email: user.email || matchedData.email || ""
+        }, { merge: true });
+    }
+
+    return matchedData;
+}
+
+async function loadKnownUserData(user) {
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data();
+    }
+
+    return findExistingUserProfile(user);
+}
+
+async function routeKnownUser(userData) {
+    if (isSuspendedAccount(userData)) {
+        notify("This account has been suspended. Please contact the administrator.", "error", "form");
+        await signOut(auth);
+        return;
+    }
+
+    const destination = getRoleRoute(userData?.role);
+    if (destination) {
+        redirectTo(destination);
+        return;
+    }
+
+    redirectTo("./chooseRoles.html");
 }
 
 function getActiveForm() {
@@ -154,32 +216,22 @@ function googleLogin(action = "signup") {
     signInWithPopup(auth, googleProvider)
     .then((result) => {
         const user = result.user;
-
-        const docRef = doc(db, "users", user.uid);
-
-        getDoc(docRef)
+        loadKnownUserData(user)
         .then((docSnap) => {
 
             if (action === "signup") {
-                if (docSnap.exists()) {
+                if (docSnap) {
                     notify("An account with this Google email already exists.", "error", "google");
                     signOut(auth); // Clear the active session since they shouldn't be logged in
                 } else {
                     redirectTo("./chooseRoles.html");
                 }
             } else if (action === "login") {
-                if (!docSnap.exists()) {
+                if (!docSnap) {
                     notify("No account found for this Google email.", "error", "google");
                     signOut(auth);
                 } else {
-                    const role = docSnap.data().role;
-                    if (role === "applicant") {
-                        redirectTo("../Applicant_homepage/index.html");
-                    } else if (role === "recruiter") {
-                        redirectTo("../Recruiter_homepage/index.html");
-                    } else {
-                        redirectTo("./chooseRoles.html");
-                    }
+                    return routeKnownUser(docSnap);
                 }
             }
         })
@@ -211,23 +263,12 @@ function logInUser(email, password) {
     signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         const user = userCredential.user;
-
-        const docRef = doc(db, "users", user.uid);
-
-        getDoc(docRef)
-        .then((docSnap) => {
-            if (!docSnap.exists()) {
+        loadKnownUserData(user)
+        .then((userData) => {
+            if (!userData) {
                 redirectTo("./chooseRoles.html");
             } else {
-                const role = docSnap.data().role;
-
-                if (role === "applicant") {
-                    redirectTo("../Applicant_homepage/index.html");
-                } else if (role === "recruiter") {
-                    redirectTo("../Recruiter_homepage/index.html");
-                } else {
-                    redirectTo("./chooseRoles.html");
-                }
+                return routeKnownUser(userData);
             }
         })
         .catch((error) => {

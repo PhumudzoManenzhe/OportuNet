@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body data-theme="light">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
     <aside class="app-sidebar" id="appSidebar" aria-hidden="true">
         <div class="sidebar-header">
             <div class="sidebar-brand">
@@ -30,14 +32,15 @@
         </div>
 
         <nav class="sidebar-nav" aria-label="Recruiter navigation">
-            <a href="index.html" class="sidebar-link active">Home</a>
-            <a href="#opportunitiesSection" class="sidebar-link">My Posts</a>
-            <a href="#applicationsSection" class="sidebar-link">Applications</a>
-            <a href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" class="sidebar-link">Notifications</a>
+            <a href="index.html" class="sidebar-link active"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
+            <a href="#opportunitiesSection" class="sidebar-link"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>My Posts</span></a>
+            <a href="#applicationsSection" class="sidebar-link"><i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Applications</span></a>
+            <a href="../RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html" class="sidebar-link"><i class="fa-solid fa-bell" aria-hidden="true"></i><span>Notifications</span></a>
+            <a href="../RECRUITER_SETTINGS_PAGE/settings.html" class="sidebar-link"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
         </nav>
         <div class="sidebar-footer">
-            <button class="sidebar-link delete-account-btn" id="sidebarDeleteAccountBtn" type="button">Delete Account</button>
-            <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button">Log Out</button>
+            <button class="sidebar-link delete-account-btn" id="sidebarDeleteAccountBtn" type="button"><i class="fa-solid fa-user-xmark" aria-hidden="true"></i><span>Delete Account</span></button>
+            <button class="sidebar-link logout-btn" id="sidebarLogoutBtn" type="button"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Log Out</span></button>
         </div>
     </aside>
     <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
@@ -56,15 +59,19 @@
         </div>
     </header>
 
-    <main class="container">
+    <main class="container" id="main-content">
         <section class="welcome">
-            <h1>Welcome back, Recruiter</h1>
-            <p>Track your opportunities, review applications, and find the next great candidate.</p>
+            <div class="welcome-copy">
+                <p class="welcome-eyebrow">Recruiter dashboard</p>
+                <h1>Welcome back, Recruiter</h1>
+                <p>Track your opportunities, review applications, and move strong candidates forward with a cleaner hiring workflow.</p>
+            </div>
         </section>
 
         <section class="analytics-panel" aria-labelledby="analyticsHeading">
             <header class="section-header analytics-header">
                 <div>
+                    <p class="section-kicker">Snapshot</p>
                     <h2 id="analyticsHeading">Dashboard Snapshot</h2>
                     <p class="section-copy">Quick metrics for your current opportunity pipeline and placement progress.</p>
                 </div>
@@ -72,17 +79,26 @@
 
             <div class="analytics-grid">
                 <article class="analytics-card">
-                    <span class="analytics-label">Total Posts</span>
+                    <div class="analytics-card-head">
+                        <span class="metric-icon" aria-hidden="true"><i class="fa-regular fa-folder-open"></i></span>
+                        <span class="analytics-label">Total Posts</span>
+                    </div>
                     <strong id="totalPostsMetric" class="analytics-value">0</strong>
                     <p class="analytics-copy">All opportunities currently saved on your dashboard.</p>
                 </article>
                 <article class="analytics-card">
-                    <span class="analytics-label">Applications</span>
+                    <div class="analytics-card-head">
+                        <span class="metric-icon" aria-hidden="true"><i class="fa-regular fa-address-card"></i></span>
+                        <span class="analytics-label">Applications</span>
+                    </div>
                     <strong id="applicantsMetric" class="analytics-value">0</strong>
                     <p class="analytics-copy">Total applicant submissions across your current posts.</p>
                 </article>
                 <article class="analytics-card">
-                    <span class="analytics-label">Placement Rate</span>
+                    <div class="analytics-card-head">
+                        <span class="metric-icon" aria-hidden="true"><i class="fa-solid fa-chart-line"></i></span>
+                        <span class="analytics-label">Placement Rate</span>
+                    </div>
                     <strong id="successRateMetric" class="analytics-value">0%</strong>
                     <p class="analytics-copy">Accepted applications as a share of all submissions received.</p>
                 </article>
@@ -91,10 +107,13 @@
 
         <section id="opportunitiesSection" aria-labelledby="opportunitiesHeading">
             <header class="section-header">
-                <h2 id="opportunitiesHeading">My Posts</h2>
+                <div>
+                    <p class="section-kicker">Pipeline</p>
+                    <h2 id="opportunitiesHeading">My Posts</h2>
+                </div>
                 <div class="header-buttons">
-                    <button class="btn-secondary" id="applicationsBtn" type="button">Applications</button>
-                    <button class="btn-primary" id="postJobBtn" type="button">+ Post New Opportunity</button>
+                    <button class="btn-secondary" id="applicationsBtn" type="button"><i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Applications</span></button>
+                    <button class="btn-primary" id="postJobBtn" type="button"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Post New Opportunity</span></button>
                 </div>
             </header>
 
@@ -134,6 +153,7 @@
         <section id="applicationsSection" style="display: none;">
             <header class="section-header">
                 <div>
+                    <p class="section-kicker">Review queue</p>
                     <h2 id="applicationsHeading">Applications</h2>
                     <p id="applicationsContextCopy" class="section-copy">Pending applications are shown first, and reviewed applicants move into their own status lists.</p>
                 </div>
@@ -150,7 +170,10 @@
 
         <section id="notificationsSection" style="display: none;">
             <header class="section-header">
-                <h2 id="notificationsHeading">Notifications</h2>
+                <div>
+                    <p class="section-kicker">Updates</p>
+                    <h2 id="notificationsHeading">Notifications</h2>
+                </div>
                 <button class="btn-primary" id="markAllReadBtn" type="button">Mark all as read</button>
             </header>
             <div id="notificationsList" class="notifications-list"></div>

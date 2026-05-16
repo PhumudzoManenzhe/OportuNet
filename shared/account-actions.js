@@ -1,6 +1,5 @@
-import { auth, db } from "../FireStore_db/firebase.js";
+import { auth } from "../FireStore_db/firebase.js";
 import { deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { deleteDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const LOGIN_PATH = "../SignUp_LogIn_pages/logIn.html";
 
@@ -34,27 +33,11 @@ export async function startDeleteAccountFlow({ loginHref = LOGIN_PATH } = {}) {
     const confirmed = confirm(`Delete the account for ${email}? This cannot be undone.`);
     if (!confirmed) return;
 
-    const userRef = doc(db, "users", user.uid);
-    const snapshot = await getDoc(userRef);
-    const previousData = snapshot.exists() ? snapshot.data() : null;
-
     try {
-        if (snapshot.exists()) {
-            await deleteDoc(userRef);
-        }
-
         await deleteUser(user);
         clearLocalSession();
         window.location.href = loginHref;
     } catch (error) {
-        if (previousData) {
-            try {
-                await setDoc(userRef, previousData, { merge: false });
-            } catch (restoreError) {
-                console.error("Unable to restore account data after delete failure.", restoreError);
-            }
-        }
-
         if (error?.code === "auth/requires-recent-login") {
             alert("For security, please log in again before deleting your account.");
             window.location.href = loginHref;

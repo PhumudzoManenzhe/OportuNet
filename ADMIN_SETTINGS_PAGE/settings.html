@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="settings.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="settings.js"></script>
+</head>
+<body data-shell-role="admin" data-shell-active="settings" data-shell-base="..">
+  <main class="settings-shell">
+    <header class="page-hero">
+      <div>
+        <p class="hero-kicker">Admin settings</p>
+        <h1>Configure your oversight workspace</h1>
+        <p id="settingsMeta" class="hero-copy">Loading your admin preferences...</p>
+      </div>
+      <div class="hero-actions">
+        <button id="resetSettingsBtn" class="ghost-btn" type="button">Reset defaults</button>
+        <button id="saveSettingsBtn" class="primary-btn" type="submit" form="settingsForm">Save changes</button>
+      </div>
+    </header>
+
+    <section class="account-panel" aria-labelledby="accountHeading">
+      <div class="account-copy">
+        <p class="section-kicker">Account</p>
+        <h2 id="accountHeading">Signed-in administrator</h2>
+        <p id="accountSummary" class="section-copy">We are loading your account details.</p>
+      </div>
+      <div class="account-badges" aria-label="Account details">
+        <span id="accountEmail" class="badge-pill">No email available</span>
+        <span class="badge-pill badge-pill-soft">Admin portal</span>
+      </div>
+    </section>
+
+    <form id="settingsForm" class="settings-grid">
+      <section class="settings-card">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Alerts</p>
+            <h2>Oversight notifications</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Suspended account alerts</strong>
+            <small>Highlight when new accounts are moved into suspended status.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="suspendedAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Opportunity moderation updates</strong>
+            <small>Keep reminders for posts that are closed or reopened by admins.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="moderationAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Application trend alerts</strong>
+            <small>Show prompts when application volumes or accepted counts rise noticeably.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="applicationTrendAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Dashboard</p>
+            <h2>Review defaults</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Prioritize suspended users</strong>
+            <small>Place suspended users at the top when you open the user management list.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="prioritizeSuspended" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Show closed opportunities</strong>
+            <small>Keep closed posts visible by default in the opportunity moderation panel.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="showClosedPosts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Reduce motion</strong>
+            <small>Prefer a calmer admin interface with fewer animated transitions.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="reducedMotion" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Visibility</p>
+            <h2>Data focus</h2>
+          </div>
+        </header>
+
+        <fieldset class="chip-group">
+          <legend>Default landing section</legend>
+          <label class="choice-chip">
+            <input id="landingDashboard" name="landingSection" type="radio">
+            <span>Dashboard</span>
+          </label>
+          <label class="choice-chip">
+            <input id="landingUsers" name="landingSection" type="radio">
+            <span>Users</span>
+          </label>
+          <label class="choice-chip">
+            <input id="landingOpportunities" name="landingSection" type="radio">
+            <span>Opportunities</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="settings-card">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Shortcuts</p>
+            <h2>Useful admin actions</h2>
+            <p class="section-copy">Jump back into the parts of the admin workspace you manage most often.</p>
+          </div>
+        </header>
+
+        <div class="quick-actions">
+          <button id="openDashboardBtn" class="quick-action-btn" type="button">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Open dashboard</span>
+          </button>
+          <button id="openUsersBtn" class="quick-action-btn" type="button">
+            <i class="fa-solid fa-users"></i>
+            <span>Manage users</span>
+          </button>
+          <button id="openOpportunitiesBtn" class="quick-action-btn" type="button">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Moderate posts</span>
+          </button>
+        </div>
+      </section>
+    </form>
+
+    <p id="settingsFeedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+  </main>
+</body>
+</html>

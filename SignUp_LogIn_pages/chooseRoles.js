@@ -83,6 +83,7 @@ async function setRole(role, providedDetails = null) {
     }
 
     const userData = {
+        accountStatus: "active",
         email: user.email || "",
         role
     };

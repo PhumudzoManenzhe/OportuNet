@@ -114,9 +114,12 @@ function renderNotifications(notifications) {
 
   container.innerHTML = notifications.map((notification) => `
     <article class="notification-card ${notification.unread ? "unread" : ""} ${notification.tone === "positive" ? "positive" : ""}">
+      <div class="notification-card-top">
+        <span class="notification-pill">${notification.tone === "positive" ? "Progress" : "Update"}</span>
+        <span class="notification-time">${escapeHtml(formatRelativeTime(notification.createdAt))}</span>
+      </div>
       <h2>${escapeHtml(notification.title || "Notification")}</h2>
       <p>${escapeHtml(notification.message || "There is a new update on your dashboard.")}</p>
-      <span class="notification-time">${escapeHtml(formatRelativeTime(notification.createdAt))}</span>
     </article>
   `).join("");
 }

@@ -55,7 +55,19 @@
             links: [
                 { key: "home", label: "Home", href: `${base}/Recruiter_homepage/index.html` },
                 { key: "posts", label: "My Posts", href: `${base}/Recruiter_homepage/index.html#opportunitiesSection` },
-                { key: "notifications", label: "Notifications", href: `${base}/RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html` }
+                { key: "applications", label: "Applications", href: `${base}/Recruiter_homepage/index.html#applicationsSection` },
+                { key: "notifications", label: "Notifications", href: `${base}/RECRUITER_NOTIFICATION_PAGE/recruiter_notifications_page.html` },
+                { key: "settings", label: "Settings", href: `${base}/RECRUITER_SETTINGS_PAGE/settings.html` }
+            ]
+        },
+        admin: {
+            caption: "Admin",
+            notificationHref: `${base}/ADMIN_DASHBOARD_PAGE/index.html#activitySection`,
+            links: [
+                { key: "home", label: "Dashboard", href: `${base}/ADMIN_DASHBOARD_PAGE/index.html` },
+                { key: "users", label: "User Management", href: `${base}/ADMIN_DASHBOARD_PAGE/index.html#usersSection` },
+                { key: "opportunities", label: "Opportunities", href: `${base}/ADMIN_DASHBOARD_PAGE/index.html#opportunitiesSection` },
+                { key: "settings", label: "Settings", href: `${base}/ADMIN_SETTINGS_PAGE/settings.html` }
             ]
         }
     };

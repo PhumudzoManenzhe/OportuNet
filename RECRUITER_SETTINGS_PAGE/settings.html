@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="settings.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="settings.js"></script>
+</head>
+<body data-shell-role="recruiter" data-shell-active="settings" data-shell-base="..">
+  <main class="settings-shell">
+    <header class="page-hero">
+      <div>
+        <p class="hero-kicker">Recruiter settings</p>
+        <h1>Shape your hiring workspace</h1>
+        <p id="settingsMeta" class="hero-copy">Loading your recruiter preferences...</p>
+      </div>
+      <div class="hero-actions">
+        <button id="resetSettingsBtn" class="ghost-btn" type="button">Reset defaults</button>
+        <button id="saveSettingsBtn" class="primary-btn" type="submit" form="settingsForm">Save changes</button>
+      </div>
+    </header>
+
+    <section class="account-panel" aria-labelledby="accountHeading">
+      <div class="account-copy">
+        <p class="section-kicker">Account</p>
+        <h2 id="accountHeading">Signed-in recruiter</h2>
+        <p id="accountSummary" class="section-copy">We are loading your account details.</p>
+      </div>
+      <div class="account-badges" aria-label="Account details">
+        <span id="accountEmail" class="badge-pill">No email available</span>
+        <span class="badge-pill badge-pill-soft">Recruiter portal</span>
+      </div>
+    </section>
+
+    <form id="settingsForm" class="settings-grid">
+      <section class="settings-card" aria-labelledby="notificationsHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Notifications</p>
+            <h2 id="notificationsHeading">Alerts you want to receive</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>New application alerts</strong>
+            <small>Show a clear prompt when new applicants submit to your active opportunities.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="newApplications" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Shortlist reminders</strong>
+            <small>Highlight shortlisted applicants who still need a final decision.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="shortlistReminders" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Closing date alerts</strong>
+            <small>Warn me when one of my live opportunities is close to its closing date.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="closingDateAlerts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Placement progress updates</strong>
+            <small>Surface accepted applicants and overall placement movement more prominently.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="placementProgress" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="workflowHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Workflow</p>
+            <h2 id="workflowHeading">Review behavior</h2>
+          </div>
+        </header>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Prioritize pending applications</strong>
+            <small>Keep pending reviews first whenever you open the applications queue.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="prioritizePending" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Separate reviewed lists</strong>
+            <small>Keep shortlisted, accepted, and rejected applicants in dedicated status queues.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="separateReviewedQueues" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Show applicant contact details</strong>
+            <small>Display applicant email details as part of the recruiter review workflow.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="showApplicantContacts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-copy">
+            <strong>Remember review filters</strong>
+            <small>Restore your last-used application filter and opportunity view the next time you sign in.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="rememberReviewFilters" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="postingHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Posting</p>
+            <h2 id="postingHeading">Opportunity preferences</h2>
+            <p class="section-copy">Choose what the dashboard should remember when you create and manage your posts.</p>
+          </div>
+        </header>
+
+        <fieldset class="chip-group">
+          <legend>Primary opportunity types</legend>
+          <label class="choice-chip">
+            <input id="prefInternships" type="checkbox">
+            <span>Internships</span>
+          </label>
+          <label class="choice-chip">
+            <input id="prefLearnerships" type="checkbox">
+            <span>Learnerships</span>
+          </label>
+          <label class="choice-chip">
+            <input id="prefApprenticeships" type="checkbox">
+            <span>Apprenticeships</span>
+          </label>
+        </fieldset>
+
+        <label class="toggle-row toggle-row-compact">
+          <span class="toggle-copy">
+            <strong>Remember posting form details</strong>
+            <small>Keep common opportunity details ready so publishing new posts is faster.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="rememberPostingDrafts" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+
+        <label class="toggle-row toggle-row-compact">
+          <span class="toggle-copy">
+            <strong>Reduce motion</strong>
+            <small>Prefer a calmer interface with fewer animated transitions.</small>
+          </span>
+          <span class="toggle-control">
+            <input id="reducedMotion" type="checkbox">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="settings-card" aria-labelledby="actionsHeading">
+        <header class="card-heading">
+          <div>
+            <p class="section-kicker">Shortcuts</p>
+            <h2 id="actionsHeading">Useful account actions</h2>
+            <p class="section-copy">Jump straight into the recruiter tools you use most, or remove your account if needed.</p>
+          </div>
+        </header>
+
+        <div class="quick-actions">
+          <button id="openDashboardBtn" class="quick-action-btn" type="button">
+            <i class="fa-solid fa-house"></i>
+            <span>Open dashboard</span>
+          </button>
+          <button id="openPostsBtn" class="quick-action-btn" type="button">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Open my posts</span>
+          </button>
+          <button id="openApplicationsBtn" class="quick-action-btn" type="button">
+            <i class="fa-regular fa-folder-open"></i>
+            <span>Review applications</span>
+          </button>
+          <button id="openNotificationsBtn" class="quick-action-btn" type="button">
+            <i class="fa-regular fa-bell"></i>
+            <span>Open notifications</span>
+          </button>
+          <button id="settingsDeleteAccountBtn" class="quick-action-btn quick-action-danger" type="button">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Delete account</span>
+          </button>
+        </div>
+      </section>
+    </form>
+
+    <p id="settingsFeedback" class="settings-feedback" role="status" aria-live="polite" hidden></p>
+  </main>
+</body>
+</html>

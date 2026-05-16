@@ -131,6 +131,7 @@ function loadSignupLoginScript(overrides = {}) {
         Promise.resolve({ user: { uid: "login-user" } })
     );
     const sendPasswordResetEmail = jest.fn(() => Promise.resolve());
+    const collection = jest.fn((dbArg, name) => ({ db: dbArg, name }));
     const doc = jest.fn((dbArg, collection, uid) => ({ db: dbArg, collection, uid }));
     const getDoc = jest.fn(() =>
         Promise.resolve({
@@ -138,7 +139,12 @@ function loadSignupLoginScript(overrides = {}) {
             data: () => ({ role: "applicant" })
         })
     );
+    const getDocs = jest.fn(() => Promise.resolve({ docs: [] }));
+    const query = jest.fn((...args) => ({ args }));
+    const setDoc = jest.fn(() => Promise.resolve());
+    const where = jest.fn((...args) => ({ args }));
     const context = vm.createContext({
+        collection,
         GoogleAuthProvider,
         alert,
         auth,
@@ -148,9 +154,13 @@ function loadSignupLoginScript(overrides = {}) {
         doc,
         document: documentMock,
         getDoc,
+        getDocs,
+        query,
         sendPasswordResetEmail,
+        setDoc,
         signInWithEmailAndPassword,
         signInWithPopup,
+        where,
         window: windowMock,
         ...overrides
     });
@@ -168,6 +178,7 @@ globalThis.__testExports = { googleLogin, signUpUser, logInUser, forgotPassword 
             GoogleAuthProvider,
             alert,
             auth,
+            collection,
             consoleMock,
             createUserWithEmailAndPassword,
             db,
@@ -176,10 +187,13 @@ globalThis.__testExports = { googleLogin, signUpUser, logInUser, forgotPassword 
             documentMock,
             elements,
             getDoc,
+            getDocs,
             googleButtons,
             googleProviderInstance,
             loginForm,
+            query,
             sendPasswordResetEmail,
+            setDoc,
             signInWithEmailAndPassword,
             signInWithPopup,
             confirmPasswordInput,
@@ -187,6 +201,7 @@ globalThis.__testExports = { googleLogin, signUpUser, logInUser, forgotPassword 
             signupForm,
             toggleConfirmPassword,
             togglePassword,
+            where,
             windowMock
         }
     };
@@ -309,6 +324,22 @@ describe("signup_logIn.js", () => {
         expect(mocks.windowMock.location.href).toBe("/SignUp_LogIn_pages/index.html");
     });
 
+    test("googleLogin sends admins to the admin dashboard", async () => {
+        const { api, mocks } = loadSignupLoginScript({
+            getDoc: jest.fn(() =>
+                Promise.resolve({
+                    exists: () => true,
+                    data: () => ({ role: "admin" })
+                })
+            )
+        });
+
+        api.googleLogin("login");
+        await flushAsyncWork();
+
+        expect(mocks.windowMock.location.href).toBe("/ADMIN_DASHBOARD_PAGE/index.html");
+    });
+
     test("googleLogin sends unknown roles to role selection", async () => {
         const { api, mocks } = loadSignupLoginScript({
             getDoc: jest.fn(() =>
@@ -372,7 +403,7 @@ describe("signup_logIn.js", () => {
         expect(mocks.windowMock.location.href).toBe("/Recruiter_homepage/index.html");
     });
 
-    test("logInUser routes applicants and missing roles correctly", async () => {
+    test("logInUser routes applicants, admins, and missing roles correctly", async () => {
         const applicantLogin = loadSignupLoginScript({
             getDoc: jest.fn(() =>
                 Promise.resolve({
@@ -387,6 +418,22 @@ describe("signup_logIn.js", () => {
 
         expect(applicantLogin.mocks.windowMock.location.href).toBe(
             "/Applicant_homepage/index.html"
+        );
+
+        const adminLogin = loadSignupLoginScript({
+            getDoc: jest.fn(() =>
+                Promise.resolve({
+                    exists: () => true,
+                    data: () => ({ role: "admin" })
+                })
+            )
+        });
+
+        adminLogin.api.logInUser("admin@example.com", "safe-pass");
+        await flushAsyncWork();
+
+        expect(adminLogin.mocks.windowMock.location.href).toBe(
+            "/ADMIN_DASHBOARD_PAGE/index.html"
         );
 
         const missingRoleLogin = loadSignupLoginScript({
@@ -419,6 +466,62 @@ describe("signup_logIn.js", () => {
         await flushAsyncWork();
 
         expect(mocks.windowMock.location.href).toBe("/SignUp_LogIn_pages/chooseRoles.html");
+    });
+
+    test("logInUser falls back to an email-matched Firestore profile and syncs it to the auth uid", async () => {
+        const manualAdminSnapshot = {
+            id: "manual-admin-doc",
+            data: () => ({
+                accountStatus: "active",
+                email: "admin@example.com",
+                role: "admin"
+            })
+        };
+        const { api, mocks } = loadSignupLoginScript({
+            getDoc: jest.fn(() =>
+                Promise.resolve({
+                    exists: () => false
+                })
+            ),
+            getDocs: jest.fn(() => Promise.resolve({ docs: [manualAdminSnapshot] }))
+        });
+
+        api.logInUser("admin@example.com", "safe-pass");
+        await flushAsyncWork();
+
+        expect(mocks.collection).toHaveBeenCalledWith(mocks.db, "users");
+        expect(mocks.where).toHaveBeenCalledWith("email", "==", "admin@example.com");
+        expect(mocks.setDoc).toHaveBeenCalledWith(
+            { db: mocks.db, collection: "users", uid: "login-user" },
+            expect.objectContaining({
+                email: "admin@example.com",
+                role: "admin"
+            }),
+            { merge: true }
+        );
+        expect(mocks.windowMock.location.href).toBe("/ADMIN_DASHBOARD_PAGE/index.html");
+    });
+
+    test("login blocks suspended accounts before routing into the app", async () => {
+        const signOut = jest.fn(() => Promise.resolve());
+        const { api, mocks } = loadSignupLoginScript({
+            getDoc: jest.fn(() =>
+                Promise.resolve({
+                    exists: () => true,
+                    data: () => ({ accountStatus: "suspended", role: "recruiter" })
+                })
+            ),
+            signOut
+        });
+
+        api.logInUser("suspended@example.com", "safe-pass");
+        await flushAsyncWork();
+
+        expect(signOut).toHaveBeenCalledWith(mocks.auth);
+        expect(mocks.alert).toHaveBeenCalledWith(
+            "This account has been suspended. Please contact the administrator."
+        );
+        expect(mocks.windowMock.location.href).toBe("/SignUp_LogIn_pages/index.html");
     });
 
     test("logInUser surfaces Firebase auth failures", async () => {

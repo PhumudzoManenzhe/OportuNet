@@ -1,0 +1,65 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.12.1
+2 info using node@v24.15.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\Phumudzo\.npmrc
+5 silly config load:file:C:\Users\Phumudzo\AppData\Roaming\npm\etc\npmrc
+6 verbose title npm install jest@30.2.0
+7 verbose argv "install" "--global" "--cache" ".npm-cache-temp" "jest@30.2.0"
+8 verbose logfile logs-max:10 dir:C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_logs\2026-05-16T00_11_18_965Z-
+9 verbose logfile C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_logs\2026-05-16T00_11_18_965Z-debug-0.log
+10 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+11 silly logfile done cleaning log files
+12 silly idealTree buildDeps
+13 silly fetch manifest jest@30.2.0
+14 silly packumentCache full:https://registry.npmjs.org/jest cache-miss
+15 http fetch GET 200 https://registry.npmjs.org/jest 130ms (cache miss)
+16 silly placeDep ROOT jest@ OK for:  want: 30.2.0
+17 verbose type system
+18 verbose stack FetchError: Invalid response body while trying to fetch https://registry.npmjs.org/jest: EPERM: operation not permitted, unlink 'C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_cacache\tmp\***'
+18 verbose stack     at C:\Program Files\nodejs\node_modules\npm\node_modules\minipass-fetch\lib\body.js:174:15
+18 verbose stack     at async Response.json (C:\Program Files\nodejs\node_modules\npm\node_modules\minipass-fetch\lib\body.js:75:17)
+18 verbose stack     at async RegistryFetcher.packument (C:\Program Files\nodejs\node_modules\npm\node_modules\pacote\lib\registry.js:98:25)
+18 verbose stack     at async RegistryFetcher.manifest (C:\Program Files\nodejs\node_modules\npm\node_modules\pacote\lib\registry.js:128:23)
+18 verbose stack     at async #fetchManifest (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:1227:20)
+18 verbose stack     at async #nodeFromEdge (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:1061:19)
+18 verbose stack     at async #buildDepStep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:917:11)
+18 verbose stack     at async Arborist.buildIdealTree (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:170:7)
+18 verbose stack     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:111:5)
+18 verbose stack     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:146:5)
+19 error code EPERM
+20 error syscall unlink
+21 error path C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_cacache\tmp\***
+22 error errno EPERM
+23 error FetchError: Invalid response body while trying to fetch https://registry.npmjs.org/jest: EPERM: operation not permitted, unlink 'C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_cacache\tmp\***'
+23 error     at C:\Program Files\nodejs\node_modules\npm\node_modules\minipass-fetch\lib\body.js:174:15
+23 error     at async Response.json (C:\Program Files\nodejs\node_modules\npm\node_modules\minipass-fetch\lib\body.js:75:17)
+23 error     at async RegistryFetcher.packument (C:\Program Files\nodejs\node_modules\npm\node_modules\pacote\lib\registry.js:98:25)
+23 error     at async RegistryFetcher.manifest (C:\Program Files\nodejs\node_modules\npm\node_modules\pacote\lib\registry.js:128:23)
+23 error     at async #fetchManifest (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:1227:20)
+23 error     at async #nodeFromEdge (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:1061:19)
+23 error     at async #buildDepStep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:917:11)
+23 error     at async Arborist.buildIdealTree (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:170:7)
+23 error     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:111:5)
+23 error     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:146:5) {
+23 error   code: 'EPERM',
+23 error   errno: 'EPERM',
+23 error   syscall: 'unlink',
+23 error   path: 'C:\\Users\\Phumudzo\\OneDrive\\文档\\Clone\\OportuNet\\.npm-cache-temp\\_cacache\\tmp\\***',
+23 error   type: 'system',
+23 error   requiredBy: '.'
+23 error }
+24 error
+24 error The operation was rejected by your operating system.
+24 error It's possible that the file was already in use (by a text editor or antivirus), or that you lack permissions to access it.
+24 error
+24 error If you believe this might be a permissions issue, please double-check the permissions of the file and its containing directories, or try running the command again as root/Administrator.
+25 silly unfinished npm timer reify 1778890279775
+26 silly unfinished npm timer reify:loadTrees 1778890279788
+27 verbose cwd C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet
+28 verbose os Windows_NT 10.0.22631
+29 verbose node v24.15.0
+30 verbose npm  v11.12.1
+31 verbose exit 1
+32 verbose code 1
+33 error A complete log of this run can be found in: C:\Users\Phumudzo\OneDrive\文档\Clone\OportuNet\.npm-cache-temp\_logs\2026-05-16T00_11_18_965Z-debug-0.log

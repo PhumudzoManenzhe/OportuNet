@@ -269,13 +269,28 @@ describe("shared/app-shell.js", () => {
         expect(header.innerHTML).not.toContain("Applicant_profile_page");
         expect(sidebar.innerHTML).toContain("Recruiter portal");
         expect(sidebar.innerHTML).toContain("../Recruiter_homepage/index.html#opportunitiesSection");
+        expect(sidebar.innerHTML).toContain("../Recruiter_homepage/index.html#applicationsSection");
+        expect(sidebar.innerHTML).toContain("../RECRUITER_SETTINGS_PAGE/settings.html");
         expect(sidebar.innerHTML).toContain("Delete Account");
         expect(sidebar.innerHTML).toContain('class="app-shell-sidebar-link active">My Posts<');
         expect(shell.documentMock.body.classList.contains("app-shell-offset")).toBe(false);
     });
 
-    test("ignores unsupported shell roles", () => {
+    test("renders the admin shell with admin-specific links", () => {
         const shell = loadAppShell({ role: "admin" });
+
+        const [header, sidebar] = shell.createdElements;
+
+        expect(header.innerHTML).toContain("../ADMIN_DASHBOARD_PAGE/index.html#activitySection");
+        expect(sidebar.innerHTML).toContain("Admin portal");
+        expect(sidebar.innerHTML).toContain("../ADMIN_DASHBOARD_PAGE/index.html#usersSection");
+        expect(sidebar.innerHTML).toContain("../ADMIN_DASHBOARD_PAGE/index.html#opportunitiesSection");
+        expect(sidebar.innerHTML).toContain("../ADMIN_SETTINGS_PAGE/settings.html");
+        expect(sidebar.innerHTML).not.toContain("Delete Account");
+    });
+
+    test("ignores unsupported shell roles", () => {
+        const shell = loadAppShell({ role: "guest" });
 
         expect(shell.documentMock.createElement).not.toHaveBeenCalled();
         expect(shell.documentMock.body.prepend).not.toHaveBeenCalled();

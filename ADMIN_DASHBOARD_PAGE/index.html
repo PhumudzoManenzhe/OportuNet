@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/app-shell.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="../shared/app-shell.js" defer></script>
+  <script type="module" src="script.js"></script>
+</head>
+<body data-shell-role="admin" data-shell-active="home" data-shell-base="..">
+  <main class="admin-shell">
+    <header class="page-hero">
+      <div>
+        <p class="hero-kicker">Admin dashboard</p>
+        <h1 id="heroTitle">Platform oversight for OpportuNet</h1>
+        <p id="dashboardMeta" class="hero-copy">Loading platform activity...</p>
+      </div>
+      <a class="hero-action" href="../ADMIN_SETTINGS_PAGE/settings.html">Open settings</a>
+    </header>
+
+    <section class="metrics-grid" aria-label="Platform metrics">
+      <article class="metric-card">
+        <span class="metric-label">Users</span>
+        <strong id="usersMetric" class="metric-value">0</strong>
+        <p class="metric-copy">Applicants, recruiters, and admins currently stored on the platform.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Active Opportunities</span>
+        <strong id="activeOpportunitiesMetric" class="metric-value">0</strong>
+        <p class="metric-copy">Posts that are still open and visible to applicants.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Applications</span>
+        <strong id="applicationsMetric" class="metric-value">0</strong>
+        <p class="metric-copy">Total submissions currently tracked across all roles.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Accepted</span>
+        <strong id="acceptedMetric" class="metric-value">0</strong>
+        <p class="metric-copy">Applications that have already reached accepted status.</p>
+      </article>
+    </section>
+
+    <section id="usersSection" class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="section-kicker">Oversight</p>
+          <h2>User management</h2>
+          <p class="section-copy">Suspend or reactivate accounts without exposing admin access to public signup.</p>
+        </div>
+        <div id="userFilterGroup" class="filter-group" aria-label="User filters">
+          <button class="filter-chip active" data-filter="all" type="button">All</button>
+          <button class="filter-chip" data-filter="applicant" type="button">Applicants</button>
+          <button class="filter-chip" data-filter="recruiter" type="button">Recruiters</button>
+          <button class="filter-chip" data-filter="admin" type="button">Admins</button>
+          <button class="filter-chip" data-filter="suspended" type="button">Suspended</button>
+        </div>
+      </header>
+      <div id="usersTable" class="table-shell"></div>
+    </section>
+
+    <section id="opportunitiesSection" class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="section-kicker">Moderation</p>
+          <h2>Opportunity management</h2>
+          <p class="section-copy">Review recruiter posts and close or reopen opportunities when needed.</p>
+        </div>
+        <div id="opportunityFilterGroup" class="filter-group" aria-label="Opportunity filters">
+          <button class="filter-chip active" data-filter="all" type="button">All</button>
+          <button class="filter-chip" data-filter="active" type="button">Active</button>
+          <button class="filter-chip" data-filter="closed" type="button">Closed</button>
+        </div>
+      </header>
+      <div id="opportunitiesTable" class="table-shell"></div>
+    </section>
+
+    <section id="activitySection" class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="section-kicker">Activity</p>
+          <h2>Recent platform updates</h2>
+          <p class="section-copy">A live summary of applications and admin moderation actions.</p>
+        </div>
+      </header>
+      <div id="activityFeed" class="activity-feed"></div>
+    </section>
+
+    <p id="adminFeedback" class="admin-feedback" role="status" aria-live="polite" hidden></p>
+  </main>
+</body>
+</html>
